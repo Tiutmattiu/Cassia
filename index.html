@@ -1,431 +1,1470 @@
-<!doctype html>
-<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-Hans">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BASIC INFO 批量整理器（固定編號／固定組別／固定 pre-post 時間）</title>
-  https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js
+  <title>Assessment Master Builder - Final</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
-    :root { --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --primary:#2563eb; --primary2:#1d4ed8; --danger:#dc2626; --good:#16a34a; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); }
-    .wrap { max-width:1520px; margin:0 auto; padding:24px; }
-    h1 { margin:0 0 8px; font-size:30px; }
-    h2 { margin:0 0 8px; font-size:20px; }
-    p { color:var(--muted); }
-    .grid { display:grid; grid-template-columns:1.15fr .85fr; gap:20px; }
-    @media (max-width:1000px){ .grid { grid-template-columns:1fr; } }
-    .card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-    .row { display:flex; flex-wrap:wrap; gap:10px; }
-    .field { flex:1 1 220px; }
-    textarea,input,select { width:100%; border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:14px; background:#fff; color:var(--text); }
-    textarea { min-height:280px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
-    label { display:block; font-size:13px; margin-bottom:6px; color:#334155; }
-    button { border:0; border-radius:12px; padding:10px 14px; font-size:14px; cursor:pointer; background:var(--primary); color:#fff; }
-    button:hover { background:var(--primary2); }
-    button.secondary { background:#fff; color:var(--text); border:1px solid var(--border); }
-    button.secondary:hover { background:#f8fafc; }
-    button.danger { background:var(--danger); }
-    button:disabled { opacity:.55; cursor:not-allowed; }
-    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-    .stat { background:#f1f5f9; border-radius:14px; padding:12px; }
-    .k { font-size:12px; color:var(--muted); }
-    .v { font-size:24px; font-weight:700; }
-    .hint { display:inline-block; background:#e2e8f0; border-radius:999px; padding:6px 10px; font-size:12px; margin-right:8px; margin-bottom:8px; }
-    .good { border:1px solid #bbf7d0; background:#f0fdf4; color:#166534; border-radius:12px; padding:10px 12px; margin-top:10px; font-size:14px; white-space:pre-wrap; }
-    .error { border:1px solid #fecaca; background:#fef2f2; color:#b91c1c; border-radius:12px; padding:10px 12px; margin-top:10px; font-size:14px; white-space:pre-wrap; }
-    .dropzone { border:1px dashed #94a3b8; border-radius:16px; padding:24px; text-align:center; background:#fff; }
-    .table-wrap { overflow:auto; border:1px solid var(--border); border-radius:16px; background:#fff; margin-top:12px; }
-    table { border-collapse:collapse; width:max-content; min-width:100%; font-size:14px; }
-    th,td { padding:10px 12px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; white-space:nowrap; }
-    thead th { position:sticky; top:0; background:#f8fafc; z-index:1; }
-    .small { font-size:12px; color:var(--muted); }
-    .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    :root{
+      --bg:#f6f8fb; --card:#fff; --line:#dbe2ea; --text:#1f2937; --sub:#667085;
+      --pri:#2563eb; --good:#16a34a; --warn:#d97706; --bad:#dc2626;
+      --soft:#eef2ff; --softtext:#3730a3;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
+    }
+    .wrap{max-width:1580px;margin:24px auto;padding:0 16px 48px}
+    h1{margin:0 0 8px;font-size:30px}
+    .desc{color:var(--sub);line-height:1.75;margin-bottom:18px}
+    .pill{
+      display:inline-block;background:var(--soft);color:var(--softtext);border-radius:999px;
+      padding:4px 8px;margin-right:6px;margin-bottom:6px;font-size:12px
+    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .card{
+      background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;
+      box-shadow:0 4px 16px rgba(16,24,40,.04)
+    }
+    .card h2{margin:0 0 8px;font-size:18px}
+    label{display:block;font-weight:700;margin:10px 0 8px}
+    textarea,input[type="text"],input[type="file"]{
+      width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff
+    }
+    textarea{
+      min-height:210px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:13px;line-height:1.45
+    }
+    .small{font-size:12px;color:var(--sub);line-height:1.6}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+    button{
+      border:none;border-radius:12px;padding:12px 16px;cursor:pointer;font-size:14px;font-weight:700
+    }
+    .btn-primary{background:var(--pri);color:#fff}
+    .btn-secondary{background:#eef2ff;color:#3730a3}
+    .btn-ghost{background:#f3f4f6;color:#111827}
+    .btn-danger{background:#fee2e2;color:#991b1b}
+    .status{
+      margin-top:14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+      background:#f8fafc;white-space:pre-wrap;line-height:1.55;font-size:13px
+    }
+    .status.good{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
+    .status.warn{border-color:#fde68a;background:#fffbeb;color:#92400e}
+    .status.bad{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+    .preview-wrap{
+      margin-top:12px;overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff;max-height:520px
+    }
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th,td{
+      border-bottom:1px solid #eef2f7;border-right:1px solid #eef2f7;padding:8px 10px;text-align:left;
+      white-space:nowrap;vertical-align:top
+    }
+    th{position:sticky;top:0;background:#f8fafc;z-index:1}
+    .section-title{margin:18px 0 8px;font-size:16px;font-weight:800}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .muted-box{
+      border:1px dashed var(--line);background:#fafafa;border-radius:12px;padding:10px 12px;margin-top:10px
+    }
+    @media (max-width:1100px){ .grid,.two-col{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>BASIC INFO 批量整理器（固定編號 / 固定組別 / 固定 pre-post 時間）</h1>
-    <p>這個版本會<strong>優先使用固定排程表</strong>決定每個人的 <strong>T 編號</strong>、<strong>Group</strong>、<strong>pre_date</strong>、<strong>post_date2</strong>。也就是說：<strong>不再信任來源表格上的 id / Group / pre-post 日期</strong>。</p>
-
-    <div class="grid">
-      <section class="card">
-        <h2>輸入與追加</h2>
-        <p class="small">可持續追加上傳很多份 Excel / JSON / CSV。系統會根據固定排程表把所有資料補進同一張 master 表。</p>
-        <label for="rawText">貼上 TSV / CSV / JSON</label>
-        <textarea id="rawText" placeholder="把 Excel 複製出來的 TSV / CSV / JSON 貼到這裡…"></textarea>
-        <div class="row" style="margin-top:10px;">
-          <button id="appendTextBtn">追加貼上資料</button>
-          <button class="secondary" id="exampleBtn">填入示例</button>
-          <button class="secondary" id="clearTextBtn">清空文字框</button>
-        </div>
-        <div style="height:18px"></div>
-        <div class="dropzone">
-          <p style="margin-top:0; color:#334155; font-weight:600;">批量上傳檔案</p>
-          <p class="small">支援 .xlsx / .xls / .csv / .tsv / .txt / .json，可一次選多個檔案（例如 40 份）。</p>
-          <input id="fileInput" type="file" multiple accept=".xlsx,.xls,.csv,.tsv,.txt,.json" />
-        </div>
-        <div id="messages"></div>
-      </section>
-
-      <section class="card">
-        <h2>規則與管理</h2>
-        <p class="small">固定排程表優先級最高：<strong>ID / Group / pre-post 日期</strong>全部來自排程表。若來源檔有詳細評估 JSON，會自動算 <strong>UPDRS 總分</strong> 與 <strong>TUG 平均秒數</strong>。</p>
-        <div class="row">
-          <div class="field"><label>預設 tester</label><input id="testerInput" placeholder="例如 Cassia" /></div>
-          <div class="field"><label>預設 staff</label><input id="staffInput" placeholder="例如 Cassia" /></div>
-          <div class="field"><label>預設 Med</label><input id="medInput" placeholder="例如 on" /></div>
-          <div class="field"><label>預設 progress</label><input id="progressInput" placeholder="例如 completed 12/12" /></div>
-        </div>
-        <div class="row" style="margin-top:12px;">
-          <button class="secondary" id="rebuildBtn">按目前規則重建主表</button>
-          <button class="secondary" id="saveBtn">手動保存暫存</button>
-          <button class="danger" id="clearAllBtn">清空所有累積資料</button>
-        </div>
-        <div style="height:16px"></div>
-        <div class="stats">
-          <div class="stat"><div class="k">原始記錄</div><div class="v" id="rawCount">0</div></div>
-          <div class="stat"><div class="k">排程匹配人數</div><div class="v" id="personCount">0</div></div>
-          <div class="stat"><div class="k">主表行數</div><div class="v" id="masterCount">0</div></div>
-          <div class="stat"><div class="k">已匯入檔案</div><div class="v" id="fileCount">0</div></div>
-        </div>
-      </section>
-    </div>
-
-    <section class="card" style="margin-top:20px;">
-      <h2>主表預覽</h2>
-      <div>
-        <span class="hint">固定 T 編號</span>
-        <span class="hint">固定 Group</span>
-        <span class="hint">固定 pre / post 時間</span>
-        <span class="hint">詳細 JSON 自動算 UPDRS / TUG</span>
-      </div>
-      <div class="row" style="margin-top:10px;">
-        <button id="exportXlsxBtn" disabled>導出 Excel</button>
-        <button class="secondary" id="exportTsvBtn" disabled>導出 TSV</button>
-        <button class="secondary" id="exportJsonBtn" disabled>導出 JSON</button>
-      </div>
-      <div class="table-wrap">
-        <table id="previewTable"><thead></thead><tbody></tbody></table>
-      </div>
-      <div class="small" style="margin-top:12px;">注意：若來源記錄名字與固定排程表不一致，工具會優先嘗試用 <span class="mono">S043 / s043 / T043 / T043_1 / T043_2</span> 這類代碼匹配；若還是找不到，再用姓名別名匹配。</div>
-    </section>
+<div class="wrap">
+  <h1>Assessment Master Builder（最终版）</h1>
+  <div class="desc">
+    <span class="pill">支持 basic txt / pre json / post json / Excel</span>
+    <span class="pill">可一次上传一个人或多人</span>
+    <span class="pill">忽略 TXT 随机 id</span>
+    <span class="pill">按 clinical id + 日期为准</span>
+    <span class="pill">自动 pre/post 归并</span>
+    <span class="pill">简繁体姓名尽量自动合并</span>
+    <span class="pill">支持手工强制绑定日期</span>
+    <span class="pill">本地总库累计保存</span>
   </div>
 
-  <script>
-    const STORAGE_KEY = 'basic_info_fixed_schedule_v1';
-    const TARGET_HEADERS = [
-      'id','Group','name','progress(green=intervention; blue=control; yellow=pending;red=dropped)',
-      'age','diagnosisDuration','educationYears','dominantHand','implants','wheelchair',
-      'medicationDetails','totalLEDD','medFirstTime','medDuration','medFrequency','training1','training2','training3',
-      'legLength','height','weigth','fci','contact','pre_date','tester','medtime',
-      'hadsAnxiety','hadsDepression','PDQ','fogqTotal','moca','PAR-Q','updrs','hyStage','tug_avg','avgSpeed','avgStepLength','avgCadence','remark',
-      'post_date2','staff','Med','hadA','hadD','PD_Q','fogSum','Moc_a','up_drs','H&Y','TUG_av','avg_Speed','avg_StepLength','avg_Cadence','re_mark',
-      '列17','列18','列19','列20','列21','列22','列23','列24','列25','列26','列27','列28','列29','列30','列31','列32','列33','列34','列35','列36','列37','列38','列39','列40','列41','列42','列43','列44','列45','列46','列47','列48','列49','列50','列51','列52','列53','列54','列55','列56','列57','列58','列59','列60','列61','列62','列63','列64','列65','列66'
-    ];
+  <div class="grid">
+    <div class="card">
+      <h2>① 上传文件 / 粘贴 TXT</h2>
 
-    const SCHEDULE = [
-      {mri:'S025', fixedId:'T025', group:'Combined', name:'張學強', aliases:['张学强','張學强','張學強'], pre:'2025-10-25', post:'2025-12-06'},
-      {mri:'S026', fixedId:'T026', group:'Combined', name:'Huing suk ha', aliases:['hui ng suk ha','huing suk ha'], pre:'2025-10-27', post:'2025-12-10'},
-      {mri:'S027', fixedId:'T027', group:'Control', name:'陳伊偉', aliases:['陈伊伟'], pre:'2025-11-01', post:'2026-01-31'},
-      {mri:'S028', fixedId:'T028', group:'Control', name:'何慧蓮', aliases:['何慧莲'], pre:'2025-11-08', post:'2026-03-28'},
-      {mri:'S029', fixedId:'T029', group:'Combined', name:'胡國輝', aliases:['胡国辉'], pre:'2025-11-13', post:'2025-12-20'},
-      {mri:'S030', fixedId:'T030', group:'Control', name:'王伟文', aliases:['王偉文'], pre:'2025-12-11', post:'2026-02-24'},
-      {mri:'S031', fixedId:'T031', group:'Combined', name:'Chris Wu', aliases:['胡子健','胡子健 chris wu','chris wu'], pre:'2025-12-23', post:'2026-02-11'},
-      {mri:'S032', fixedId:'T032', group:'quit', name:'siu', aliases:[], pre:'2026-01-08', post:''},
-      {mri:'S033', fixedId:'T033', group:'Combined', name:'盧嘉達', aliases:['卢嘉达'], pre:'2026-01-12', post:'2026-03-04'},
-      {mri:'S034', fixedId:'T034', group:'Combined', name:'丁美雲', aliases:['丁美云'], pre:'2026-01-16', post:''},
-      {mri:'S035', fixedId:'T035', group:'Control', name:'譚金勝', aliases:['谭金胜'], pre:'2026-01-24', post:''},
-      {mri:'S036', fixedId:'T036', group:'Combined', name:'林志強', aliases:['lam chi keung simon'], pre:'2026-01-31', post:'2026-03-15'},
-      {mri:'S037', fixedId:'T037', group:'quit（图像质量太差）', name:'黄婉年', aliases:['黃婉年'], pre:'2026-02-03', post:''},
-      {mri:'S038', fixedId:'T038', group:'Combined', name:'吴一勉', aliases:['吳一勉','my yat min','ng yat min'], pre:'2026-02-09', post:'2026-04-09'},
-      {mri:'S039', fixedId:'T039', group:'Combined', name:'黃苑興', aliases:['黄苑兴'], pre:'2026-02-09', post:'2026-04-02'},
-      {mri:'S040', fixedId:'T040', group:'Combined', name:'何宏龙', aliases:['何宏龍','calvin'], pre:'2026-02-13', post:'2026-04-08'},
-      {mri:'S041', fixedId:'T041', group:'Combined', name:'梁翠芬', aliases:[], pre:'2026-04-10', post:''},
-      {mri:'S042', fixedId:'T042', group:'Combined', name:'陈桂珍', aliases:['陳桂珍'], pre:'2026-04-15', post:''},
-      {mri:'S043', fixedId:'T043', group:'Combined', name:'吴秀碧', aliases:['吳秀碧','go siu peck'], pre:'2026-04-16', post:''}
-    ];
+      <label for="fileInput">上传文件（可多选）</label>
+      <input id="fileInput" type="file" multiple accept=".txt,.tsv,.csv,.json,.xlsx,.xls" />
 
-    const DIRECT_MAP_PRE = {
-      name:['name','姓名'], age:['age','年齡'], diagnosisDuration:['diagnosisDuration','diagnosisYear','病程'], educationYears:['educationYears'],
-      dominantHand:['dominantHand'], implants:['implants'], wheelchair:['wheelchair'], medicationDetails:['medicationDetails','medication','medDetails'],
-      totalLEDD:['totalLEDD','LEDD'], medFirstTime:['medFirstTime'], medDuration:['medDuration'], medFrequency:['medFrequency'],
-      training1:['training1'], training2:['training2'], training3:['training3'], legLength:['legLength'], height:['height','fci18_height'],
-      weigth:['weigth','weight','fci18_weight'], fci:['fci','fciTotal'], contact:['contact'], tester:['tester'], medtime:['medtime'],
-      hadsAnxiety:['hadsAnxiety'], hadsDepression:['hadsDepression'], PDQ:['PDQ','pdqTotal'], fogqTotal:['fogqTotal'], moca:['moca'],
-      'PAR-Q':['PAR-Q','PARQ'], updrs:['updrs'], hyStage:['hyStage','H&Y','hystage'], tug_avg:['tug_avg','TUG_av'], avgSpeed:['avgSpeed','avg_Speed'],
-      avgStepLength:['avgStepLength','avg_StepLength'], avgCadence:['avgCadence','avg_Cadence'], remark:['remark','re_mark','備註']
+      <label for="txtInput">或直接粘贴 basic TXT（tab 分隔）</label>
+      <textarea id="txtInput" placeholder="如果你是复制粘贴 basic txt，就贴在这里。第一行应为表头。"></textarea>
+
+      <label for="sheetNameContains">可选：Excel 只读取工作表名包含以下关键词的表</label>
+      <input id="sheetNameContains" type="text" placeholder="例如 data（留空=全部工作表）" />
+
+      <div class="muted-box small">
+        <b>说明：</b><br>
+        • basic txt：支持粘贴，也支持上传 .txt/.tsv/.csv<br>
+        • clinical：支持 .json / .xlsx / .xls / .csv<br>
+        • 你以后可以每次只传一部分文件，点“追加到本地总库并预览”，它会自动累计
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>② MRI 顺序表（可编辑）</h2>
+      <label for="refTableInput">排序参考表</label>
+      <textarea id="refTableInput">MRI    Group    Parti    Name    Date
+s025_pre    Combined    T025_1    張學強    10/25/2025
+s025_post    Combined    T025_2    張學強    12/6/2025
+s026_pre    Combined    T026_1    Huing suk ha    10/27/2025
+s026_post    Combined    T026_2    Huing suk ha    12/10/2025
+s027_pre    Control    T027_1    陳伊偉    11/1/2025
+s027_post    Control    T027_2    陳伊偉    1/31/2026
+s028_pre    Control    T028_1    何慧蓮    11/8/2025
+s028_post    Control    T028_2    何慧蓮    3/28/2026
+s029_pre    Combined    T029_1    胡國輝    11/13/2025
+s029_post    Combined    T029_2    胡國輝    12/20/2025
+s030_pre    Control    T030_1    王伟文    12/11/2025
+s030_post    Control    T030_2    王伟文    2/24/2026
+s031_pre    Combined    T031_1    Chris Wu    12/23/2025
+s031_post    Combined    T031_2    Chris Wu    2/11/2026
+s032_pre    quit    T032_1    siu    1/8/2026
+s033_pre    Combined    T033_1    卢嘉达    1/12/2026
+s033_post    Combined    T033_2    卢嘉达    3/4/2026
+s034_pre    Combined    T034_1    丁美云    1/16/2026
+s035_pre    Control    T035_1    譚金勝    1/24/2026
+s036_pre    Combined    T036_1    林志強    1/31/2026
+s036_post    Combined    T036_2    林志強    3/15/2026
+s037_pre    quit（图像质量太差）    T037_1    黄婉年    2/3/2026
+s038_pre    Combined    T038_1    吴一勉    2/9/2026
+s038_post    Combined    T038_2    吴一勉    4/9/2026
+s039_pre    Combined    T039_1    黃苑興    2/9/2026
+s039_post    Combined    T039_2    黃苑興    4/2/2026
+s040_pre    Combined    T040_1    何宏龙    2/13/2026
+s040_post    Combined    T040_2    何宏龙    4/8/2026
+s041_pre    Combined    T041_1    梁翠芬    4/10/2026
+s042_pre    Combined    T042_1    陈桂珍    4/15/2026
+s043_pre    Combined    T043_1    吴秀碧    4/16/2026</textarea>
+
+      <div class="small">
+        表里有的人按表排序；表里没有的人自动排到最后。
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h2>③ 别名归并规则（最稳）</h2>
+      <label for="aliasInput">每行一条：别名=标准名</label>
+      <textarea id="aliasInput">张先生=张学强
+張先生=張學強
+lam chi keung=林志强
+lam chikeung=林志强
+lin zhi qiang=林志强
+lam chi keung=林志強
+ng=吴一勉
+ng =吴一勉
+huing suk ha=Huing suk ha
+wong hok hing=黃苑興
+huang yuan xing=黃苑興
+he hong long=何宏龙
+ting mei wan=丁美云
+chen yi wei=陳伊偉
+hu guo hui=胡國輝</textarea>
+      <div class="small">
+        程序会先自动做大小写/空格/标点/简繁体归一，再应用这里的 alias。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>④ 强制绑定规则（可选）</h2>
+      <label for="forceBindInput">每行一条：ID|stage|date</label>
+      <textarea id="forceBindInput" placeholder="例如：
+T036|pre|1/31/2026
+T036|post|3/15/2026
+T038|post|4/9/2026"></textarea>
+      <div class="small">
+        用途：如果某个 ID 的自动匹配有歧义，可以手动指定其 pre/post 应使用的日期。<br>
+        它会影响：
+        <br>• 选择哪条 clinical 记录
+        <br>• 给 pre/post 匹配哪条 txt
+      </div>
+
+      <div class="actions">
+        <button class="btn-secondary" id="previewCurrentBtn">仅预览当前上传</button>
+        <button class="btn-primary" id="appendStoreBtn">追加到本地总库并预览</button>
+        <button class="btn-primary" id="exportStoreBtn">导出当前总表 Excel</button>
+        <button class="btn-ghost" id="downloadTemplateBtn">下载模板</button>
+        <button class="btn-danger" id="clearStoreBtn">清空本地总库</button>
+      </div>
+
+      <div id="status" class="status">等待操作…</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h2>⑤ 当前状态</h2>
+    <div class="two-col">
+      <div class="muted-box small">
+        <b>本地总库内容：</b><br>
+        <span id="storeSummary">尚未读取</span>
+      </div>
+      <div class="muted-box small">
+        <b>当前上传内容：</b><br>
+        <span id="currentSummary">尚未读取</span>
+      </div>
+    </div>
+
+    <div class="section-title">merged_output 预览（前 20 行）</div>
+    <div class="preview-wrap">
+      <table id="previewTable"></table>
+    </div>
+
+    <div class="section-title">issues（前 20 行）</div>
+    <div class="preview-wrap">
+      <table id="issuesTable"></table>
+    </div>
+
+    <div class="section-title">unmatched_log（前 20 行）</div>
+    <div class="preview-wrap">
+      <table id="unmatchedTable"></table>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   常量
+========================= */
+const STORE_KEY = "assessment_master_builder_store_v3";
+
+const OUTPUT_HEADERS = [
+  "id", "Group", "name", "progress(green=intervention; blue=control; yellow=pending;red=dropped)",
+  "age", "diagnosisDuration", "educationYears", "dominantHand", "implants", "wheelchair",
+  "medicationDetails", "totalLEDD", "medFirstTime", "medDuration", "medFrequency",
+  "training1", "training2", "training3", "legLength", "height", "weigth", "fci", "contact",
+  "pre_date", "tester", "medtime", "hadsAnxiety", "hadsDepression", "PDQ", "fogqTotal",
+  "moca", "PAR-Q", "updrs", "hyStage", "tug_avg", "avgSpeed", "avgStepLength", "avgCadence", "remark",
+  "post_date2", "staff", "Med", "hadA", "hadD", "PD_Q", "fogSum", "Moc_a", "up_drs", "H&Y",
+  "TUG_av", "avg_Speed", "avg_StepLength", "avg_Cadence", "re_mark"
+];
+
+// 分区位置：0-22 basic, 23-38 pre, 39-53 post
+const BASIC_END = 22;
+const PRE_START = 23;
+const PRE_END = 38;
+const POST_START = 39;
+const POST_END = 53;
+
+const PARQ_KEYS = ["parq1","parq2","parq3","parq4","parq5","parq6","parq7"];
+const TXT_NAME_CANDIDATES = ["name","姓名","participant","subject"];
+const TXT_DATE_CANDIDATES = ["timestamp","localSaveTime","testDate","date"];
+
+/* =========================
+   UI
+========================= */
+function setStatus(msg, type=""){
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.className = "status " + type;
+}
+function safeStr(v){ return v == null ? "" : String(v).trim(); }
+function coalesce(...vals){
+  for(const v of vals){ if(safeStr(v)!=="") return v; }
+  return "";
+}
+function setText(id, text){
+  const el = document.getElementById(id);
+  if(el) el.textContent = text;
+}
+
+/* =========================
+   Local Store
+========================= */
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return { txtRows: [], clinicalRows: [] };
+    const obj = JSON.parse(raw);
+    return {
+      txtRows: Array.isArray(obj.txtRows) ? obj.txtRows : [],
+      clinicalRows: Array.isArray(obj.clinicalRows) ? obj.clinicalRows : []
     };
+  }catch(e){
+    return { txtRows: [], clinicalRows: [] };
+  }
+}
+function saveStore(store){
+  localStorage.setItem(STORE_KEY, JSON.stringify(store));
+}
+function clearStore(){
+  localStorage.removeItem(STORE_KEY);
+}
+function dedupeBy(rows, keyFn){
+  const seen = new Set();
+  const out = [];
+  for(const row of rows){
+    const key = keyFn(row);
+    if(seen.has(key)) continue;
+    seen.add(key);
+    out.push(row);
+  }
+  return out;
+}
+function summarizeStore(store){
+  return `TXT 行数：${store.txtRows.length}；Clinical 记录数：${store.clinicalRows.length}`;
+}
 
-    const DIRECT_MAP_POST = {
-      staff:['staff','tester'], Med:['Med','med','medicationStatus'], hadA:['hadA','hadsAnxiety'], hadD:['hadD','hadsDepression'], PD_Q:['PD_Q','PDQ','pdqTotal'],
-      fogSum:['fogSum','fogqTotal'], Moc_a:['Moc_a','moca'], up_drs:['up_drs','updrs'], 'H&Y':['H&Y','hyStage'], TUG_av:['TUG_av','tug_avg'],
-      avg_Speed:['avg_Speed','avgSpeed'], avg_StepLength:['avg_StepLength','avgStepLength'], avg_Cadence:['avg_Cadence','avgCadence'], re_mark:['re_mark','remark']
-    };
+/* =========================
+   简繁体归一（常见姓名字）
+   说明：这里只做“尽量”合并，alias 仍然最稳
+========================= */
+const CHS_MAP = {
+  "張":"张","學":"学","強":"强","陳":"陈","偉":"伟","蓮":"莲","國":"国","輝":"辉","盧":"卢","達":"达",
+  "雲":"云","譚":"谭","勝":"胜","黃":"黄","吳":"吴","興":"兴","龍":"龙","麗":"丽","劉":"刘","楊":"杨",
+  "鄭":"郑","謝":"谢","葉":"叶","鍾":"钟","蘇":"苏","趙":"赵","錢":"钱","孫":"孙","馮":"冯","馬":"马",
+  "蕭":"萧","麥":"麦","許":"许","羅":"罗","關":"关","開":"开","來":"来","電":"电","圖":"图","質":"质",
+  "歲":"岁","醫":"医","藥":"药","體":"体","後":"后","發":"发","時":"时","間":"间","腦":"脑","萬":"万",
+  "與":"与","樣":"样","實":"实","臺":"台","灣":"湾","門":"门","風":"风","長":"长","樂":"乐","麗":"丽",
+  "彥":"彦","傑":"杰","瑩":"莹","蘭":"兰","華":"华","賢":"贤","榮":"荣","凱":"凯","潔":"洁","楨":"桢",
+  "穎":"颖","嫻":"娴","寧":"宁","靜":"静","濤":"涛","潔":"洁","漢":"汉","欽":"钦","樹":"树","澤":"泽",
+  "曉":"晓","鳳":"凤","濱":"滨","堯":"尧","慶":"庆","堅":"坚","寶":"宝","義":"义","媛":"媛","蘊":"蕴",
+  "彤":"彤","卿":"卿","啟":"启","晉":"晋","業":"业","銘":"铭","珮":"佩","妍":"妍","鋒":"锋","瑤":"瑶"
+};
+function toSimplifiedLikely(s){
+  let out = "";
+  for(const ch of safeStr(s)){
+    out += CHS_MAP[ch] || ch;
+  }
+  return out;
+}
+function normalizeNameBase(s){
+  return toSimplifiedLikely(
+    safeStr(s)
+      .normalize("NFKC")
+      .toLowerCase()
+      .replace(/[\u3000\s]+/g, "")
+      .replace(/[.,/#!$%^&*;:{}=\-_`~()（）[\]【】'"“”‘’、，。！？?<>《》|\\]/g, "")
+  );
+}
 
-    const SAMPLE_TEXT = `timestamp\tid\tname\tage\tdiagnosisYear\teducationYears\tdominantHand\timplants\twheelchair\tmedFirstTime\tmedDuration\tmedFrequency\ttraining1\ttraining2\ttraining3\tfci18_height\tfci18_weight\tfciTotal\thadsAnxiety\thadsDepression\tpdqTotal\tfogqTotal\n2025-12-05T09:10:01.670Z\t3\t張學強\t70\t6\t6\t右\t否\t不使用\t06:00\t3\t5\t星期一下午\t星期三下午\t星期五下午\t166\t51\t0\t8\t12\t68\t14\n2026-01-15T09:10:01.670Z\t3\t張學強\t70\t6\t6\t右\t否\t不使用\t06:00\t3\t5\t星期一下午\t星期三下午\t星期五下午\t166\t51\t0\t7\t10\t60\t12`;
+/* =========================
+   Alias
+========================= */
+function buildAliasMap(text){
+  const map = new Map();
+  const lines = safeStr(text).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  for(const line of lines){
+    if(!line.includes("=")) continue;
+    const [left, right] = line.split("=").map(x=>x.trim());
+    if(!left || !right) continue;
+    map.set(normalizeNameBase(left), right);
+    map.set(normalizeNameBase(toSimplifiedLikely(left)), right);
+  }
+  return map;
+}
+function canonicalName(name, aliasMap){
+  const raw = safeStr(name);
+  if(!raw) return "";
+  const base = normalizeNameBase(raw);
+  if(aliasMap.has(base)) return aliasMap.get(base);
+  return raw;
+}
+function normalizeName(name, aliasMap){
+  return normalizeNameBase(canonicalName(name, aliasMap));
+}
 
-    let rawRecords = [];
-    let importedFiles = [];
-    let masterRows = [];
+/* =========================
+   日期处理
+========================= */
+function parseMaybeDate(v){
+  if(!v) return null;
+  if(v instanceof Date && !isNaN(v)) return v;
 
-    function normalizeHeader(h){ return String(h ?? '').replace(/\uFEFF/g,'').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim(); }
-    function normalizeName(name){ return String(name ?? '').replace(/\u3000/g,' ').replace(/\s+/g,' ').trim().toLowerCase(); }
-    function cleanValue(v){ if(v == null) return ''; return typeof v === 'string' ? v.trim() : v; }
-    function firstNonEmpty(record, candidates){ for(const key of candidates){ if(record && Object.prototype.hasOwnProperty.call(record,key)){ const value = cleanValue(record[key]); if(value !== '') return value; } } return ''; }
-    function isProbablyJSON(text){ const t = text.trim(); return t.startsWith('[') || t.startsWith('{'); }
-    function escapeHtml(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-    function parseNumber(v){ if(v == null || v === '') return null; const n = Number(String(v).replace(/,/g,'').trim()); return Number.isFinite(n) ? n : null; }
-    function formatDateCell(v){ if(v == null || v === '') return ''; if(typeof v === 'number'){ const d = XLSX.SSF.parse_date_code(v); if(!d) return String(v); return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`; } const s = String(v).trim(); if(/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0,10); if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s; const d = new Date(s); if(!Number.isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; return s; }
-    function normalizeObjectKeys(obj){ const out={}; Object.entries(obj||{}).forEach(([k,v])=> out[normalizeHeader(k)] = cleanValue(v)); return out; }
-    function splitSmartLine(line, delimiter){ const out=[]; let cur=''; let inQuotes=false; for(let i=0;i<line.length;i++){ const ch=line[i], next=line[i+1]; if(ch === '"'){ if(inQuotes && next === '"'){ cur+='"'; i++; } else inQuotes=!inQuotes; continue; } if(ch === delimiter && !inQuotes){ out.push(cur); cur=''; continue; } cur += ch; } out.push(cur); return out.map(x=>x.trim()); }
-    function parseDelimitedText(text){ const cleaned=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim(); if(!cleaned) return []; const firstLine=cleaned.split('\n').find(x=>x.trim()) || ''; const tabCount=(firstLine.match(/\t/g)||[]).length; const commaCount=(firstLine.match(/,/g)||[]).length; const delimiter=tabCount >= commaCount ? '\t' : ','; const lines=cleaned.split('\n').filter(x=>x.trim() !== ''); const headers=splitSmartLine(lines[0], delimiter).map(normalizeHeader); return lines.slice(1).map(line=>{ const cells=splitSmartLine(line, delimiter); const row={}; headers.forEach((h,idx)=> row[h]=cleanValue(cells[idx] ?? '')); return row; }); }
-    function parseText(text){ if(!text.trim()) return []; if(isProbablyJSON(text)){ const parsed=JSON.parse(text); if(Array.isArray(parsed)) return parsed.map(normalizeObjectKeys); if(Array.isArray(parsed?.data)) return parsed.data.map(normalizeObjectKeys); return [normalizeObjectKeys(parsed)]; } return parseDelimitedText(text).map(normalizeObjectKeys); }
+  let s = String(v).trim();
+  if(!s) return null;
 
-    function normalizeCode(code){
-      return String(code || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  // Unix timestamp
+  if(/^\d{10,13}$/.test(s)){
+    const n = Number(s);
+    const d = new Date(s.length===13 ? n : n*1000);
+    return isNaN(d) ? null : d;
+  }
+
+  // Excel serial
+  if(/^\d+(\.\d+)?$/.test(s)){
+    const n = Number(s);
+    if(n > 20000 && n < 80000){
+      const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+      const d = new Date(excelEpoch.getTime() + n*24*60*60*1000);
+      return isNaN(d) ? null : d;
+    }
+  }
+
+  // normalize dots
+  s = s.replace(/\./g, "/");
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+function fmtDate(d){
+  if(!d || isNaN(d)) return "";
+  return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
+}
+function dateDiffDays(a,b){
+  if(!a || !b) return Number.MAX_SAFE_INTEGER;
+  return Math.abs(a.getTime() - b.getTime()) / (1000*60*60*24);
+}
+function parseForceBindings(text){
+  const map = new Map(); // key = id|stage => Date
+  const lines = safeStr(text).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  for(const line of lines){
+    const parts = line.split("|").map(x=>x.trim());
+    if(parts.length < 3) continue;
+    const [id, stage, dateText] = parts;
+    const st = stage.toLowerCase();
+    if(!id || !["pre","post"].includes(st)) continue;
+    const d = parseMaybeDate(dateText);
+    if(d) map.set(`${id}|${st}`, d);
+  }
+  return map;
+}
+
+/* =========================
+   诊断时长
+========================= */
+function formatNumberMaybe(v){
+  const n = Number(v);
+  if(isNaN(n)) return safeStr(v);
+  if(Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
+  return String(Math.round(n*10)/10);
+}
+function computeDiagnosisDuration(diagnosisYearRaw, assessmentDate){
+  const s = safeStr(diagnosisYearRaw);
+  if(!s) return "";
+
+  if(/^\d+(\.\d+)?$/.test(s)){
+    const num = Number(s);
+
+    // 1900-2100 当年份
+    if(num >= 1900 && num <= 2100 && assessmentDate){
+      const years = assessmentDate.getFullYear() - num;
+      return years >= 0 ? formatNumberMaybe(years) : "";
     }
 
-    function resolveSchedule(record){
-      const idCandidates = [record.id, record.MRI, record.mri, record.Parti, record.parti].filter(Boolean).map(normalizeCode);
-      for(const raw of idCandidates){
-        const m = raw.match(/S0?(\d{2,3})/i) || raw.match(/T0?(\d{2,3})/i);
-        if(m){
-          const n = String(Number(m[1])).padStart(3,'0');
-          const found = SCHEDULE.find(x => x.fixedId === `T${n}` || x.mri === `S${n}`);
-          if(found) return found;
-        }
-      }
-      const name = normalizeName(firstNonEmpty(record, ['name','姓名']));
-      if(name){
-        for(const s of SCHEDULE){
-          const aliases = [s.name, ...(s.aliases || [])].map(normalizeName);
-          if(aliases.includes(name)) return s;
-        }
-      }
-      return null;
+    // 0-100 当时长
+    if(num >= 0 && num < 100){
+      return formatNumberMaybe(num);
     }
+  }
 
-    function computeUPDRSTotal(record){ const keys = Object.keys(record).filter(k => /^updrs3_/i.test(k)); const nums = keys.map(k => parseNumber(record[k])).filter(v => v != null); if(nums.length===0) return ''; return nums.reduce((a,b)=>a+b,0); }
-    function computeTUGAverage(record){ const vals=['tug1','tug2','tug3'].map(k => parseNumber(record[k])).filter(v => v != null); if(vals.length===0) return ''; return +(vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(2); }
-    function computePARQ(record){ const vals=['parq1','parq2','parq3','parq4','parq5','parq6','parq7'].map(k => String(record[k] ?? '').trim()); const hasAny=vals.some(Boolean); if(!hasAny) return ''; return vals.some(v => ['是','yes','true','1','y'].includes(v.toLowerCase?.() || v)) ? 'T' : 'F'; }
+  // 日期 => 计算年差
+  const d = parseMaybeDate(s);
+  if(d && assessmentDate){
+    const months = (assessmentDate.getFullYear() - d.getFullYear())*12 + (assessmentDate.getMonth() - d.getMonth());
+    const years = months / 12;
+    return years >= 0 ? formatNumberMaybe(years) : "";
+  }
 
-    function maybeConvertDetailedAssessment(record){
-      const hasUPDRSItems = Object.keys(record).some(k => /^updrs3_/i.test(k));
-      const hasTUG = ['tug1','tug2','tug3','tug_avg'].some(k => k in record);
-      const hasTestType = 'testType' in record || 'testDate' in record || 'localSaveTime' in record;
-      if(!(hasUPDRSItems || hasTUG || hasTestType)) return record;
-      const out = { ...record };
-      const updrsTotal = computeUPDRSTotal(record);
-      const tugAvg = record.tug_avg || computeTUGAverage(record);
-      const parq = computePARQ(record);
-      const phase = String(record.testType || '').trim().toLowerCase();
-      if(phase === 'pre'){
-        out.updrs = updrsTotal; out.tug_avg = tugAvg; out['PAR-Q'] = parq; out.tester = record.tester || out.tester || ''; out.pre_date = record.testDate || record.localSaveTime || out.pre_date || '';
-      } else if(phase === 'post'){
-        out.up_drs = updrsTotal; out.TUG_av = tugAvg; out.staff = record.tester || out.staff || ''; out.post_date2 = record.testDate || record.localSaveTime || out.post_date2 || '';
-      } else {
-        out.updrs = updrsTotal; out.tug_avg = tugAvg; out['PAR-Q'] = parq; out.tester = record.tester || out.tester || ''; out.pre_date = record.testDate || record.localSaveTime || out.pre_date || '';
-      }
-      out.medicationDetails = record.medicationDetails || out.medicationDetails || '';
-      out.totalLEDD = record.totalLEDD || out.totalLEDD || '';
-      out.Med = record.updrs3b_on || out.Med || '';
-      out.hyStage = record.hyStage || out.hyStage || '';
-      out['H&Y'] = record.hyStage || out['H&Y'] || '';
-      out.legLength = record.legLength || out.legLength || '';
-      out.moca = record.moca || out.moca || '';
-      out.Moc_a = record.moca || out.Moc_a || '';
-      return out;
+  return s;
+}
+
+/* =========================
+   on/off
+========================= */
+function normalizeOnOff(v){
+  const raw = safeStr(v);
+  if(!raw) return "";
+
+  const s = normalizeNameBase(raw);
+
+  if(/^(on|onstate|服药后|吃药后|食药后|已服药|有服药|開|开启|開啟|来电|來電)$/.test(s)) return "on";
+  if(/^(off|offstate|未服药|未吃药|未食药|停药|關|关闭|關閉)$/.test(s)) return "off";
+
+  if(s.includes("on")) return "on";
+  if(s.includes("off")) return "off";
+
+  return raw;
+}
+
+/* =========================
+   相似度（用于未识别姓名建议）
+========================= */
+function levenshtein(a,b){
+  a = safeStr(a); b = safeStr(b);
+  const m = a.length, n = b.length;
+  if(!m) return n;
+  if(!n) return m;
+  const dp = Array.from({length:m+1}, ()=>Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0] = i;
+  for(let j=0;j<=n;j++) dp[0][j] = j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      const cost = a[i-1]===b[j-1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i-1][j] + 1,
+        dp[i][j-1] + 1,
+        dp[i-1][j-1] + cost
+      );
     }
+  }
+  return dp[m][n];
+}
+function nameSimilarity(a,b){
+  const x = normalizeNameBase(a), y = normalizeNameBase(b);
+  if(!x || !y) return 0;
+  if(x === y) return 1;
+  const maxLen = Math.max(x.length, y.length);
+  const lev = levenshtein(x, y);
+  const ratio = 1 - (lev / maxLen);
 
-    function resolvePhase(record, schedule){
-      const explicit = String(record.testType || '').trim().toLowerCase();
-      if(explicit === 'pre' || explicit === 'post') return explicit;
-      if(!schedule) return 'pre';
-      if(schedule.pre && !schedule.post) return 'pre';
-      if(!schedule.pre && schedule.post) return 'post';
-      const sourceDate = formatDateCell(firstNonEmpty(record, ['timestamp','testDate','pre_date','post_date2','localSaveTime']));
-      if(!sourceDate) return 'pre';
-      const d = new Date(sourceDate), pre = new Date(schedule.pre), post = new Date(schedule.post);
-      const diffPre = Math.abs(d - pre), diffPost = Math.abs(d - post);
-      return diffPre <= diffPost ? 'pre' : 'post';
+  // 字符集合重叠
+  const sx = new Set(x.split(""));
+  const sy = new Set(y.split(""));
+  let inter = 0;
+  sx.forEach(ch => { if(sy.has(ch)) inter++; });
+  const union = new Set([...sx, ...sy]).size || 1;
+  const jacc = inter / union;
+
+  return Math.max(ratio, jacc);
+}
+function suggestNames(targetName, candidateNames, topN=3){
+  const scored = candidateNames.map(name => ({
+    name,
+    score: nameSimilarity(targetName, name)
+  }))
+  .filter(x => x.score >= 0.25)
+  .sort((a,b) => b.score - a.score)
+  .slice(0, topN);
+
+  return scored.map(x => `${x.name} (${x.score.toFixed(2)})`).join("; ");
+}
+
+/* =========================
+   TXT 解析
+========================= */
+function parseDelimitedText(text){
+  const raw = safeStr(text);
+  if(!raw) return [];
+  const lines = raw.split(/\r?\n/).filter(x=>x.trim().length>0);
+  if(!lines.length) return [];
+
+  let delimiter = "\t";
+  if(!lines[0].includes("\t") && lines[0].includes(",")) delimiter = ",";
+
+  const header = lines[0].split(delimiter).map(h=>h.trim());
+  const rows = [];
+  for(let i=1;i<lines.length;i++){
+    const cols = lines[i].split(delimiter);
+    const obj = {};
+    for(let j=0;j<header.length;j++){
+      obj[header[j]] = cols[j] == null ? "" : cols[j].trim();
     }
-
-    function getGroupKey(record){
-      const schedule = resolveSchedule(record);
-      if(schedule) return schedule.fixedId;
-      const id = firstNonEmpty(record, ['id']); const name = firstNonEmpty(record, ['name','姓名']);
-      return normalizeName(id || name) || Math.random().toString(36).slice(2);
+    rows.push(obj);
+  }
+  return rows;
+}
+function guessTxtName(row){
+  for(const key of TXT_NAME_CANDIDATES){
+    if(row[key]) return row[key];
+  }
+  return "";
+}
+function guessTxtDate(row){
+  for(const key of TXT_DATE_CANDIDATES){
+    if(row[key]){
+      const d = parseMaybeDate(row[key]);
+      if(d) return d;
     }
+  }
+  return null;
+}
+function normalizeTxtRows(txtRows, aliasMap){
+  return txtRows.map((row, idx) => ({
+    raw: row,
+    _txtIndex: idx,
+    txtNameRaw: guessTxtName(row),
+    txtName: canonicalName(guessTxtName(row), aliasMap),
+    txtNameNorm: normalizeName(guessTxtName(row), aliasMap),
+    txtDate: guessTxtDate(row)
+  }));
+}
 
-    function readDefaults(){
-      return {
-        tester: document.getElementById('testerInput').value.trim(),
-        staff: document.getElementById('staffInput').value.trim(),
-        med: document.getElementById('medInput').value.trim(),
-        progress: document.getElementById('progressInput').value.trim(),
-      };
-    }
-
-    function splitByFixedSchedule(records){
-      const buckets = new Map();
-      records.forEach(r => {
-        const key = getGroupKey(r);
-        if(!buckets.has(key)) buckets.set(key, []);
-        buckets.get(key).push(r);
-      });
-      const grouped = [];
-      for(const [key, list] of buckets.entries()){
-        const schedule = resolveSchedule(list[0]);
-        let pre = null, post = null;
-        for(const r of list.sort((a,b)=>formatDateCell(firstNonEmpty(a,['timestamp','testDate','pre_date','post_date2','localSaveTime'])).localeCompare(formatDateCell(firstNonEmpty(b,['timestamp','testDate','pre_date','post_date2','localSaveTime'])))){
-          const phase = resolvePhase(r, schedule);
-          if(phase === 'pre' && !pre) pre = r;
-          else if(phase === 'post') post = r;
-          else if(!pre) pre = r;
-        }
-        if(!pre && list.length) pre = list[0];
-        grouped.push({ key, schedule, pre, post });
-      }
-      return grouped;
-    }
-
-    function buildTargetRow(pre, post, schedule, defaults){
-      const row = Object.fromEntries(TARGET_HEADERS.map(h => [h, '']));
-      if(pre){ for(const [target, candidates] of Object.entries(DIRECT_MAP_PRE)) row[target] = firstNonEmpty(pre, candidates); }
-      if(post){ for(const [target, candidates] of Object.entries(DIRECT_MAP_POST)) row[target] = firstNonEmpty(post, candidates); }
-      if(schedule){
-        row.id = schedule.fixedId;
-        row.Group = schedule.group;
-        row.name = schedule.name;
-        row.pre_date = schedule.pre || '';
-        row.post_date2 = schedule.post || '';
-      }
-      row.pre_date = formatDateCell(row.pre_date);
-      row.post_date2 = formatDateCell(row.post_date2);
-      if(!row.tester) row.tester = defaults.tester || '';
-      if(!row.staff) row.staff = defaults.staff || row.tester || '';
-      if(!row.Med) row.Med = defaults.med || '';
-      if(!row['progress(green=intervention; blue=control; yellow=pending;red=dropped)']) row['progress(green=intervention; blue=control; yellow=pending;red=dropped)'] = defaults.progress || '';
-      return row;
-    }
-
-    function getRecordSignature(record){
-      const schedule = resolveSchedule(record);
-      const key = schedule ? schedule.fixedId : getGroupKey(record);
-      const phase = resolvePhase(record, schedule);
-      const date = formatDateCell(firstNonEmpty(record, ['timestamp','testDate','pre_date','post_date2','localSaveTime'])) || '';
-      return `${key}|${phase}|${date}`;
-    }
-
-    function rebuildMaster(){
-      const defaults = readDefaults();
-      const normalized = rawRecords.map(item => maybeConvertDetailedAssessment(item.record));
-      masterRows = splitByFixedSchedule(normalized).map(g => buildTargetRow(g.pre, g.post, g.schedule, defaults)).sort((a,b)=> (a.id || '').localeCompare(b.id || ''));
-      renderAll();
-      autoSave();
-    }
-
-    function updateStats(){
-      const matched = new Set(rawRecords.map(x => resolveSchedule(x.record)?.fixedId).filter(Boolean));
-      document.getElementById('rawCount').textContent = rawRecords.length;
-      document.getElementById('personCount').textContent = matched.size;
-      document.getElementById('masterCount').textContent = masterRows.length;
-      document.getElementById('fileCount').textContent = importedFiles.length;
-    }
-
-    function renderPreview(){
-      const previewHeaders = ['id','Group','name','pre_date','post_date2','tester','staff','updrs','up_drs','tug_avg','TUG_av','moca','Moc_a','medicationDetails'];
-      const thead = document.querySelector('#previewTable thead');
-      const tbody = document.querySelector('#previewTable tbody');
-      thead.innerHTML = `<tr>${previewHeaders.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
-      if(!masterRows.length){ tbody.innerHTML = `<tr><td colspan="14" class="small">目前還沒有主表資料。</td></tr>`; return; }
-      tbody.innerHTML = masterRows.map(row => `<tr>${previewHeaders.map(h => `<td>${escapeHtml(String(row[h] ?? ''))}</td>`).join('')}</tr>`).join('');
-    }
-
-    function renderMessages(kind, text){ document.getElementById('messages').innerHTML = text ? `<div class="${kind}">${escapeHtml(text)}</div>` : ''; }
-    function renderAll(){ updateStats(); renderPreview(); const disabled = masterRows.length === 0; document.getElementById('exportXlsxBtn').disabled = disabled; document.getElementById('exportTsvBtn').disabled = disabled; document.getElementById('exportJsonBtn').disabled = disabled; }
-
-    function appendParsedRecords(records, sourceName){
-      const existing = new Set(rawRecords.map(x => getRecordSignature(x.record)));
-      let appended=0, skipped=0, unmatched=0;
-      for(const record of records){
-        const normalized = normalizeObjectKeys(record);
-        const sig = getRecordSignature(normalized);
-        if(existing.has(sig)){ skipped++; continue; }
-        rawRecords.push({ sourceFile: sourceName || 'pasted-text', record: normalized });
-        existing.add(sig); appended++;
-        if(!resolveSchedule(normalized)) unmatched++;
-      }
-      return { appended, skipped, unmatched };
-    }
-
-    async function appendFiles(fileList){
-      let addedFiles=0, addedRecords=0, skippedRecords=0, unmatchedRecords=0;
-      for(const file of fileList){
-        const name = file.name.toLowerCase();
-        let parsed = [];
-        if(name.endsWith('.json')){ const text = await file.text(); parsed = parseText(text); }
-        else if(name.endsWith('.csv') || name.endsWith('.tsv') || name.endsWith('.txt')){ const text = await file.text(); parsed = parseText(text); }
-        else if(name.endsWith('.xlsx') || name.endsWith('.xls')){ const buf = await file.arrayBuffer(); const wb = XLSX.read(buf, { type:'array' }); const ws = wb.Sheets[wb.SheetNames[0]]; parsed = XLSX.utils.sheet_to_json(ws, { defval:'' }).map(normalizeObjectKeys); }
-        else throw new Error(`不支援檔案格式：${file.name}`);
-        if(parsed.length){
-          const result = appendParsedRecords(parsed, file.name);
-          if(result.appended > 0) importedFiles.push(file.name);
-          if(result.appended > 0) addedFiles += 1;
-          addedRecords += result.appended; skippedRecords += result.skipped; unmatchedRecords += result.unmatched;
-        }
-      }
-      rebuildMaster();
-      renderMessages('good', `已追加 ${addedFiles} 份檔案，共新增 ${addedRecords} 筆來源記錄。${skippedRecords ? `\n跳過重複記錄 ${skippedRecords} 筆。` : ''}${unmatchedRecords ? `\n有 ${unmatchedRecords} 筆沒有匹配到固定排程，請檢查姓名或 id。` : ''}\n目前主表共有 ${masterRows.length} 行。`);
-    }
-
-    function exportJSON(){ const blob = new Blob([JSON.stringify(masterRows, null, 2)], { type:'application/json;charset=utf-8' }); downloadBlob('basic-info-master-fixed-schedule.json', blob); }
-    function exportTSV(){ const lines = [TARGET_HEADERS.join('\t')].concat(masterRows.map(row => TARGET_HEADERS.map(h => String(row[h] ?? '').replace(/\t/g,' ')).join('\t'))); const blob = new Blob([lines.join('\n')], { type:'text/tab-separated-values;charset=utf-8' }); downloadBlob('basic-info-master-fixed-schedule.tsv', blob); }
-    function exportXLSX(){ const wb = XLSX.utils.book_new(); const ws = XLSX.utils.json_to_sheet(masterRows, { header: TARGET_HEADERS }); XLSX.utils.book_append_sheet(wb, ws, 'BASIC_INFO'); XLSX.writeFile(wb, 'basic-info-master-fixed-schedule.xlsx'); }
-    function downloadBlob(filename, blob){ const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url); }
-
-    function autoSave(){ const payload = { rawRecords, importedFiles, defaults: readDefaults() }; localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }
-    function loadSaved(){
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-        if(!saved) return;
-        rawRecords = Array.isArray(saved.rawRecords) ? saved.rawRecords : [];
-        importedFiles = Array.isArray(saved.importedFiles) ? saved.importedFiles : [];
-        const d = saved.defaults || {};
-        document.getElementById('testerInput').value = d.tester || '';
-        document.getElementById('staffInput').value = d.staff || '';
-        document.getElementById('medInput').value = d.med || '';
-        document.getElementById('progressInput').value = d.progress || '';
-        rebuildMaster();
-        if(rawRecords.length) renderMessages('good', `已從瀏覽器恢復暫存：${rawRecords.length} 筆來源記錄，${masterRows.length} 行主表。`);
-      } catch(err){ console.warn(err); }
-    }
-
-    document.getElementById('appendTextBtn').addEventListener('click', () => {
-      try {
-        const text = document.getElementById('rawText').value;
-        const parsed = parseText(text);
-        if(!parsed.length) throw new Error('沒有讀到任何資料。請貼上 TSV/CSV/JSON，或改用上傳檔案。');
-        const result = appendParsedRecords(parsed, 'pasted-text');
-        rebuildMaster();
-        renderMessages('good', `已追加貼上資料，新增 ${result.appended} 筆。${result.skipped ? `\n跳過重複記錄 ${result.skipped} 筆。` : ''}${result.unmatched ? `\n有 ${result.unmatched} 筆沒有匹配到固定排程。` : ''}\n現在主表共有 ${masterRows.length} 行。`);
-      } catch(err){ renderMessages('error', String(err?.message || err)); }
+/* =========================
+   参考表
+========================= */
+function parseRefTable(text, aliasMap){
+  const lines = safeStr(text).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const rows = [];
+  for(const line of lines){
+    if(/^mri\b/i.test(line)) continue;
+    const parts = line.split(/\t+| {2,}/).map(x=>x.trim()).filter(Boolean);
+    if(parts.length < 5) continue;
+    const [mri, group, parti, name, date] = parts;
+    const baseId = safeStr(parti).split("_")[0] || "";
+    const stage = /post/i.test(mri) || /_2$/.test(parti) ? "post" : "pre";
+    rows.push({
+      mri,
+      group,
+      parti,
+      baseId,
+      stage,
+      name: canonicalName(name, aliasMap),
+      date: parseMaybeDate(date),
+      order: rows.length
     });
+  }
 
-    document.getElementById('exampleBtn').addEventListener('click', ()=> document.getElementById('rawText').value = SAMPLE_TEXT);
-    document.getElementById('clearTextBtn').addEventListener('click', ()=> document.getElementById('rawText').value = '');
-    document.getElementById('fileInput').addEventListener('change', async e => { const files = Array.from(e.target.files || []); if(!files.length) return; try { await appendFiles(files); } catch(err){ renderMessages('error', String(err?.message || err)); } e.target.value = ''; });
-    document.getElementById('rebuildBtn').addEventListener('click', ()=>{ rebuildMaster(); renderMessages('good', '已按固定排程規則重建主表。'); });
-    document.getElementById('saveBtn').addEventListener('click', ()=>{ autoSave(); renderMessages('good', '已手動保存暫存到瀏覽器。'); });
-    document.getElementById('clearAllBtn').addEventListener('click', ()=>{ if(!confirm('確定要清空目前所有累積資料嗎？')) return; rawRecords=[]; importedFiles=[]; masterRows=[]; localStorage.removeItem(STORAGE_KEY); renderAll(); renderMessages('good', '已清空所有累積資料與本地暫存。'); });
-    document.getElementById('exportJsonBtn').addEventListener('click', exportJSON);
-    document.getElementById('exportTsvBtn').addEventListener('click', exportTSV);
-    document.getElementById('exportXlsxBtn').addEventListener('click', exportXLSX);
-    ['testerInput','staffInput','medInput','progressInput'].forEach(id => document.getElementById(id).addEventListener('change', autoSave));
+  const byId = new Map();
+  for(const row of rows){
+    if(!row.baseId) continue;
+    if(!byId.has(row.baseId)){
+      byId.set(row.baseId, {
+        baseId: row.baseId,
+        group: row.group,
+        name: row.name,
+        order: row.order,
+        preDate: "",
+        postDate: ""
+      });
+    }
+    const cur = byId.get(row.baseId);
+    cur.group = cur.group || row.group;
+    cur.name = cur.name || row.name;
+    cur.order = Math.min(cur.order, row.order);
+    if(row.stage === "pre" && row.date) cur.preDate = fmtDate(row.date);
+    if(row.stage === "post" && row.date) cur.postDate = fmtDate(row.date);
+  }
+  return byId;
+}
 
-    loadSaved();
-    renderAll();
-  </script>
+/* =========================
+   Clinical 读取
+========================= */
+async function readJsonFile(file){
+  const text = await file.text();
+  const parsed = JSON.parse(text);
+  return Array.isArray(parsed) ? parsed : [parsed];
+}
+async function readExcelFile(file, sheetNameContains=""){
+  const buffer = await file.arrayBuffer();
+  const wb = XLSX.read(buffer, { type:"array", cellDates:true });
+  const rows = [];
+  const filter = safeStr(sheetNameContains).toLowerCase();
+  wb.SheetNames.forEach(sheetName => {
+    if(filter && !sheetName.toLowerCase().includes(filter)) return;
+    const ws = wb.Sheets[sheetName];
+    const arr = XLSX.utils.sheet_to_json(ws, { defval:"" });
+    rows.push(...arr);
+  });
+  return rows;
+}
+async function readTextFile(file){
+  const text = await file.text();
+  return parseDelimitedText(text);
+}
+async function ingestCurrentInputs(){
+  const files = document.getElementById("fileInput").files;
+  const txtPasted = document.getElementById("txtInput").value;
+  const sheetNameContains = document.getElementById("sheetNameContains").value.trim();
+
+  const txtRows = [];
+  const clinicalRows = [];
+
+  if(safeStr(txtPasted)){
+    txtRows.push(...parseDelimitedText(txtPasted));
+  }
+
+  for(const file of files){
+    const lower = file.name.toLowerCase();
+
+    if(lower.endsWith(".json")){
+      const arr = await readJsonFile(file);
+      clinicalRows.push(...arr);
+    } else if(lower.endsWith(".xlsx") || lower.endsWith(".xls")){
+      const arr = await readExcelFile(file, sheetNameContains);
+      clinicalRows.push(...arr);
+    } else if(lower.endsWith(".txt") || lower.endsWith(".tsv")){
+      const arr = await readTextFile(file);
+      txtRows.push(...arr);
+    } else if(lower.endsWith(".csv")){
+      // CSV 既可能是 txt 类，也可能是 clinical 类
+      const arr = await readExcelFile(file, sheetNameContains);
+      if(arr.length){
+        const keys = Object.keys(arr[0] || {}).map(k => safeStr(k).toLowerCase());
+        const looksClinical = keys.includes("testtype") || keys.includes("updrs3_1") || keys.includes("moca");
+        if(looksClinical) clinicalRows.push(...arr);
+        else txtRows.push(...arr);
+      }
+    }
+  }
+
+  return { txtRows, clinicalRows };
+}
+function normalizeClinicalRecord(rec, aliasMap){
+  const id = safeStr(rec.id || rec.ID || rec.Id);
+  const name = canonicalName(rec.name || rec.Name || rec.participant || rec.subject || "", aliasMap);
+
+  const testTypeRaw = safeStr(rec.testType || rec.type || rec.stage).toLowerCase();
+  let testType = "";
+  if(testTypeRaw.includes("pre")) testType = "pre";
+  else if(testTypeRaw.includes("post")) testType = "post";
+
+  const testDate = parseMaybeDate(rec.testDate) || parseMaybeDate(rec.localSaveTime) || parseMaybeDate(rec.date);
+
+  return {
+    raw: rec,
+    id,
+    name,
+    nameNorm: normalizeName(name, aliasMap),
+    testType,
+    testDate,
+    updrsTotal: sumUPDRS(rec),
+    parqSummary: summarizePARQ(rec),
+    medStatus: normalizeOnOff(rec.updrs3b_on || rec.medStatus || "")
+  };
+}
+function sumUPDRS(rec){
+  let sum = 0;
+  let found = false;
+  for(const [k,v] of Object.entries(rec || {})){
+    if(/^updrs3_\d+/i.test(k)){
+      const n = Number(String(v).trim());
+      if(!isNaN(n)){
+        sum += n;
+        found = true;
+      }
+    }
+  }
+  return found ? sum : "";
+}
+function summarizePARQ(rec){
+  let anyYes = false;
+  let anyFilled = false;
+  for(const key of PARQ_KEYS){
+    const v = rec?.[key];
+    const s = normalizeNameBase(v);
+    if(safeStr(v)!=="") anyFilled = true;
+    if(["是","yes","y","true","1"].includes(s) || s.includes("是")) anyYes = true;
+  }
+  if(!anyFilled) return "";
+  return anyYes ? "T" : "F";
+}
+
+/* =========================
+   分组 & 选择 clinical
+========================= */
+function chooseClosestRecord(records, targetDate){
+  if(!records || !records.length) return null;
+  if(!targetDate) return records[0];
+  let best = records[0];
+  let bestDiff = dateDiffDays(records[0].testDate, targetDate);
+  for(let i=1;i<records.length;i++){
+    const diff = dateDiffDays(records[i].testDate, targetDate);
+    if(diff < bestDiff){
+      best = records[i];
+      bestDiff = diff;
+    }
+  }
+  return best;
+}
+function groupClinicalRecords(clinicalRows, refMap, forceMap, issues){
+  const grouped = new Map();
+
+  for(const c of clinicalRows){
+    if(!c.id){
+      issues.push({
+        type:"clinical_missing_id",
+        id:"",
+        name:c.name || "",
+        date:c.testDate ? fmtDate(c.testDate) : "",
+        detail:"该 clinical 记录没有 id，已跳过"
+      });
+      continue;
+    }
+    if(!grouped.has(c.id)){
+      grouped.set(c.id, { id:c.id, name:c.name, all:[], preList:[], postList:[], otherList:[] });
+    }
+    const g = grouped.get(c.id);
+    g.all.push(c);
+    g.name = g.name || c.name;
+    if(c.testType === "pre") g.preList.push(c);
+    else if(c.testType === "post") g.postList.push(c);
+    else g.otherList.push(c);
+  }
+
+  const result = new Map();
+
+  for(const [id, g] of grouped.entries()){
+    const ref = refMap.get(id);
+    const preForce = forceMap.get(`${id}|pre`) || null;
+    const postForce = forceMap.get(`${id}|post`) || null;
+    const preRefDate = preForce || (ref?.preDate ? parseMaybeDate(ref.preDate) : null);
+    const postRefDate = postForce || (ref?.postDate ? parseMaybeDate(ref.postDate) : null);
+
+    let pre = null;
+    let post = null;
+
+    if(g.preList.length > 1){
+      pre = chooseClosestRecord(g.preList, preRefDate);
+      issues.push({
+        type:"duplicate_pre_clinical",
+        id, name:g.name || "",
+        date: pre?.testDate ? fmtDate(pre.testDate) : "",
+        detail:`同一 ID 有 ${g.preList.length} 条 pre clinical，已按${preForce ? "强制绑定日期" : "参考日期"}选择最接近的一条`
+      });
+    } else if(g.preList.length === 1){
+      pre = g.preList[0];
+    }
+
+    if(g.postList.length > 1){
+      post = chooseClosestRecord(g.postList, postRefDate);
+      issues.push({
+        type:"duplicate_post_clinical",
+        id, name:g.name || "",
+        date: post?.testDate ? fmtDate(post.testDate) : "",
+        detail:`同一 ID 有 ${g.postList.length} 条 post clinical，已按${postForce ? "强制绑定日期" : "参考日期"}选择最接近的一条`
+      });
+    } else if(g.postList.length === 1){
+      post = g.postList[0];
+    }
+
+    if(!pre && g.otherList.length === 1 && !post){
+      pre = g.otherList[0];
+      issues.push({
+        type:"clinical_stage_missing_assume_pre",
+        id, name:g.name || "",
+        date: pre?.testDate ? fmtDate(pre.testDate) : "",
+        detail:"该记录没有 testType，暂按 pre 处理"
+      });
+    }
+
+    result.set(id, { id, name:g.name, pre, post, all:g.all });
+  }
+
+  return result;
+}
+
+/* =========================
+   TXT 匹配
+========================= */
+function chooseBestTxtCandidate(candidates, targetDate, usedTxtIndices){
+  const available = candidates.filter(c => !usedTxtIndices.has(c._txtIndex));
+  if(!available.length) return null;
+  available.sort((a,b) => dateDiffDays(a.txtDate, targetDate) - dateDiffDays(b.txtDate, targetDate));
+  return available[0] || null;
+}
+function matchTxtForPerson(person, refInfo, txtNormalizedRows, aliasMap, usedTxtIndices, issues, forceMap){
+  const nameCandidates = new Set();
+
+  if(person.name) nameCandidates.add(normalizeName(person.name, aliasMap));
+  if(person.pre?.name) nameCandidates.add(normalizeName(person.pre.name, aliasMap));
+  if(person.post?.name) nameCandidates.add(normalizeName(person.post.name, aliasMap));
+  if(refInfo?.name) nameCandidates.add(normalizeName(refInfo.name, aliasMap));
+
+  const candidates = txtNormalizedRows.filter(t => nameCandidates.has(t.txtNameNorm));
+
+  const preTargetDate = forceMap.get(`${person.id}|pre`) ||
+                        person.pre?.testDate ||
+                        parseMaybeDate(refInfo?.preDate) ||
+                        null;
+  const postTargetDate = forceMap.get(`${person.id}|post`) ||
+                         person.post?.testDate ||
+                         parseMaybeDate(refInfo?.postDate) ||
+                         null;
+
+  let preTxt = null, postTxt = null;
+
+  if(person.pre){
+    preTxt = chooseBestTxtCandidate(candidates, preTargetDate, usedTxtIndices);
+    if(preTxt) usedTxtIndices.add(preTxt._txtIndex);
+  }
+  if(person.post){
+    postTxt = chooseBestTxtCandidate(candidates, postTargetDate, usedTxtIndices);
+    if(postTxt) usedTxtIndices.add(postTxt._txtIndex);
+  }
+
+  if(preTxt && preTargetDate && preTxt.txtDate){
+    const d = dateDiffDays(preTxt.txtDate, preTargetDate);
+    if(d > 45){
+      issues.push({
+        type:"txt_pre_date_far",
+        id:person.id,
+        name:person.name || refInfo?.name || "",
+        date:fmtDate(preTargetDate),
+        detail:`匹配到的 pre TXT 日期相差 ${Math.round(d)} 天，请人工检查`
+      });
+    }
+  }
+  if(postTxt && postTargetDate && postTxt.txtDate){
+    const d = dateDiffDays(postTxt.txtDate, postTargetDate);
+    if(d > 45){
+      issues.push({
+        type:"txt_post_date_far",
+        id:person.id,
+        name:person.name || refInfo?.name || "",
+        date:fmtDate(postTargetDate),
+        detail:`匹配到的 post TXT 日期相差 ${Math.round(d)} 天，请人工检查`
+      });
+    }
+  }
+
+  return { preTxt, postTxt, candidateCount:candidates.length, candidateNames:[...new Set(candidates.map(x=>x.txtName))] };
+}
+
+/* =========================
+   输出行
+========================= */
+function buildEmptyOutputRow(id){
+  const row = {};
+  OUTPUT_HEADERS.forEach(h => row[h] = "");
+  row.id = id || "";
+  return row;
+}
+function setProgress(row, value){
+  row["progress(green=intervention; blue=control; yellow=pending;red=dropped)"] = value;
+}
+function buildProgress(group, hasPre, hasPost){
+  const g = safeStr(group).toLowerCase();
+  if(g.includes("quit") || g.includes("drop")) return "red";
+  if(!(hasPre && hasPost)) return "yellow";
+  if(g.includes("combined")) return "green";
+  if(g.includes("control")) return "blue";
+  return "yellow";
+}
+function fillStaticFromTxt(outRow, txtRaw, assessmentDateForDx){
+  if(!txtRaw) return;
+  outRow.age = coalesce(outRow.age, txtRaw.age);
+  outRow.educationYears = coalesce(outRow.educationYears, txtRaw.educationYears);
+  outRow.dominantHand = coalesce(outRow.dominantHand, txtRaw.dominantHand);
+  outRow.implants = coalesce(outRow.implants, txtRaw.implants);
+  outRow.wheelchair = coalesce(outRow.wheelchair, txtRaw.wheelchair);
+
+  // Basic 服药
+  outRow.medFirstTime = coalesce(outRow.medFirstTime, txtRaw.medFirstTime);
+  outRow.medDuration = coalesce(outRow.medDuration, txtRaw.medDuration);
+  outRow.medFrequency = coalesce(outRow.medFrequency, txtRaw.medFrequency);
+
+  outRow.training1 = coalesce(outRow.training1, txtRaw.training1);
+  outRow.training2 = coalesce(outRow.training2, txtRaw.training2);
+  outRow.training3 = coalesce(outRow.training3, txtRaw.training3);
+
+  outRow.height = coalesce(outRow.height, txtRaw.fci18_height);
+  outRow.weigth = coalesce(outRow.weigth, txtRaw.fci18_weight);
+  outRow.fci = coalesce(outRow.fci, txtRaw.fciTotal);
+
+  if(!outRow.diagnosisDuration){
+    outRow.diagnosisDuration = computeDiagnosisDuration(txtRaw.diagnosisYear, assessmentDateForDx || null);
+  }
+}
+function fillAssessment(outRow, clinical, txtRaw, stage, issues){
+  if(!clinical) return;
+  const rec = clinical.raw || {};
+
+  // shared
+  outRow.name = coalesce(outRow.name, clinical.name);
+  outRow.medicationDetails = coalesce(outRow.medicationDetails, rec.medicationDetails);
+  outRow.totalLEDD = coalesce(outRow.totalLEDD, rec.totalLEDD);
+  outRow.legLength = coalesce(outRow.legLength, rec.legLength);
+
+  fillStaticFromTxt(outRow, txtRaw, clinical.testDate);
+
+  const medStatus = clinical.medStatus;
+  if(medStatus && medStatus !== "on" && medStatus !== "off"){
+    issues.push({
+      type:"med_status_unrecognized",
+      id:clinical.id,
+      name:clinical.name || "",
+      date:clinical.testDate ? fmtDate(clinical.testDate) : "",
+      detail:`updrs3b_on 无法标准化为 on/off，已保留原值：${medStatus}`
+    });
+  }
+
+  if(stage === "pre"){
+    outRow.pre_date = clinical.testDate ? fmtDate(clinical.testDate) : "";
+    outRow.tester = coalesce(outRow.tester, rec.tester);
+    outRow.medtime = medStatus;
+    outRow.hadsAnxiety = txtRaw ? coalesce(outRow.hadsAnxiety, txtRaw.hadsAnxiety) : outRow.hadsAnxiety;
+    outRow.hadsDepression = txtRaw ? coalesce(outRow.hadsDepression, txtRaw.hadsDepression) : outRow.hadsDepression;
+    outRow.PDQ = txtRaw ? coalesce(outRow.PDQ, txtRaw.pdqTotal) : outRow.PDQ;
+    outRow.fogqTotal = txtRaw ? coalesce(outRow.fogqTotal, txtRaw.fogqTotal) : outRow.fogqTotal;
+    outRow.moca = coalesce(outRow.moca, rec.moca);
+    outRow["PAR-Q"] = coalesce(outRow["PAR-Q"], clinical.parqSummary);
+    outRow.updrs = coalesce(outRow.updrs, clinical.updrsTotal);
+    outRow.hyStage = coalesce(outRow.hyStage, rec.hyStage);
+    outRow.tug_avg = coalesce(outRow.tug_avg, rec.tug_avg);
+    outRow.avgSpeed = coalesce(outRow.avgSpeed, rec.avgSpeed);
+    outRow.avgStepLength = coalesce(outRow.avgStepLength, rec.avgStepLength);
+    outRow.avgCadence = coalesce(outRow.avgCadence, rec.avgCadence);
+  } else {
+    outRow.post_date2 = clinical.testDate ? fmtDate(clinical.testDate) : "";
+    outRow.staff = coalesce(outRow.staff, rec.tester);
+    outRow.Med = medStatus;
+    outRow.hadA = txtRaw ? coalesce(outRow.hadA, txtRaw.hadsAnxiety) : outRow.hadA;
+    outRow.hadD = txtRaw ? coalesce(outRow.hadD, txtRaw.hadsDepression) : outRow.hadD;
+    outRow.PD_Q = txtRaw ? coalesce(outRow.PD_Q, txtRaw.pdqTotal) : outRow.PD_Q;
+    outRow.fogSum = txtRaw ? coalesce(outRow.fogSum, txtRaw.fogqTotal) : outRow.fogSum;
+    outRow.Moc_a = coalesce(outRow.Moc_a, rec.moca);
+    outRow.up_drs = coalesce(outRow.up_drs, clinical.updrsTotal);
+    outRow["H&Y"] = coalesce(outRow["H&Y"], rec.hyStage);
+    outRow.TUG_av = coalesce(outRow.TUG_av, rec.tug_avg);
+    outRow.avg_Speed = coalesce(outRow.avg_Speed, rec.avgSpeed);
+    outRow.avg_StepLength = coalesce(outRow.avg_StepLength, rec.avgStepLength);
+    outRow.avg_Cadence = coalesce(outRow.avg_Cadence, rec.avgCadence);
+  }
+}
+function finalizeRow(outRow, refInfo, person){
+  outRow.Group = coalesce(outRow.Group, refInfo?.group);
+  outRow.name = coalesce(outRow.name, refInfo?.name, person.name);
+  if(!outRow.pre_date && refInfo?.preDate) outRow.pre_date = refInfo.preDate;
+  if(!outRow.post_date2 && refInfo?.postDate) outRow.post_date2 = refInfo.postDate;
+  setProgress(outRow, buildProgress(outRow.Group, !!person.pre, !!person.post));
+}
+
+/* =========================
+   主构建流程
+========================= */
+function dedupeTxtRawRows(rows){
+  return dedupeBy(rows, row => {
+    const nm = normalizeNameBase(guessTxtName(row));
+    const dt = fmtDate(guessTxtDate(row));
+    const age = safeStr(row.age);
+    const dx = safeStr(row.diagnosisYear);
+    return `${nm}|${dt}|${age}|${dx}`;
+  });
+}
+function dedupeClinicalRawRows(rows){
+  return dedupeBy(rows, row => {
+    const id = safeStr(row.id || row.ID || row.Id);
+    const tt = safeStr(row.testType || row.type || row.stage).toLowerCase();
+    const dt = fmtDate(parseMaybeDate(row.testDate) || parseMaybeDate(row.localSaveTime) || parseMaybeDate(row.date));
+    const nm = normalizeNameBase(row.name || row.Name || row.participant || row.subject || "");
+    return `${id}|${tt}|${dt}|${nm}`;
+  });
+}
+function collectCandidateTxtNames(txtRowsNorm){
+  return [...new Set(txtRowsNorm.map(x => x.txtName).filter(Boolean))];
+}
+function buildBundle(txtRawRows, clinicalRawRows, refText, aliasText, forceBindText){
+  const issues = [];
+  const unmatchedLog = [];
+
+  const aliasMap = buildAliasMap(aliasText);
+  const forceMap = parseForceBindings(forceBindText);
+  const refMap = parseRefTable(refText, aliasMap);
+
+  const txtRawClean = dedupeTxtRawRows(txtRawRows);
+  const clinicalRawClean = dedupeClinicalRawRows(clinicalRawRows);
+
+  const txtRows = normalizeTxtRows(txtRawClean, aliasMap);
+  const clinicalRows = clinicalRawClean.map(r => normalizeClinicalRecord(r, aliasMap))
+                                      .filter(r => r.id || r.name);
+
+  const groupedClinical = groupClinicalRecords(clinicalRows, refMap, forceMap, issues);
+  const usedTxtIndices = new Set();
+  const outputRows = [];
+  const allTxtCandidateNames = collectCandidateTxtNames(txtRows);
+
+  for(const [id, person] of groupedClinical.entries()){
+    const refInfo = refMap.get(id);
+    const outRow = buildEmptyOutputRow(id);
+
+    const { preTxt, postTxt, candidateCount, candidateNames } = matchTxtForPerson(
+      person, refInfo, txtRows, aliasMap, usedTxtIndices, issues, forceMap
+    );
+
+    if(person.pre && !preTxt){
+      unmatchedLog.push({
+        type:"clinical_pre_without_txt",
+        id,
+        name: person.name || refInfo?.name || "",
+        stage:"pre",
+        clinical_date: person.pre.testDate ? fmtDate(person.pre.testDate) : "",
+        suggestions: suggestNames(person.name || refInfo?.name || "", allTxtCandidateNames),
+        detail: candidateCount > 0 ? "有同名/近似同名 TXT 候选，但没有成功匹配到 pre" : "找不到可匹配 TXT"
+      });
+    }
+    if(person.post && !postTxt){
+      unmatchedLog.push({
+        type:"clinical_post_without_txt",
+        id,
+        name: person.name || refInfo?.name || "",
+        stage:"post",
+        clinical_date: person.post.testDate ? fmtDate(person.post.testDate) : "",
+        suggestions: suggestNames(person.name || refInfo?.name || "", allTxtCandidateNames),
+        detail: candidateCount > 0 ? "有同名/近似同名 TXT 候选，但没有成功匹配到 post" : "找不到可匹配 TXT"
+      });
+    }
+
+    if(preTxt) fillAssessment(outRow, person.pre, preTxt.raw, "pre", issues);
+    else if(person.pre) fillAssessment(outRow, person.pre, null, "pre", issues);
+
+    if(postTxt) fillAssessment(outRow, person.post, postTxt.raw, "post", issues);
+    else if(person.post) fillAssessment(outRow, person.post, null, "post", issues);
+
+    // 如果 pre/post 都没配到 txt，尝试用同名未使用 txt 补 basic
+    if(!preTxt && !postTxt){
+      const personNames = new Set();
+      if(person.name) personNames.add(normalizeName(person.name, aliasMap));
+      if(refInfo?.name) personNames.add(normalizeName(refInfo.name, aliasMap));
+
+      const fallbackCandidates = txtRows.filter(t =>
+        !usedTxtIndices.has(t._txtIndex) && personNames.has(t.txtNameNorm)
+      );
+
+      if(fallbackCandidates.length){
+        const fallback = fallbackCandidates[0];
+        usedTxtIndices.add(fallback._txtIndex);
+        fillStaticFromTxt(outRow, fallback.raw, person.pre?.testDate || person.post?.testDate || null);
+        outRow.name = coalesce(outRow.name, fallback.txtName);
+      }
+    }
+
+    finalizeRow(outRow, refInfo, person);
+
+    outputRows.push({
+      ...outRow,
+      __sortOrder: refInfo ? refInfo.order : 999999,
+      __sortId: id
+    });
+  }
+
+  // 未被用到的 TXT
+  txtRows.forEach(t => {
+    if(!usedTxtIndices.has(t._txtIndex)){
+      unmatchedLog.push({
+        type:"txt_without_clinical_match",
+        id:"",
+        name:t.txtName || "",
+        stage:"",
+        clinical_date:"",
+        suggestions:"",
+        detail:`TXT 未匹配到 clinical；TXT 时间=${t.txtDate ? fmtDate(t.txtDate) : ""}`
+      });
+    }
+  });
+
+  // MRI 表有但 clinical 没有
+  for(const [id, refInfo] of refMap.entries()){
+    if(!groupedClinical.has(id)){
+      issues.push({
+        type:"id_in_ref_but_missing_clinical",
+        id,
+        name:refInfo.name || "",
+        date:"",
+        detail:"MRI 参考表里有该 ID，但当前数据中没有 clinical 记录"
+      });
+    }
+  }
+
+  outputRows.sort((a,b) => {
+    if(a.__sortOrder !== b.__sortOrder) return a.__sortOrder - b.__sortOrder;
+    return a.__sortId.localeCompare(b.__sortId, "zh-Hans-CN", { numeric:true, sensitivity:"base" });
+  });
+
+  const merged_output = outputRows.map(r => {
+    const o = {};
+    OUTPUT_HEADERS.forEach(h => o[h] = r[h] ?? "");
+    return o;
+  });
+
+  return {
+    merged_output,
+    unmatched_log: unmatchedLog,
+    issues,
+    stats: {
+      txtRows: txtRawClean.length,
+      clinicalRows: clinicalRawClean.length,
+      subjects: merged_output.length,
+      refCount: refMap.size
+    }
+  };
+}
+
+/* =========================
+   预览表
+========================= */
+function renderGenericTable(tableId, rows){
+  const table = document.getElementById(tableId);
+  table.innerHTML = "";
+  if(!rows || !rows.length){
+    table.innerHTML = "<tr><td style='padding:12px;'>暂无数据</td></tr>";
+    return;
+  }
+  const headers = Object.keys(rows[0]);
+  const thead = document.createElement("thead");
+  const trh = document.createElement("tr");
+  headers.forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h;
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh);
+
+  const tbody = document.createElement("tbody");
+  rows.slice(0,20).forEach(row => {
+    const tr = document.createElement("tr");
+    headers.forEach(h => {
+      const td = document.createElement("td");
+      td.textContent = row[h] ?? "";
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
+}
+function renderBundle(bundle){
+  renderGenericTable("previewTable", bundle.merged_output);
+  renderGenericTable("issuesTable", bundle.issues);
+  renderGenericTable("unmatchedTable", bundle.unmatched_log);
+}
+
+/* =========================
+   导出 Excel
+========================= */
+function autoColWidths(rows, headers){
+  const widths = headers.map(h => ({ wch: Math.max(12, String(h).length + 2) }));
+  rows.forEach(r => {
+    headers.forEach((h, i) => {
+      const len = String(r[h] ?? "").length;
+      widths[i].wch = Math.min(45, Math.max(widths[i].wch, len + 2));
+    });
+  });
+  return widths;
+}
+function buildMergedOutputSheet(rows){
+  const aoa = [];
+  const row1 = new Array(OUTPUT_HEADERS.length).fill("");
+  row1[0] = "BASIC INFO";
+  row1[PRE_START] = "PRE Assessment";
+  row1[POST_START] = "Post Assessment";
+  aoa.push(row1);
+  aoa.push(OUTPUT_HEADERS);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  XLSX.utils.sheet_add_json(ws, rows, {
+    header: OUTPUT_HEADERS,
+    skipHeader: true,
+    origin: "A3"
+  });
+
+  ws["!merges"] = [
+    { s:{r:0,c:0}, e:{r:0,c:BASIC_END} },
+    { s:{r:0,c:PRE_START}, e:{r:0,c:PRE_END} },
+    { s:{r:0,c:POST_START}, e:{r:0,c:POST_END} }
+  ];
+
+  ws["!cols"] = autoColWidths(rows, OUTPUT_HEADERS);
+
+  // 冻结前两行（兼容性不是所有软件都完美，但 Excel 一般可识别）
+  ws["!freeze"] = { xSplit: 0, ySplit: 2 };
+
+  return ws;
+}
+function exportBundle(bundle){
+  const wb = XLSX.utils.book_new();
+
+  const wsMain = buildMergedOutputSheet(bundle.merged_output);
+  XLSX.utils.book_append_sheet(wb, wsMain, "merged_output");
+
+  const unmatchedHeaders = bundle.unmatched_log.length
+    ? Object.keys(bundle.unmatched_log[0])
+    : ["type","id","name","stage","clinical_date","suggestions","detail"];
+  const wsUn = XLSX.utils.json_to_sheet(bundle.unmatched_log, { header: unmatchedHeaders });
+  wsUn["!cols"] = autoColWidths(bundle.unmatched_log, unmatchedHeaders);
+  XLSX.utils.book_append_sheet(wb, wsUn, "unmatched_log");
+
+  const issueHeaders = bundle.issues.length
+    ? Object.keys(bundle.issues[0])
+    : ["type","id","name","date","detail"];
+  const wsIssue = XLSX.utils.json_to_sheet(bundle.issues, { header: issueHeaders });
+  wsIssue["!cols"] = autoColWidths(bundle.issues, issueHeaders);
+  XLSX.utils.book_append_sheet(wb, wsIssue, "issues");
+
+  const now = new Date();
+  const filename = `assessment_master_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.xlsx`;
+  XLSX.writeFile(wb, filename);
+}
+
+/* =========================
+   模板下载
+========================= */
+function downloadTemplate(){
+  const wb = XLSX.utils.book_new();
+
+  const wsMain = buildMergedOutputSheet([]);
+  XLSX.utils.book_append_sheet(wb, wsMain, "merged_output_template");
+
+  const txtHeader = [[
+    "timestamp","id","name","age","diagnosisYear","educationYears","dominantHand","implants","wheelchair",
+    "medFirstTime","medDuration","medFrequency","training1","training2","training3",
+    "fci1_arthritis","fci2_osteoporosis","fci3_asthma","fci4_copd","fci5_angina","fci6_heart_failure",
+    "fci7_heart_attack","fci8_neuro_disease","fci10_peripheral_vascular","fci11_diabetes","fci12_gastro",
+    "fci16_hearing","fci17_disc_disease","fci18_height","fci18_weight","fci18_obesity","fciTotal",
+    "hads1","hads2","hads3","hads4","hads5","hads6","hads7","hads8","hads9","hads10","hads11","hads12","hads13","hads14",
+    "hadsAnxiety","hadsDepression",
+    "pdq1","pdq2","pdq3","pdq4","pdq5","pdq6","pdq7","pdq8","pdq9","pdq10","pdq11","pdq12","pdq13","pdq14",
+    "pdq15","pdq16","pdq17","pdq18","pdq19","pdq20","pdq21","pdq22","pdq23","pdq24","pdq25","pdq26","pdq27","pdq28",
+    "pdq29","pdq30","pdq31","pdq32","pdq33","pdq34","pdq35","pdq36","pdq37","pdq38","pdq39","pdqTotal",
+    "fogq1","fogq2","fogq3","fogq4","fogq5","fogq6","fogqTotal"
+  ]];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(txtHeader), "basic_txt_header");
+
+  const clinicalHeader = [[
+    "testType","id","name","testDate","tester","legLength","moca",
+    "parq1","parq2","parq3","parq4","parq5","parq6","parq7","parqAgreement",
+    "medicationDetails","totalLEDD",
+    "updrs3a","updrs3b_on","updrs3c1",
+    "updrs3_1","updrs3_2","updrs3_3a","updrs3_3b","updrs3_3c","updrs3_3d","updrs3_3e",
+    "updrs3_4a","updrs3_4b","updrs3_5a","updrs3_5b","updrs3_6a","updrs3_6b","updrs3_7a","updrs3_7b",
+    "updrs3_8a","updrs3_8b","updrs3_9","updrs3_10","updrs3_11","updrs3_12","updrs3_13","updrs3_14",
+    "updrs3_15a","updrs3_15b","updrs3_16a","updrs3_16b","updrs3_17a","updrs3_17b","updrs3_17c","updrs3_17d","updrs3_17e","updrs3_18",
+    "updrsA","updrsB","hyStage","tug1","tug2","tug3","tug_avg","walkDistance",
+    "walk1_time","walk1_steps","walk2_time","walk2_steps","walk3_time","walk3_steps",
+    "avgSpeed","avgStepLength","avgCadence","localSaveTime"
+  ]];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(clinicalHeader), "clinical_header");
+
+  const wsRule = XLSX.utils.aoa_to_sheet([
+    ["Force bind format"],
+    ["T036|pre|1/31/2026"],
+    ["T036|post|3/15/2026"]
+  ]);
+  XLSX.utils.book_append_sheet(wb, wsRule, "force_bind_example");
+
+  XLSX.writeFile(wb, "assessment_master_template.xlsx");
+}
+
+/* =========================
+   汇总显示
+========================= */
+function updateStoreSummary(){
+  const store = loadStore();
+  setText("storeSummary", summarizeStore(store));
+}
+function updateCurrentSummary(txtRows, clinicalRows){
+  setText("currentSummary", `当前读取：TXT 行数 ${txtRows.length}；Clinical 记录数 ${clinicalRows.length}`);
+}
+
+/* =========================
+   主操作
+========================= */
+async function buildPreviewFromCurrentOnly(){
+  const current = await ingestCurrentInputs();
+  updateCurrentSummary(current.txtRows, current.clinicalRows);
+
+  const refText = document.getElementById("refTableInput").value;
+  const aliasText = document.getElementById("aliasInput").value;
+  const forceText = document.getElementById("forceBindInput").value;
+
+  const bundle = buildBundle(current.txtRows, current.clinicalRows, refText, aliasText, forceText);
+  renderBundle(bundle);
+  setStatus(
+    `已按“当前上传”预览。\n` +
+    `TXT 行数：${bundle.stats.txtRows}\n` +
+    `Clinical 记录数：${bundle.stats.clinicalRows}\n` +
+    `输出受试者数：${bundle.stats.subjects}\n` +
+    `Issues：${bundle.issues.length}\n` +
+    `Unmatched log：${bundle.unmatched_log.length}`,
+    "good"
+  );
+}
+async function appendCurrentToStoreAndPreview(){
+  const current = await ingestCurrentInputs();
+  updateCurrentSummary(current.txtRows, current.clinicalRows);
+
+  const store = loadStore();
+  const mergedStore = {
+    txtRows: dedupeTxtRawRows([...store.txtRows, ...current.txtRows]),
+    clinicalRows: dedupeClinicalRawRows([...store.clinicalRows, ...current.clinicalRows])
+  };
+  saveStore(mergedStore);
+  updateStoreSummary();
+
+  const refText = document.getElementById("refTableInput").value;
+  const aliasText = document.getElementById("aliasInput").value;
+  const forceText = document.getElementById("forceBindInput").value;
+
+  const bundle = buildBundle(mergedStore.txtRows, mergedStore.clinicalRows, refText, aliasText, forceText);
+  renderBundle(bundle);
+
+  setStatus(
+    `已追加到本地总库并预览。\n` +
+    `本地总库 TXT 行数：${mergedStore.txtRows.length}\n` +
+    `本地总库 Clinical 记录数：${mergedStore.clinicalRows.length}\n` +
+    `输出受试者数：${bundle.stats.subjects}\n` +
+    `Issues：${bundle.issues.length}\n` +
+    `Unmatched log：${bundle.unmatched_log.length}`,
+    "good"
+  );
+}
+function exportFromStore(){
+  const store = loadStore();
+  const refText = document.getElementById("refTableInput").value;
+  const aliasText = document.getElementById("aliasInput").value;
+  const forceText = document.getElementById("forceBindInput").value;
+
+  const bundle = buildBundle(store.txtRows, store.clinicalRows, refText, aliasText, forceText);
+  renderBundle(bundle);
+  exportBundle(bundle);
+
+  setStatus(
+    `已导出当前本地总表 Excel。\n` +
+    `本地总库 TXT 行数：${store.txtRows.length}\n` +
+    `本地总库 Clinical 记录数：${store.clinicalRows.length}\n` +
+    `输出受试者数：${bundle.stats.subjects}\n` +
+    `已导出 3 个 sheet：merged_output / unmatched_log / issues`,
+    "good"
+  );
+}
+
+/* =========================
+   初始化
+========================= */
+document.getElementById("previewCurrentBtn").addEventListener("click", async () => {
+  try{
+    setStatus("正在按当前上传预览，请稍候…", "warn");
+    await buildPreviewFromCurrentOnly();
+  }catch(err){
+    console.error(err);
+    setStatus("预览失败：\n" + (err?.message || err), "bad");
+  }
+});
+
+document.getElementById("appendStoreBtn").addEventListener("click", async () => {
+  try{
+    setStatus("正在追加到本地总库并预览，请稍候…", "warn");
+    await appendCurrentToStoreAndPreview();
+  }catch(err){
+    console.error(err);
+    setStatus("追加失败：\n" + (err?.message || err), "bad");
+  }
+});
+
+document.getElementById("exportStoreBtn").addEventListener("click", () => {
+  try{
+    setStatus("正在导出当前本地总表，请稍候…", "warn");
+    exportFromStore();
+  }catch(err){
+    console.error(err);
+    setStatus("导出失败：\n" + (err?.message || err), "bad");
+  }
+});
+
+document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
+  try{
+    downloadTemplate();
+    setStatus("已下载模板 assessment_master_template.xlsx", "good");
+  }catch(err){
+    console.error(err);
+    setStatus("下载模板失败：\n" + (err?.message || err), "bad");
+  }
+});
+
+document.getElementById("clearStoreBtn").addEventListener("click", () => {
+  if(!confirm("确定要清空本地总库吗？此操作不可撤销。")) return;
+  clearStore();
+  updateStoreSummary();
+  setStatus("本地总库已清空。", "good");
+});
+
+updateStoreSummary();
+</script>
 </body>
 </html>
