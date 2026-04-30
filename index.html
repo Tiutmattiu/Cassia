@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="zh-HK">
+<!DOCTYPE html><!DOCTYPE html">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MRI Merge Export Tool</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
   <style>
     :root{
       --bg:#f7f8fb;
@@ -14,9 +12,6 @@
       --muted:#5f6b7a;
       --line:#e5e7eb;
       --primary:#2563eb;
-      --ok:#0f766e;
-      --warn:#b45309;
-      --bad:#b91c1c;
     }
     *{box-sizing:border-box}
     body{
@@ -25,90 +20,44 @@
       background:var(--bg);
       color:var(--text);
     }
-    .wrap{max-width:1450px;margin:0 auto;padding:18px}
+    .wrap{max-width:1460px;margin:0 auto;padding:18px}
     .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:18px;
-      box-shadow:0 6px 18px rgba(0,0,0,.04);
-      padding:16px;
-      margin-bottom:16px;
+      background:#fff;border:1px solid var(--line);border-radius:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,.04);padding:16px;margin-bottom:16px;
     }
-    h1,h2,h3{margin:0 0 10px}
+    h1,h2{margin:0 0 10px}
     h1{font-size:28px}
     h2{font-size:20px}
-    h3{font-size:16px;color:var(--muted)}
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
     .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
     .cols-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    textarea,input[type="text"],input[type="file"],select{
-      width:100%;
-      padding:12px 14px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      font-size:14px;
-      background:#fff;
+    textarea,input[type="file"]{
+      width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
+      font-size:14px;background:#fff;
     }
-    textarea{
-      min-height:120px;
-      resize:vertical;
-      font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
-    }
+    textarea{min-height:120px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
     button{
-      border:none;
-      background:var(--primary);
-      color:#fff;
-      padding:10px 14px;
-      border-radius:12px;
-      font-weight:700;
-      cursor:pointer;
+      border:none;background:var(--primary);color:#fff;padding:10px 14px;
+      border-radius:12px;font-weight:700;cursor:pointer;
     }
     button.secondary{background:#eef2ff;color:#1e40af}
     button.ghost{background:#f3f4f6;color:#111827}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap}
-    .muted{color:var(--muted)}
-    .small{font-size:12px}
     .pill{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      background:#eef2ff;
-      color:#1e40af;
-      font-size:12px;
-      margin-right:6px;
-      margin-bottom:6px;
+      display:inline-block;padding:4px 8px;border-radius:999px;
+      background:#eef2ff;color:#1e40af;font-size:12px;margin-right:6px;margin-bottom:6px;
+    }
+    .note{
+      padding:10px 12px;border-radius:12px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e
     }
     .stat{display:flex;gap:10px;flex-wrap:wrap}
-    .stat .box{
-      padding:12px 14px;
-      border-radius:14px;
-      background:#f8fafc;
-      border:1px solid var(--line)
-    }
+    .stat .box{padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}
+    .sticky{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:12px}
     table{width:100%;border-collapse:collapse;font-size:13px}
-    th,td{
-      border:1px solid var(--line);
-      padding:6px 8px;
-      vertical-align:top
-    }
+    th,td{border:1px solid var(--line);padding:6px 8px;vertical-align:top}
     th{background:#f8fafc}
-    .sticky{
-      max-height:460px;
-      overflow:auto;
-      border:1px solid var(--line);
-      border-radius:12px
-    }
     .mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
-    .note{
-      padding:10px 12px;
-      border-radius:12px;
-      background:#fffbeb;
-      border:1px solid #fcd34d;
-      color:#92400e
-    }
-    .sectionTitle{font-size:14px;font-weight:700;margin-bottom:8px}
-    .good{color:#0f766e}
-    .warning{color:#b45309}
-    .danger{color:#b91c1c}
     @media (max-width:1100px){
       .grid,.cols-2{grid-template-columns:1fr}
     }
@@ -119,12 +68,12 @@
   <div class="card">
     <h1>MRI 总表合并与 Excel 导出</h1>
     <div class="muted">
-      <span class="pill">basic TXT（tab 分隔）</span>
+      <span class="pill">basic TXT</span>
       <span class="pill">JSON / CSV / XLSX</span>
+      <span class="pill">clinical 表单型 CSV/Excel 可读</span>
       <span class="pill">MRI master 强制归一</span>
       <span class="pill">姓名候选建议</span>
       <span class="pill">pre/post 强制绑定</span>
-      <span class="pill">支持中文表单型 CSV / Excel</span>
     </div>
   </div>
 
@@ -133,27 +82,25 @@
       <div class="card">
         <h2>1) basic TXT（tab 分隔）</h2>
         <div class="muted small">
-          贴整段 basic TXT（包含表头）；会忽略其中随机 id；同一人出现两次时，会按时间戳 + MRI 日期归到 pre / post。
+          会忽略 basic TXT 的随机 id；同一人两次记录会按时间戳 + MRI 日期自动归为 pre / post。
         </div>
-        <textarea id="basicTxt" placeholder="把 basic TXT 贴到这里（包含表头）"></textarea>
+        <textarea id="basicTxt" placeholder="把 basic TXT 整段贴到这里（含表头）"></textarea>
         <div class="toolbar" style="margin-top:10px">
           <button id="parseBasicBtn">解析 basic TXT</button>
-          <button class="ghost" id="loadDemoBasicBtn">载入 basic 示例</button>
-          <button class="secondary" id="clearBasicBtn">清空</button>
+          <button class="ghost" id="clearBasicBtn">清空</button>
         </div>
       </div>
 
       <div class="card">
-        <h2>2) 上传临床文件</h2>
+        <h2>2) 上传 clinical / basic 文件</h2>
         <div class="muted small">
           支持：
           <span class="mono">.json / .csv / .xlsx / .xls / .txt</span><br/>
-          普通横向表格会自动读取；像「編號 / 姓名 / 測試日期」这种中文表单型 CSV / Excel 也会自动识别。
+          clinical 如果是“編號 / 姓名 / 測試日期”这种两列表单，也会自动识别成一条记录。
         </div>
         <input type="file" id="fileInput" multiple accept=".json,.xlsx,.xls,.csv,.txt" />
         <div class="toolbar" style="margin-top:10px">
           <button id="processFilesBtn">读取上传文件</button>
-          <button class="secondary" id="loadDemoJsonBtn">载入 JSON 示例</button>
         </div>
       </div>
 
@@ -161,7 +108,7 @@
         <h2>3) 手工规则（可选）</h2>
         <div class="cols-2">
           <div>
-            <div class="sectionTitle">强制绑定某个 ID 的 pre/post 日期</div>
+            <div style="font-weight:700;margin-bottom:8px">强制绑定 pre / post 日期</div>
             <textarea id="bindingJson" placeholder='例如：
 {
   "T036": {"pre":"2026-01-31","post":"2026-03-15"},
@@ -169,7 +116,7 @@
 }'></textarea>
           </div>
           <div>
-            <div class="sectionTitle">额外别名（可选，一行一个）</div>
+            <div style="font-weight:700;margin-bottom:8px">额外别名（可选）</div>
             <textarea id="extraAlias" placeholder='格式：别名 = MRI标准名
 例如：
 张先生 = 張學強
@@ -187,12 +134,11 @@ lam chi keung = 林志強'></textarea>
         <h2>状态</h2>
         <div class="stat" id="stats"></div>
         <div class="note" style="margin-top:10px">
-          输出规则：<br/>
-          1. 所有人都以 MRI master 的 <span class="mono">Parti / Name / Date / Group</span> 为准；<br/>
-          2. clinical 文件里的名字会尽量合并到 MRI 标准名（简繁体 + alias + 拼音/英文名映射）；<br/>
-          3. MRI 名单里没有的人，按识别顺序追加到总表末尾；<br/>
-          4. 导出 Excel 时第一行会自动做成分区表头：<span class="mono">BASIC INFO / PRE Assessment / Post Assessment</span>。<br/>
-          5. clinical 文件里的 <span class="mono">So42 / S042 / T042</span> 现在都会视为同一人（T042）。
+          规则：<br/>
+          1. 所有人以 MRI master 的 <span class="mono">Parti / Name / Date / Group</span> 为准；<br/>
+          2. clinical 优先使用 <span class="mono">id + name + date</span> 匹配；<br/>
+          3. clinical CSV/Excel 若为两列表单，会整份合成一条记录，而不是逐行拆散；<br/>
+          4. 导出 Excel 第一行会自动做成：<span class="mono">BASIC INFO / PRE Assessment / Post Assessment</span>。
         </div>
       </div>
 
@@ -218,12 +164,7 @@ lam chi keung = 林志強'></textarea>
         <div class="toolbar">
           <button id="mergeBtn">生成总表预览</button>
           <button id="exportBtn">导出 Excel</button>
-          <button class="ghost" id="downloadJsonBtn">下载中间结果 JSON</button>
-        </div>
-        <div class="muted small" style="margin-top:8px">
-          导出文件包含 3 个 sheet：<span class="mono">merged_output</span>、
-          <span class="mono">unrecognized</span>、
-          <span class="mono">raw_debug</span>。
+          <button class="ghost" id="downloadJsonBtn">下载中间 JSON</button>
         </div>
       </div>
     </div>
@@ -231,14 +172,16 @@ lam chi keung = 林志強'></textarea>
 
   <div class="card">
     <h2>总表预览</h2>
-    <div class="sticky"><table id="previewTable"></table></div>
+    <div class="sticky">
+      <table id="previewTable"></table>
+    </div>
   </div>
 </div>
 
 <script>
-/*************************************************
- * 0) MRI MASTER（唯一准绳）
- *************************************************/
+/* =========================
+   MRI MASTER
+========================= */
 const MRI_MASTER_RAW = [
   ["s025_pre","Combined","T025_1","張學強","10/25/2025"],
   ["s025_post","Combined","T025_2","張學強","12/6/2025"],
@@ -295,9 +238,9 @@ const GROUP_SORT = {
   "quit（图像质量太差）":4
 };
 
-/*************************************************
- * 1) 姓名 alias & 简繁转换
- *************************************************/
+/* =========================
+   Alias & Maps
+========================= */
 const EXTRA_ALIAS_PRESET = {
   "张先生":"張學強",
   "张学强":"張學強",
@@ -336,17 +279,21 @@ const SIMP_TRAD_MAP = {
   "苑":"苑","兴":"興","勉":"勉","桂":"桂","学强":"學強","启":"啟","萧":"蕭"
 };
 
-/*************************************************
- * 2) 中文表单字段映射（CSV / Excel form）
- *************************************************/
 const FORM_LABEL_MAP = {
   "編號":"id",
+  "编号":"id",
   "姓名":"name",
+  "Name":"name",
   "測試日期":"testDate",
+  "测试日期":"testDate",
   "測試員":"tester",
+  "测试员":"tester",
   "腿長(米)":"legLength",
+  "腿长(米)":"legLength",
   "MOCA分數":"moca",
+  "MOCA分数":"moca",
   "測試類型":"testType",
+  "测试类型":"testType",
 
   "醫生曾否說過你的心臟有問題":"parq1",
   "你進行體能活動時會否感到胸口痛":"parq2",
@@ -356,17 +303,26 @@ const FORM_LABEL_MAP = {
   "醫生現時是否有開血壓或心臟藥物":"parq6",
   "是否有其他理由令你不應進行體能活動":"parq7",
   "同意確認":"parqAgreement",
+  "同意":"parqAgreement",
 
   "用藥詳情":"medicationDetails",
+  "用药详情":"medicationDetails",
   "總LEDD量":"totalLEDD",
+  "总LEDD量":"totalLEDD",
 
   "是否正接受巴金森病藥物治療":"updrs3a",
+  "是否正接受巴金森病药物治疗":"updrs3a",
   "來電狀態":"updrs3b_on",
+  "来电状态":"updrs3b_on",
   "停電狀態":"updrs3b_off",
+  "停电状态":"updrs3b_off",
   "是否有服用左多巴藥物":"updrs3c",
+  "是否有服用左多巴药物":"updrs3c",
   "距離最後一次服用左多巴藥物(分鐘)":"updrs3c1",
+  "距离最后一次服用左多巴药物(分钟)":"updrs3c1",
 
   "言語":"updrs3_1",
+  "言语":"updrs3_1",
   "面部表情":"updrs3_2",
   "僵硬(脖子)":"updrs3_3a",
   "僵硬(右上肢)":"updrs3_3b",
@@ -385,10 +341,15 @@ const FORM_LABEL_MAP = {
   "兩腳靈敏度測試(左)":"updrs3_8b",
   "從椅子上站起來":"updrs3_9",
   "步態":"updrs3_10",
+  "步态":"updrs3_10",
   "步態凍結的評估":"updrs3_11",
+  "步态冻结的评估":"updrs3_11",
   "姿勢平穩度":"updrs3_12",
+  "姿势平稳度":"updrs3_12",
   "姿勢":"updrs3_13",
+  "姿势":"updrs3_13",
   "全身自發性的動作評估":"updrs3_14",
+  "全身自发性的动作评估":"updrs3_14",
   "雙手姿態型顫抖(右)":"updrs3_15a",
   "雙手姿態型顫抖(左)":"updrs3_15b",
   "雙手動作型顫抖(右)":"updrs3_16a",
@@ -400,7 +361,9 @@ const FORM_LABEL_MAP = {
   "靜止型顫抖幅度(嘴唇/下巴)":"updrs3_17e",
   "靜止型顫抖持續性":"updrs3_18",
   "異動症是否出現":"updrsA",
+  "异动症是否出现":"updrsA",
   "異動症是否干擾檢查":"updrsB",
+  "异动症是否干扰检查":"updrsB",
 
   "H&Y分期":"hyStage",
 
@@ -408,8 +371,10 @@ const FORM_LABEL_MAP = {
   "第二次TUG(秒)":"tug2",
   "第三次TUG(秒)":"tug3",
   "TUG平均時間(秒)":"tug_avg",
+  "TUG平均时间(秒)":"tug_avg",
 
   "步行距離(米)":"walkDistance",
+  "步行距离(米)":"walkDistance",
   "第一次時間(秒)":"walk1_time",
   "第一次步數":"walk1_steps",
   "第二次時間(秒)":"walk2_time",
@@ -418,12 +383,13 @@ const FORM_LABEL_MAP = {
   "第三次步數":"walk3_steps",
   "平均速度(米/秒)":"avgSpeed",
   "平均步距(米)":"avgStepLength",
-  "平均步頻(步/分鐘)":"avgCadence"
+  "平均步頻(步/分鐘)":"avgCadence",
+  "平均步频(步/分钟)":"avgCadence"
 };
 
-/*************************************************
- * 3) 全局状态
- *************************************************/
+/* =========================
+   State
+========================= */
 const state = {
   basicRows: [],
   clinicalRows: [],
@@ -445,45 +411,32 @@ function buildMaster(){
 
     if(!byTid[tid]){
       byTid[tid] = {
-        tid,
-        name,
-        group,
-        order: idx,
-        mriCode: mri.replace(/_(pre|post)$/i, ""),
-        preDate:"",
-        postDate:"",
-        partiPre:"",
-        partiPost:"",
-        rows:[]
+        tid, name, group, order: idx,
+        preDate:"", postDate:"", partiPre:"", partiPost:"", rows:[]
       };
       order.push(tid);
     }
-
     byTid[tid].rows.push({mri, group, parti, name, date, phase});
-    if(phase === "pre"){
-      byTid[tid].preDate = normalizeDate(date);
-      byTid[tid].partiPre = parti;
-    }
-    if(phase === "post"){
-      byTid[tid].postDate = normalizeDate(date);
-      byTid[tid].partiPost = parti;
-    }
+    if(phase === "pre"){ byTid[tid].preDate = normalizeDate(date); byTid[tid].partiPre = parti; }
+    if(phase === "post"){ byTid[tid].postDate = normalizeDate(date); byTid[tid].partiPost = parti; }
   });
   return {byTid, order};
 }
 
-/*************************************************
- * 4) 基础工具函数
- *************************************************/
+/* =========================
+   Utils
+========================= */
 function canonTid(v){
   if(v == null) return "";
   let s = String(v).trim().toUpperCase();
 
-  // 支持：T042 / S042 / SO42 / s042_pre / T042_1
+  // T042 / S042 / SO42 / T042_1 / s042_pre 都可抓到
   let m = s.match(/(?:^|[^A-Z0-9])(T|S|SO)\s*0*(\d{1,3})(?:[^0-9]|$)/i);
   if(m) return `T${m[2].padStart(3,"0")}`;
 
-  // 回退：任何字符串中提取 1~3 位数字
+  m = s.match(/^(T|S|SO)\s*0*(\d{1,3})$/i);
+  if(m) return `T${m[2].padStart(3,"0")}`;
+
   m = s.match(/0*(\d{1,3})/);
   if(m) return `T${m[1].padStart(3,"0")}`;
 
@@ -492,16 +445,16 @@ function canonTid(v){
 
 function convertSimpTradLite(s){
   let out = String(s || "");
-  Object.keys(SIMP_TRAD_MAP)
-    .sort((a,b)=>b.length-a.length)
-    .forEach(k=>{ out = out.split(k).join(SIMP_TRAD_MAP[k]); });
+  Object.keys(SIMP_TRAD_MAP).sort((a,b)=>b.length-a.length).forEach(k=>{
+    out = out.split(k).join(SIMP_TRAD_MAP[k]);
+  });
   return out;
 }
 
 function normalizeName(s){
   let x = convertSimpTradLite(String(s||"")).trim().toLowerCase();
-  x = x.replace(/[（）()\[\]{}，,.;:'"`~!@#$%^&*+=|\\/?<>_-]/g, " ");
-  x = x.replace(/\s+/g, " ").trim();
+  x = x.replace(/[（）()\\[\\]{}，,.;:'"`~!@#$%^&*+=|\\\\/?<>_-]/g, " ");
+  x = x.replace(/\\s+/g, " ").trim();
   return x;
 }
 
@@ -511,57 +464,45 @@ function normalizeDate(d){
 
   const s0 = String(d).trim();
   if(!s0) return "";
-  let s = s0;
-
-  if(/^\d{4}-\d{2}-\d{2}/.test(s)){
-    const z = new Date(s);
+  if(/^\\d{4}-\\d{2}-\\d{2}/.test(s0)){
+    const z = new Date(s0);
     if(!isNaN(z)) return fmtDate(z);
-    const [y,m,da] = s.slice(0,10).split("-").map(Number);
+    const [y,m,da] = s0.slice(0,10).split("-").map(Number);
     return `${m}/${da}/${y}`;
   }
-
-  const z = new Date(s);
+  const z = new Date(s0);
   if(!isNaN(z)) return fmtDate(z);
 
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  const m = s0.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);
   if(m) return `${Number(m[1])}/${Number(m[2])}/${m[3]}`;
-
-  return s;
+  return s0;
 }
 
-function fmtDate(d){
-  return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
-}
+function fmtDate(d){ return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`; }
 
 function daysDiff(a,b){
   if(!a || !b) return 999999;
   const da = new Date(a), db = new Date(b);
   if(isNaN(da) || isNaN(db)) return 999999;
-  return Math.abs((da - db)/(1000*3600*24));
-}
-
-function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>"']/g,m=>({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    "\"":"&quot;",
-    "'":"&#39;"
-  }[m]));
+  return Math.abs((da-db)/(1000*3600*24));
 }
 
 function isBlankRow(obj){
   return !Object.values(obj).some(v=>String(v ?? "").trim() !== "");
 }
 
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+  }[m]));
+}
+
 function levenshtein(a,b){
-  a = normalizeName(a);
-  b = normalizeName(b);
+  a = normalizeName(a); b = normalizeName(b);
   const m=a.length,n=b.length;
   const dp = Array.from({length:m+1},()=>Array(n+1).fill(0));
   for(let i=0;i<=m;i++) dp[i][0]=i;
   for(let j=0;j<=n;j++) dp[0][j]=j;
-
   for(let i=1;i<=m;i++){
     for(let j=1;j<=n;j++){
       dp[i][j] = Math.min(
@@ -597,14 +538,7 @@ function groupBucket(group){
   return "Quit";
 }
 
-function uniq(arr){
-  return [...new Set(arr.filter(Boolean))];
-}
-
-function val(wrapper, key){
-  return wrapper?.raw?.[key] ?? "";
-}
-
+function val(wrapper, key){ return wrapper?.raw?.[key] ?? ""; }
 function findAnyName(tid){
   const m = state.master.byTid[tid];
   if(m) return m.name;
@@ -612,22 +546,19 @@ function findAnyName(tid){
   return x?.canonicalName || "";
 }
 
-/*************************************************
- * 5) 姓名匹配 / alias
- *************************************************/
+/* =========================
+   Alias / Resolve
+========================= */
 function buildAliasMap(){
   const map = {};
-
-  Object.entries(EXTRA_ALIAS_PRESET).forEach(([k,v])=>{
-    map[normalizeName(k)] = v;
-  });
+  Object.entries(EXTRA_ALIAS_PRESET).forEach(([k,v])=>{ map[normalizeName(k)] = v; });
 
   Object.values(state.master.byTid).forEach(m=>{
     map[normalizeName(m.name)] = m.name;
     map[normalizeName(m.tid)] = m.name;
   });
 
-  const extra = document.getElementById("extraAlias").value.split(/\r?\n/);
+  const extra = document.getElementById("extraAlias").value.split(/\\r?\\n/);
   extra.forEach(line=>{
     const m = line.split("=");
     if(m.length >= 2){
@@ -653,7 +584,7 @@ function resolveToMaster({name, id, date, source}){
 
   if(aliasVal){
     const tid2 = Object.values(state.master.byTid)
-      .find(x=>normalizeName(x.name) === normalizeName(aliasVal))?.tid;
+      .find(x=>normalizeName(x.name)===normalizeName(aliasVal))?.tid;
     if(tid2){
       return {status:"matched", tid:tid2, name:state.master.byTid[tid2].name, by:"alias"};
     }
@@ -661,20 +592,16 @@ function resolveToMaster({name, id, date, source}){
 
   const exact = Object.values(state.master.byTid)
     .find(x=>normalizeName(x.name) === nn);
-
   if(exact){
     return {status:"matched", tid:exact.tid, name:exact.name, by:"name_exact"};
   }
 
   const candidates = Object.values(state.master.byTid).map(x=>{
     const nameDist = levenshtein(nn, normalizeName(x.name));
-    const dateDist = Math.min(
-      daysDiff(normalizeDate(date), x.preDate || ""),
-      daysDiff(normalizeDate(date), x.postDate || "")
-    );
+    const dateDist = Math.min(daysDiff(normalizeDate(date), x.preDate || ""), daysDiff(normalizeDate(date), x.postDate || ""));
     const score = nameDist * 10 + Math.min(dateDist, 365);
-    return {tid:x.tid, name:x.name, score, nameDist, dateDist};
-  }).sort((a,b)=>a.score - b.score).slice(0,5);
+    return {tid:x.tid,name:x.name,score,nameDist,dateDist};
+  }).sort((a,b)=>a.score-b.score).slice(0,5);
 
   state.unrecognized.push({
     source,
@@ -728,17 +655,13 @@ function calcUPDRS(rec){
   return total || "";
 }
 
-/*************************************************
- * 6) basic TXT 解析
- *************************************************/
+/* =========================
+   basic TXT
+========================= */
 function parseDelimited(text){
-  const lines = String(text || "")
-    .replace(/^\uFEFF/, "")
-    .split(/\r?\n/)
-    .filter(x=>x.trim() !== "");
-
+  const lines = String(text || "").replace(/^\\uFEFF/, "").split(/\\r?\\n/).filter(x=>x.trim() !== "");
   if(!lines.length) return [];
-  const sep = lines[0].includes("\t") ? "\t" : (lines[0].includes(",") ? "," : null);
+  const sep = lines[0].includes("\\t") ? "\\t" : (lines[0].includes(",") ? "," : null);
   if(!sep) return [];
 
   const headers = lines[0].split(sep).map(h=>h.trim());
@@ -750,19 +673,14 @@ function parseDelimited(text){
     headers.forEach((h,idx)=> obj[h] = (vals[idx] ?? "").trim());
     if(!isBlankRow(obj)) rows.push(obj);
   }
-
   return rows;
 }
 
 function ingestBasicRows(rows){
   rows.forEach(r=>{
     const resolved = resolveToMaster({
-      name:r.name,
-      id:r.id,
-      date:r.timestamp,
-      source:"basic_txt"
+      name:r.name, id:r.id, date:r.timestamp, source:"basic_txt"
     });
-
     if(resolved.status === "ignore") return;
 
     const tid = resolved.status === "matched"
@@ -782,25 +700,101 @@ function ingestBasicRows(rows){
     });
 
     state.rawDebug.push({
-      type:"basic",
-      tid,
-      phase,
-      name:r.name,
-      timestamp:r.timestamp,
-      raw:r
+      type:"basic", tid, phase, name:r.name, timestamp:r.timestamp, raw:r
     });
   });
 }
 
-/*************************************************
- * 7) clinical JSON / CSV / XLSX 解析
- *************************************************/
+/* =========================
+   Clinical form/table parsing
+========================= */
+function normalizeCell(v){
+  return String(v ?? "").replace(/^"+|"+$/g, "").trim();
+}
+
+function detectClinicalFormAoA(aoa){
+  if(!Array.isArray(aoa) || aoa.length < 5) return false;
+
+  const sectionTitles = new Set([
+    "帕金森評估數據","帕金森评估数据","基本信息","基本資料",
+    "PAR-Q問卷","PAR-Q问卷","用藥詳情","用药详情",
+    "UPDRS-3評估","UPDRS-3评估","其他評估","其他评估","TUG測試","TUG测试","步行測試","步行测试"
+  ]);
+
+  let nonEmptyFirstCol = 0;
+  let matchCount = 0;
+
+  for(let i=0;i<aoa.length;i++){
+    const row = aoa[i] || [];
+    const key = normalizeCell(row[0]);
+    if(!key) continue;
+    nonEmptyFirstCol++;
+    if(FORM_LABEL_MAP[key] || sectionTitles.has(key)) matchCount++;
+  }
+
+  if(nonEmptyFirstCol === 0) return false;
+  return (matchCount / nonEmptyFirstCol) >= 0.3 || matchCount >= 8;
+}
+
+function aoaFormToRecord(aoa){
+  const rec = {};
+  for(const row of aoa){
+    if(!row || !row.length) continue;
+    const key = normalizeCell(row[0]);
+    const val = normalizeCell(row[1]);
+    if(!key) continue;
+    if(FORM_LABEL_MAP[key]){
+      rec[FORM_LABEL_MAP[key]] = val;
+    }
+  }
+
+  // fallback: 万一表里有中文标签但没被映射，尽量扫关键字
+  if(!rec.name){
+    for(const row of aoa){
+      const k = normalizeCell(row[0]);
+      const v = normalizeCell(row[1]);
+      if(["姓名","Name"].includes(k) && v){
+        rec.name = v; break;
+      }
+    }
+  }
+  if(!rec.id){
+    for(const row of aoa){
+      const k = normalizeCell(row[0]);
+      const v = normalizeCell(row[1]);
+      if(["編號","编号","ID","id"].includes(k) && v){
+        rec.id = v; break;
+      }
+    }
+  }
+  if(!rec.testDate){
+    for(const row of aoa){
+      const k = normalizeCell(row[0]);
+      const v = normalizeCell(row[1]);
+      if(["測試日期","测试日期","Date"].includes(k) && v){
+        rec.testDate = v; break;
+      }
+    }
+  }
+  if(!rec.testType){
+    for(const row of aoa){
+      const k = normalizeCell(row[0]);
+      const v = normalizeCell(row[1]);
+      if(["測試類型","测试类型","Type"].includes(k) && v){
+        rec.testType = v; break;
+      }
+    }
+  }
+
+  return rec;
+}
+
 function normalizeClinicalRecord(obj){
   const rec = {...obj};
   rec.id = canonTid(rec.id || rec.ID || rec.participantId || rec.parti || rec.code || "");
   rec.name = rec.name || rec.Name || rec.participantName || rec.姓名 || "";
-  rec.testType = String(rec.testType || rec.phase || rec.測試類型 || "").toLowerCase();
-  rec.testDate = normalizeDate(rec.testDate || rec.date || rec.Date || rec.測試日期 || rec.localSaveTime || "");
+  rec.testType = String(rec.testType || rec.phase || rec.測試類型 || rec.测试类型 || "").toLowerCase();
+  rec.testDate = normalizeDate(rec.testDate || rec.date || rec.Date || rec.測試日期 || rec.测试日期 || rec.localSaveTime || "");
   rec.localSaveTime = rec.localSaveTime || "";
   return rec;
 }
@@ -809,6 +803,9 @@ function ingestClinicalRows(rows, sourceName){
   rows.forEach(obj=>{
     const rec = normalizeClinicalRecord(obj);
     if(isBlankRow(rec)) return;
+
+    // 如果 clinical 文件读出来既没有 name 也没有 id，则直接忽略，不进 unrecognized
+    if(!String(rec.name||"").trim() && !String(rec.id||"").trim()) return;
 
     const resolved = resolveToMaster({
       name:rec.name,
@@ -850,56 +847,45 @@ function ingestClinicalRows(rows, sourceName){
   });
 }
 
-function detectClinicalFormAoA(aoa){
-  if(!Array.isArray(aoa) || aoa.length < 8) return false;
-  let score = 0;
-  for(let i=0;i<Math.min(aoa.length, 40); i++){
-    const row = aoa[i] || [];
-    const key = String(row[0] ?? "").trim().replace(/^"+|"+$/g,'');
-    if(FORM_LABEL_MAP[key]) score++;
-    if(["帕金森評估數據","基本信息","PAR-Q問卷","用藥詳情","UPDRS-3評估","其他評估","TUG測試","步行測試"].includes(key)) score++;
-  }
-  return score >= 8;
-}
+function sheetToRecords(sheet){
+  const aoa = XLSX.utils.sheet_to_json(sheet, {
+    header:1,
+    defval:"",
+    blankrows:false,
+    raw:false
+  });
 
-function aoaFormToRecord(aoa){
-  const rec = {};
-  for(const row of aoa){
-    if(!row || !row.length) continue;
-
-    let key = String(row[0] ?? "").trim();
-    let val = String(row[1] ?? "").trim();
-
-    key = key.replace(/^"+|"+$/g, "");
-    val = val.replace(/^"+|"+$/g, "");
-
-    if(!key) continue;
-    if(FORM_LABEL_MAP[key]){
-      rec[FORM_LABEL_MAP[key]] = val;
-    }
-  }
-  return rec;
-}
-
-function sheetToRecords(sheet, sourceName){
-  const aoa = XLSX.utils.sheet_to_json(sheet, {header:1, defval:""});
-
-  // 1) 中文表单型
   if(detectClinicalFormAoA(aoa)){
     const rec = aoaFormToRecord(aoa);
     return rec && Object.keys(rec).length ? [rec] : [];
   }
 
-  // 2) 普通横向表格
-  const arr = XLSX.utils.sheet_to_json(sheet, {defval:""});
-  if(Array.isArray(arr) && arr.length) return arr;
+  // 普通横向表
+  const rows = XLSX.utils.sheet_to_json(sheet, {
+    defval:"",
+    raw:false
+  });
+
+  // 如果普通解析出来的每行都没有像样字段，尝试用前两列转成 form
+  const hasUseful = rows.some(r => {
+    const keys = Object.keys(r);
+    return keys.some(k => ["id","ID","name","Name","testDate","date","timestamp","姓名","編號","编号"].includes(k));
+  });
+
+  if(hasUseful) return rows;
+
+  // fallback：某些 CSV 会被解析成 __EMPTY / __EMPTY_1 两列
+  if(aoa && aoa.length){
+    const rec = aoaFormToRecord(aoa);
+    if(rec && (rec.id || rec.name || rec.testDate)) return [rec];
+  }
 
   return [];
 }
 
 async function readUploadedFiles(files){
-  if(typeof XLSX === 'undefined'){
-    alert('XLSX 库没有加载成功，请检查网络。');
+  if(typeof XLSX === "undefined"){
+    alert("XLSX 库没有加载成功，请检查网络。");
     return;
   }
 
@@ -910,9 +896,9 @@ async function readUploadedFiles(files){
       const txt = await file.text();
       let parsed;
       try{
-        parsed = JSON.parse(txt.replace(/^\uFEFF/, ""));
+        parsed = JSON.parse(txt.replace(/^\\uFEFF/, ""));
       }catch(err){
-        alert(`JSON 解析失败：${file.name}\n${err.message}`);
+        alert(`JSON 解析失败：${file.name}\\n${err.message}`);
         continue;
       }
 
@@ -922,20 +908,18 @@ async function readUploadedFiles(files){
     }
 
     if(lower.endsWith(".csv")){
-      // 用 XLSX 直接读 CSV，既能处理普通表，也能取到二维数组做表单识别
       const text = await file.text();
       let wb;
       try{
-        wb = XLSX.read(text, {type:"string"});
+        wb = XLSX.read(text, {type:"string", raw:false, codepage:65001});
       }catch(err){
-        alert(`CSV 读取失败：${file.name}\n${err.message}`);
+        alert(`CSV 读取失败：${file.name}\\n${err.message}`);
         continue;
       }
 
       const all = [];
       wb.SheetNames.forEach(sn=>{
-        const sheet = wb.Sheets[sn];
-        const part = sheetToRecords(sheet, file.name);
+        const part = sheetToRecords(wb.Sheets[sn]);
         part.forEach(x=>all.push(x));
       });
 
@@ -953,16 +937,15 @@ async function readUploadedFiles(files){
       const ab = await file.arrayBuffer();
       let wb;
       try{
-        wb = XLSX.read(ab, {type:"array"});
+        wb = XLSX.read(ab, {type:"array", raw:false});
       }catch(err){
-        alert(`Excel 读取失败：${file.name}\n${err.message}`);
+        alert(`Excel 读取失败：${file.name}\\n${err.message}`);
         continue;
       }
 
       const all = [];
       wb.SheetNames.forEach(sn=>{
-        const sheet = wb.Sheets[sn];
-        const part = sheetToRecords(sheet, file.name + "::" + sn);
+        const part = sheetToRecords(wb.Sheets[sn]);
         part.forEach(x=>all.push(x));
       });
 
@@ -983,8 +966,7 @@ async function readUploadedFiles(files){
       if(rows.length && Object.keys(rows[0]).includes("timestamp")){
         ingestBasicRows(rows);
       }else{
-        const arr = txt
-          .split(/\r?\n/)
+        const arr = txt.split(/\\r?\\n/)
           .map(x=>x.trim())
           .filter(Boolean)
           .map(x=>{ try{return JSON.parse(x)}catch{return null} })
@@ -997,25 +979,21 @@ async function readUploadedFiles(files){
   }
 }
 
-/*************************************************
- * 8) 合并逻辑
- *************************************************/
+/* =========================
+   Merge
+========================= */
 function chooseBasicForPhase(arr, phase, master){
   const items = arr.filter(x=>x.phase===phase);
   if(!items.length) return null;
   const targetDate = phase==="pre" ? master?.preDate : master?.postDate;
-  return items.slice().sort((a,b)=>
-    daysDiff(a.timestamp, targetDate) - daysDiff(b.timestamp, targetDate)
-  )[0];
+  return items.slice().sort((a,b)=>daysDiff(a.timestamp, targetDate)-daysDiff(b.timestamp, targetDate))[0];
 }
 
 function chooseClinicalForPhase(arr, phase, master){
   const items = arr.filter(x=>x.phase===phase);
   if(!items.length) return null;
   const targetDate = phase==="pre" ? master?.preDate : master?.postDate;
-  return items.slice().sort((a,b)=>
-    daysDiff(a.testDate, targetDate) - daysDiff(b.testDate, targetDate)
-  )[0];
+  return items.slice().sort((a,b)=>daysDiff(a.testDate, targetDate)-daysDiff(b.testDate, targetDate))[0];
 }
 
 function buildMergedRows(){
@@ -1127,9 +1105,9 @@ function buildMergedRows(){
   renderStats();
 }
 
-/*************************************************
- * 9) 预览 / 导出
- *************************************************/
+/* =========================
+   Render / Export
+========================= */
 function renderStats(){
   const total = state.mergedRows.length;
   const pre = state.mergedRows.filter(r=>r.pre_date).length;
@@ -1146,12 +1124,12 @@ function renderStats(){
     ["Control", control],
     ["Quit", quit],
     ["未识别", state.unrecognized.length]
-  ].map(([k,v])=>
-    `<div class="box">
+  ].map(([k,v])=>`
+    <div class="box">
       <div class="small muted">${escapeHtml(k)}</div>
       <div style="font-size:24px;font-weight:800">${escapeHtml(v)}</div>
-    </div>`
-  ).join("");
+    </div>
+  `).join("");
 
   document.getElementById("stats").innerHTML = html;
   renderSuggest();
@@ -1160,11 +1138,7 @@ function renderStats(){
 function renderSuggest(){
   const tbody = document.querySelector("#suggestTable tbody");
   tbody.innerHTML = state.unrecognized.map(x=>{
-    const cand = (x.candidates||[])
-      .slice(0,3)
-      .map(c=>`${c.name} (${c.tid})`)
-      .join(" / ");
-
+    const cand = (x.candidates||[]).slice(0,3).map(c=>`${c.name} (${c.tid})`).join(" / ");
     return `<tr>
       <td>${escapeHtml(x.source||"")}</td>
       <td>${escapeHtml(x.rawName||"")}</td>
@@ -1186,11 +1160,9 @@ function renderPreview(){
   `;
   html += "<tr>" + FINAL_COLUMNS.map(h=>`<th>${escapeHtml(h)}</th>`).join("") + "</tr>";
   html += "</thead><tbody>";
-
-  html += state.mergedRows.map(r=>
+  html += state.mergedRows.map(r =>
     "<tr>" + FINAL_COLUMNS.map(c=>`<td>${escapeHtml(r[c] ?? "")}</td>`).join("") + "</tr>"
   ).join("");
-
   html += "</tbody>";
   table.innerHTML = html;
 }
@@ -1202,7 +1174,6 @@ function exportExcel(){
     }
 
     const wb = XLSX.utils.book_new();
-
     const aoa = [];
     aoa.push([
       "BASIC INFO : tx / ctrl / quit",
@@ -1213,40 +1184,33 @@ function exportExcel(){
       ...Array(13).fill("")
     ]);
     aoa.push(FINAL_COLUMNS);
-
     state.mergedRows.forEach(r=>{
       aoa.push(FINAL_COLUMNS.map(c=>r[c] ?? ""));
     });
 
     const ws = XLSX.utils.aoa_to_sheet(aoa);
     ws["!merges"] = SECTION_MERGES;
-    ws["!cols"] = FINAL_COLUMNS.map(c=>({
-      wch: Math.max(10, Math.min(28, String(c).length + 2))
-    }));
+    ws["!cols"] = FINAL_COLUMNS.map(c=>({wch: Math.max(10, Math.min(28, String(c).length + 2))}));
     XLSX.utils.book_append_sheet(wb, ws, "merged_output");
 
     const unrecAoa = [["source","rawName","candidates","reason"]];
-    state.unrecognized.forEach(x=>
-      unrecAoa.push([
-        x.source || "",
-        x.rawName || "",
-        (x.candidates || []).map(c=>`${c.name} (${c.tid})`).join(" | "),
-        x.reason || ""
-      ])
-    );
+    state.unrecognized.forEach(x=>unrecAoa.push([
+      x.source || "",
+      x.rawName || "",
+      (x.candidates || []).map(c=>`${c.name} (${c.tid})`).join(" | "),
+      x.reason || ""
+    ]));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(unrecAoa), "unrecognized");
 
     const debugAoa = [["type","tid","phase","name","date","raw"]];
-    state.rawDebug.forEach(x=>
-      debugAoa.push([
-        x.type || "",
-        x.tid || "",
-        x.phase || "",
-        x.name || "",
-        x.timestamp || x.testDate || "",
-        JSON.stringify(x.raw || {})
-      ])
-    );
+    state.rawDebug.forEach(x=>debugAoa.push([
+      x.type || "",
+      x.tid || "",
+      x.phase || "",
+      x.name || "",
+      x.timestamp || x.testDate || "",
+      JSON.stringify(x.raw || {})
+    ]));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(debugAoa), "raw_debug");
 
     const fn = `mri_merged_${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.xlsx`;
@@ -1258,14 +1222,11 @@ function exportExcel(){
 }
 
 function downloadJson(){
-  const blob = new Blob(
-    [JSON.stringify({
-      mergedRows:state.mergedRows,
-      unrecognized:state.unrecognized,
-      rawDebug:state.rawDebug
-    }, null, 2)],
-    {type:"application/json;charset=utf-8"}
-  );
+  const blob = new Blob([JSON.stringify({
+    mergedRows: state.mergedRows,
+    unrecognized: state.unrecognized,
+    rawDebug: state.rawDebug
+  }, null, 2)], {type:"application/json;charset=utf-8"});
 
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -1274,9 +1235,9 @@ function downloadJson(){
   URL.revokeObjectURL(a.href);
 }
 
-/*************************************************
- * 10) 交互
- *************************************************/
+/* =========================
+   UI Actions
+========================= */
 function resetDerived(){
   state.basicRows = [];
   state.clinicalRows = [];
@@ -1295,90 +1256,6 @@ function loadRules(){
   }
 }
 
-const demoBasic = `timestamp\tid\tname\tage\tdiagnosisYear\teducationYears\tdominantHand\timplants\twheelchair\tmedFirstTime\tmedDuration\tmedFrequency\ttraining1\ttraining2\ttraining3\tfci1_arthritis\tfci2_osteoporosis\tfci3_asthma\tfci4_copd\tfci5_angina\tfci6_heart_failure\tfci7_heart_attack\tfci8_neuro_disease\tfci10_peripheral_vascular\tfci11_diabetes\tfci12_gastro\tfci16_hearing\tfci17_disc_disease\tfci18_height\tfci18_weight\tfci18_obesity\tfciTotal\thads1\thads2\thads3\thads4\thads5\thads6\thads7\thads8\thads9\thads10\thads11\thads12\thads13\thads14\thadsAnxiety\thadsDepression\tpdq1\tpdq2\tpdq3\tpdq4\tpdq5\tpdq6\tpdq7\tpdq8\tpdq9\tpdq10\tpdq11\tpdq12\tpdq13\tpdq14\tpdq15\tpdq16\tpdq17\tpdq18\tpdq19\tpdq20\tpdq21\tpdq22\tpdq23\tpdq24\tpdq25\tpdq26\tpdq27\tpdq28\tpdq29\tpdq30\tpdq31\tpdq32\tpdq33\tpdq34\tpdq35\tpdq36\tpdq37\tpdq38\tpdq39\tpdqTotal\tfogq1\tfogq2\tfogq3\tfogq4\tfogq5\tfogq6\tfogqTotal
-2026-01-31T08:00:00.000Z\trandom-1\tlam chi keung\t70\t6\t6\t右\t否\t不使用\t6:00\t2\t5\t星期二上午\t星期四上午\t星期六下午\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t160\t50\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t5\t11\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t61\t1\t2\t3\t4\t2\t3\t15
-2026-03-15T09:00:00.000Z\trandom-2\t林志强\t70\t6\t6\t右\t否\t不使用\t6:00\t2\t5\t星期二上午\t星期四上午\t星期六下午\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t160\t50\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t8\t12\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t68\t1\t2\t3\t4\t2\t2\t14`;
-
-const demoJson = {
-  testType: "pre",
-  id: "So42",
-  name: "Chan Gui zhen",
-  testDate: "2026-04-15",
-  tester: "Cassia",
-  legLength: "",
-  moca: "29",
-  parq1: "否",
-  parq2: "否",
-  parq3: "否",
-  parq4: "否",
-  parq5: "否",
-  parq6: "否",
-  parq7: "否",
-  parqAgreement: "同意",
-  medicationDetails: "teva carbidopa/levodopa",
-  totalLEDD: "",
-  updrs3a: "是",
-  updrs3b_on: "來電",
-  updrs3c1: "197",
-  updrs3_1: "0",
-  updrs3_2: "2",
-  updrs3_3a: "0",
-  updrs3_3b: "1",
-  updrs3_3c: "1",
-  updrs3_3d: "0",
-  updrs3_3e: "0",
-  updrs3_4a: "1",
-  updrs3_4b: "1",
-  updrs3_5a: "1",
-  updrs3_5b: "2",
-  updrs3_6a: "0",
-  updrs3_6b: "0",
-  updrs3_7a: "0",
-  updrs3_7b: "1",
-  updrs3_8a: "0",
-  updrs3_8b: "1",
-  updrs3_9: "0",
-  updrs3_10: "2",
-  updrs3_11: "2",
-  updrs3_12: "2",
-  updrs3_13: "",
-  updrs3_14: "1",
-  updrs3_15a: "0",
-  updrs3_15b: "0",
-  updrs3_16a: "1",
-  updrs3_16b: "1",
-  updrs3_17a: "0",
-  updrs3_17b: "0",
-  updrs3_17c: "0",
-  updrs3_17d: "0",
-  updrs3_17e: "0",
-  updrs3_18: "0",
-  hyStage: "2",
-  tug1: "31.2",
-  tug2: "16.1",
-  tug3: "26.7",
-  tug_avg: "24.7",
-  avgSpeed: "",
-  avgStepLength: "",
-  avgCadence: "",
-  localSaveTime: "2026-04-15T02:03:18.115Z"
-};
-
-document.getElementById("loadDemoBasicBtn").onclick = ()=>{
-  document.getElementById("basicTxt").value = demoBasic;
-};
-
-document.getElementById("clearBasicBtn").onclick = ()=>{
-  document.getElementById("basicTxt").value = "";
-};
-
-document.getElementById("loadDemoJsonBtn").onclick = ()=>{
-  const blob = new Blob([JSON.stringify(demoJson,null,2)], {type:"application/json"});
-  const f = new File([blob], "demo_pre_So42.json", {type:"application/json"});
-  document.getElementById("fileInput")._demoFiles = [f];
-  alert("已载入 demo JSON（点击“读取上传文件”即可导入）");
-};
-
 document.getElementById("parseBasicBtn").onclick = ()=>{
   loadRules();
   const txt = document.getElementById("basicTxt").value;
@@ -1394,6 +1271,10 @@ document.getElementById("parseBasicBtn").onclick = ()=>{
   buildMergedRows();
 };
 
+document.getElementById("clearBasicBtn").onclick = ()=>{
+  document.getElementById("basicTxt").value = "";
+};
+
 document.getElementById("processFilesBtn").onclick = async ()=>{
   loadRules();
   resetDerived();
@@ -1405,15 +1286,16 @@ document.getElementById("processFilesBtn").onclick = async ()=>{
   }
 
   const input = document.getElementById("fileInput");
-  const list = [...(input.files || []), ...((input._demoFiles)||[])];
+  const list = [...(input.files || [])];
 
-  if(list.length) await readUploadedFiles(list);
+  if(list.length){
+    await readUploadedFiles(list);
+  }
 
   buildMergedRows();
-  input._demoFiles = [];
 };
 
-document.getElementById("applyRulesBtn").onclick = async ()=>{
+document.getElementById("applyRulesBtn").onclick = ()=>{
   document.getElementById("processFilesBtn").click();
 };
 
@@ -1424,7 +1306,7 @@ document.getElementById("mergeBtn").onclick = ()=>{
 
 document.getElementById("exportBtn").onclick = ()=>{
   if(typeof XLSX === "undefined"){
-    alert("Excel 导出库没有加载成功，请检查网络，或确认 HTML 中的 xlsx script 标签没有被删掉。");
+    alert("Excel 导出库没有加载成功，请检查网络，或确认 HTML 中的 xlsx script 标签存在。");
     return;
   }
   if(!state.mergedRows.length) buildMergedRows();
@@ -1441,4 +1323,3 @@ renderPreview();
 </script>
 </body>
 </html>
-``
