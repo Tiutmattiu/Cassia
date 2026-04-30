@@ -1,1470 +1,759 @@
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="zh-HK">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assessment Master Builder - Final</title>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <title>MRI Merge Export Tool</title>
+  https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js
   <style>
-    :root{
-      --bg:#f6f8fb; --card:#fff; --line:#dbe2ea; --text:#1f2937; --sub:#667085;
-      --pri:#2563eb; --good:#16a34a; --warn:#d97706; --bad:#dc2626;
-      --soft:#eef2ff; --softtext:#3730a3;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; background:var(--bg); color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;
-    }
-    .wrap{max-width:1580px;margin:24px auto;padding:0 16px 48px}
-    h1{margin:0 0 8px;font-size:30px}
-    .desc{color:var(--sub);line-height:1.75;margin-bottom:18px}
-    .pill{
-      display:inline-block;background:var(--soft);color:var(--softtext);border-radius:999px;
-      padding:4px 8px;margin-right:6px;margin-bottom:6px;font-size:12px
-    }
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .card{
-      background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;
-      box-shadow:0 4px 16px rgba(16,24,40,.04)
-    }
-    .card h2{margin:0 0 8px;font-size:18px}
-    label{display:block;font-weight:700;margin:10px 0 8px}
-    textarea,input[type="text"],input[type="file"]{
-      width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff
-    }
-    textarea{
-      min-height:210px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      font-size:13px;line-height:1.45
-    }
-    .small{font-size:12px;color:var(--sub);line-height:1.6}
-    .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
-    button{
-      border:none;border-radius:12px;padding:12px 16px;cursor:pointer;font-size:14px;font-weight:700
-    }
-    .btn-primary{background:var(--pri);color:#fff}
-    .btn-secondary{background:#eef2ff;color:#3730a3}
-    .btn-ghost{background:#f3f4f6;color:#111827}
-    .btn-danger{background:#fee2e2;color:#991b1b}
-    .status{
-      margin-top:14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
-      background:#f8fafc;white-space:pre-wrap;line-height:1.55;font-size:13px
-    }
-    .status.good{border-color:#bbf7d0;background:#f0fdf4;color:#166534}
-    .status.warn{border-color:#fde68a;background:#fffbeb;color:#92400e}
-    .status.bad{border-color:#fecaca;background:#fef2f2;color:#991b1b}
-    .preview-wrap{
-      margin-top:12px;overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff;max-height:520px
-    }
-    table{width:100%;border-collapse:collapse;font-size:12px}
-    th,td{
-      border-bottom:1px solid #eef2f7;border-right:1px solid #eef2f7;padding:8px 10px;text-align:left;
-      white-space:nowrap;vertical-align:top
-    }
-    th{position:sticky;top:0;background:#f8fafc;z-index:1}
-    .section-title{margin:18px 0 8px;font-size:16px;font-weight:800}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .muted-box{
-      border:1px dashed var(--line);background:#fafafa;border-radius:12px;padding:10px 12px;margin-top:10px
-    }
-    @media (max-width:1100px){ .grid,.two-col{grid-template-columns:1fr} }
+    :root{--bg:#f7f8fb;--card:#fff;--text:#17202a;--muted:#5f6b7a;--line:#e5e7eb;--primary:#2563eb;--ok:#0f766e;--warn:#b45309;--bad:#b91c1c}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,"PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1400px;margin:0 auto;padding:18px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 18px rgba(0,0,0,.04);padding:16px;margin-bottom:16px}
+    h1,h2,h3{margin:0 0 10px} h1{font-size:28px} h2{font-size:20px} h3{font-size:16px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px} .cols-2{display:grid;grid-template-columns:1fr 1fr;gap:12px} .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    textarea,input[type="text"],input[type="file"],select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:14px;background:#fff}
+    textarea{min-height:120px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    button{border:none;background:var(--primary);color:#fff;padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer} button.secondary{background:#eef2ff;color:#1e40af} button.ghost{background:#f3f4f6;color:#111827} button.warn{background:#f59e0b} button.bad{background:#dc2626}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap}.muted{color:var(--muted)} .small{font-size:12px}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;color:#1e40af;font-size:12px;margin-right:6px}
+    .stat{display:flex;gap:10px;flex-wrap:wrap}.stat .box{padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}
+    table{width:100%;border-collapse:collapse;font-size:13px} th,td{border:1px solid var(--line);padding:6px 8px;vertical-align:top} th{background:#f8fafc} .sticky{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+    .ok{color:var(--ok)} .warnText{color:var(--warn)} .badText{color:var(--bad)} .mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    .note{padding:10px 12px;border-radius:12px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e}
+    .sectionTitle{font-size:14px;font-weight:700;margin-bottom:8px}
+    @media (max-width:1100px){.grid,.cols-2,.cols-3{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Assessment Master Builder（最终版）</h1>
-  <div class="desc">
-    <span class="pill">支持 basic txt / pre json / post json / Excel</span>
-    <span class="pill">可一次上传一个人或多人</span>
-    <span class="pill">忽略 TXT 随机 id</span>
-    <span class="pill">按 clinical id + 日期为准</span>
-    <span class="pill">自动 pre/post 归并</span>
-    <span class="pill">简繁体姓名尽量自动合并</span>
-    <span class="pill">支持手工强制绑定日期</span>
-    <span class="pill">本地总库累计保存</span>
+  <div class="card">
+    <h1>MRI 总表合并与 Excel 导出</h1>
+    <div class="muted">支持：<span class="pill">basic TXT 复制粘贴</span><span class="pill">JSON / Excel 上传</span><span class="pill">按 MRI 名单强制归一</span><span class="pill">未识别姓名候选建议</span><span class="pill">手工绑定 pre/post</span></div>
   </div>
 
   <div class="grid">
-    <div class="card">
-      <h2>① 上传文件 / 粘贴 TXT</h2>
+    <div>
+      <div class="card">
+        <h2>1) 贴上 basic TXT（tab 分隔）</h2>
+        <div class="muted small">会忽略 basic TXT 里的随机 id；同一人出现两次时，会优先按时间戳 + MRI 日期自动归到 pre/post。</div>
+        <textarea id="basicTxt" placeholder="把整段 TXT 贴到这里（包含表头）"></textarea>
+        <div class="toolbar" style="margin-top:10px">
+          <button id="parseBasicBtn">解析 basic TXT</button>
+          <button class="ghost" id="loadDemoBasicBtn">载入 basic 示例</button>
+          <button class="secondary" id="clearBasicBtn">清空</button>
+        </div>
+      </div>
 
-      <label for="fileInput">上传文件（可多选）</label>
-      <input id="fileInput" type="file" multiple accept=".txt,.tsv,.csv,.json,.xlsx,.xls" />
+      <div class="card">
+        <h2>2) 上传 pre/post JSON 或 Excel</h2>
+        <div class="muted small">可一次上传一个或多个文件；Excel 支持单表或多表。系统会优先使用 <span class="mono">testType + id + testDate</span>，并以 MRI 预设名单与日期为准。</div>
+        <input type="file" id="fileInput" multiple accept=".json,.xlsx,.xls,.csv,.txt" />
+        <div class="toolbar" style="margin-top:10px">
+          <button id="processFilesBtn">读取上传文件</button>
+          <button class="secondary" id="loadDemoJsonBtn">载入 JSON 示例</button>
+        </div>
+      </div>
 
-      <label for="txtInput">或直接粘贴 basic TXT（tab 分隔）</label>
-      <textarea id="txtInput" placeholder="如果你是复制粘贴 basic txt，就贴在这里。第一行应为表头。"></textarea>
-
-      <label for="sheetNameContains">可选：Excel 只读取工作表名包含以下关键词的表</label>
-      <input id="sheetNameContains" type="text" placeholder="例如 data（留空=全部工作表）" />
-
-      <div class="muted-box small">
-        <b>说明：</b><br>
-        • basic txt：支持粘贴，也支持上传 .txt/.tsv/.csv<br>
-        • clinical：支持 .json / .xlsx / .xls / .csv<br>
-        • 你以后可以每次只传一部分文件，点“追加到本地总库并预览”，它会自动累计
+      <div class="card">
+        <h2>3) 手工规则（可选）</h2>
+        <div class="cols-2">
+          <div>
+            <div class="sectionTitle">强制绑定某个 ID 的 pre/post 日期</div>
+            <textarea id="bindingJson" placeholder='例如：
+{
+  "T036": {"pre":"2026-01-31","post":"2026-03-15"},
+  "T038": {"pre":"2026-02-09","post":"2026-04-09"}
+}'></textarea>
+          </div>
+          <div>
+            <div class="sectionTitle">额外别名（可选，一行一个）</div>
+            <textarea id="extraAlias" placeholder='格式：别名 = MRI标准名
+例如：
+张先生 = 張學強
+lam chi keung = 林志強'></textarea>
+          </div>
+        </div>
+        <div class="toolbar" style="margin-top:10px">
+          <button id="applyRulesBtn">应用规则并重新合并</button>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>② MRI 顺序表（可编辑）</h2>
-      <label for="refTableInput">排序参考表</label>
-      <textarea id="refTableInput">MRI    Group    Parti    Name    Date
-s025_pre    Combined    T025_1    張學強    10/25/2025
-s025_post    Combined    T025_2    張學強    12/6/2025
-s026_pre    Combined    T026_1    Huing suk ha    10/27/2025
-s026_post    Combined    T026_2    Huing suk ha    12/10/2025
-s027_pre    Control    T027_1    陳伊偉    11/1/2025
-s027_post    Control    T027_2    陳伊偉    1/31/2026
-s028_pre    Control    T028_1    何慧蓮    11/8/2025
-s028_post    Control    T028_2    何慧蓮    3/28/2026
-s029_pre    Combined    T029_1    胡國輝    11/13/2025
-s029_post    Combined    T029_2    胡國輝    12/20/2025
-s030_pre    Control    T030_1    王伟文    12/11/2025
-s030_post    Control    T030_2    王伟文    2/24/2026
-s031_pre    Combined    T031_1    Chris Wu    12/23/2025
-s031_post    Combined    T031_2    Chris Wu    2/11/2026
-s032_pre    quit    T032_1    siu    1/8/2026
-s033_pre    Combined    T033_1    卢嘉达    1/12/2026
-s033_post    Combined    T033_2    卢嘉达    3/4/2026
-s034_pre    Combined    T034_1    丁美云    1/16/2026
-s035_pre    Control    T035_1    譚金勝    1/24/2026
-s036_pre    Combined    T036_1    林志強    1/31/2026
-s036_post    Combined    T036_2    林志強    3/15/2026
-s037_pre    quit（图像质量太差）    T037_1    黄婉年    2/3/2026
-s038_pre    Combined    T038_1    吴一勉    2/9/2026
-s038_post    Combined    T038_2    吴一勉    4/9/2026
-s039_pre    Combined    T039_1    黃苑興    2/9/2026
-s039_post    Combined    T039_2    黃苑興    4/2/2026
-s040_pre    Combined    T040_1    何宏龙    2/13/2026
-s040_post    Combined    T040_2    何宏龙    4/8/2026
-s041_pre    Combined    T041_1    梁翠芬    4/10/2026
-s042_pre    Combined    T042_1    陈桂珍    4/15/2026
-s043_pre    Combined    T043_1    吴秀碧    4/16/2026</textarea>
+    <div>
+      <div class="card">
+        <h2>状态</h2>
+        <div class="stat" id="stats"></div>
+        <div class="note" style="margin-top:10px">
+          输出规则：<br/>
+          1. 所有人都以 MRI 名单中的 <span class="mono">Parti / Name / Date / Group</span> 为准；<br/>
+          2. 临床文件里的名字会尽量合并到 MRI 标准名（简繁体 + 别名 + 拼音/英文名映射）；<br/>
+          3. MRI 名单里没有的人，按识别顺序追加到总表末尾；<br/>
+          4. 导出 Excel 时第一行会自动做成分区表头：<span class="mono">BASIC INFO / PRE Assessment / Post Assessment</span>。
+        </div>
+      </div>
 
-      <div class="small">
-        表里有的人按表排序；表里没有的人自动排到最后。
+      <div class="card">
+        <h2>未识别姓名候选建议</h2>
+        <div class="sticky"><table id="suggestTable"><thead><tr><th>来源</th><th>原始姓名</th><th>建议候选</th><th>说明</th></tr></thead><tbody></tbody></table></div>
+      </div>
+
+      <div class="card">
+        <h2>导出</h2>
+        <div class="toolbar">
+          <button id="mergeBtn">生成总表预览</button>
+          <button id="exportBtn">导出 Excel</button>
+          <button class="ghost" id="downloadJsonBtn">下载中间结果 JSON</button>
+        </div>
+        <div class="muted small" style="margin-top:8px">导出文件包含 3 个 sheet：<span class="mono">merged_output</span>、<span class="mono">unrecognized</span>、<span class="mono">raw_debug</span>。</div>
       </div>
     </div>
   </div>
 
-  <div class="grid" style="margin-top:16px;">
-    <div class="card">
-      <h2>③ 别名归并规则（最稳）</h2>
-      <label for="aliasInput">每行一条：别名=标准名</label>
-      <textarea id="aliasInput">张先生=张学强
-張先生=張學強
-lam chi keung=林志强
-lam chikeung=林志强
-lin zhi qiang=林志强
-lam chi keung=林志強
-ng=吴一勉
-ng =吴一勉
-huing suk ha=Huing suk ha
-wong hok hing=黃苑興
-huang yuan xing=黃苑興
-he hong long=何宏龙
-ting mei wan=丁美云
-chen yi wei=陳伊偉
-hu guo hui=胡國輝</textarea>
-      <div class="small">
-        程序会先自动做大小写/空格/标点/简繁体归一，再应用这里的 alias。
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>④ 强制绑定规则（可选）</h2>
-      <label for="forceBindInput">每行一条：ID|stage|date</label>
-      <textarea id="forceBindInput" placeholder="例如：
-T036|pre|1/31/2026
-T036|post|3/15/2026
-T038|post|4/9/2026"></textarea>
-      <div class="small">
-        用途：如果某个 ID 的自动匹配有歧义，可以手动指定其 pre/post 应使用的日期。<br>
-        它会影响：
-        <br>• 选择哪条 clinical 记录
-        <br>• 给 pre/post 匹配哪条 txt
-      </div>
-
-      <div class="actions">
-        <button class="btn-secondary" id="previewCurrentBtn">仅预览当前上传</button>
-        <button class="btn-primary" id="appendStoreBtn">追加到本地总库并预览</button>
-        <button class="btn-primary" id="exportStoreBtn">导出当前总表 Excel</button>
-        <button class="btn-ghost" id="downloadTemplateBtn">下载模板</button>
-        <button class="btn-danger" id="clearStoreBtn">清空本地总库</button>
-      </div>
-
-      <div id="status" class="status">等待操作…</div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:16px;">
-    <h2>⑤ 当前状态</h2>
-    <div class="two-col">
-      <div class="muted-box small">
-        <b>本地总库内容：</b><br>
-        <span id="storeSummary">尚未读取</span>
-      </div>
-      <div class="muted-box small">
-        <b>当前上传内容：</b><br>
-        <span id="currentSummary">尚未读取</span>
-      </div>
-    </div>
-
-    <div class="section-title">merged_output 预览（前 20 行）</div>
-    <div class="preview-wrap">
-      <table id="previewTable"></table>
-    </div>
-
-    <div class="section-title">issues（前 20 行）</div>
-    <div class="preview-wrap">
-      <table id="issuesTable"></table>
-    </div>
-
-    <div class="section-title">unmatched_log（前 20 行）</div>
-    <div class="preview-wrap">
-      <table id="unmatchedTable"></table>
-    </div>
+  <div class="card">
+    <h2>总表预览</h2>
+    <div class="sticky"><table id="previewTable"></table></div>
   </div>
 </div>
 
 <script>
-/* =========================
-   常量
-========================= */
-const STORE_KEY = "assessment_master_builder_store_v3";
-
-const OUTPUT_HEADERS = [
-  "id", "Group", "name", "progress(green=intervention; blue=control; yellow=pending;red=dropped)",
-  "age", "diagnosisDuration", "educationYears", "dominantHand", "implants", "wheelchair",
-  "medicationDetails", "totalLEDD", "medFirstTime", "medDuration", "medFrequency",
-  "training1", "training2", "training3", "legLength", "height", "weigth", "fci", "contact",
-  "pre_date", "tester", "medtime", "hadsAnxiety", "hadsDepression", "PDQ", "fogqTotal",
-  "moca", "PAR-Q", "updrs", "hyStage", "tug_avg", "avgSpeed", "avgStepLength", "avgCadence", "remark",
-  "post_date2", "staff", "Med", "hadA", "hadD", "PD_Q", "fogSum", "Moc_a", "up_drs", "H&Y",
-  "TUG_av", "avg_Speed", "avg_StepLength", "avg_Cadence", "re_mark"
+/***********************
+ * 0) MRI MASTER（唯一准绳）
+ ***********************/
+const MRI_MASTER_RAW = [
+  ["s025_pre","Combined","T025_1","張學強","10/25/2025"],
+  ["s025_post","Combined","T025_2","張學強","12/6/2025"],
+  ["s026_pre","Combined","T026_1","Huing suk ha","10/27/2025"],
+  ["s026_post","Combined","T026_2","Huing suk ha","12/10/2025"],
+  ["s027_pre","Control","T027_1","陳伊偉","11/1/2025"],
+  ["s027_post","Control","T027_2","陳伊偉","1/31/2026"],
+  ["s028_pre","Control","T028_1","何慧蓮","11/8/2025"],
+  ["s028_post","Control","T028_2","何慧蓮","3/28/2026"],
+  ["s029_pre","Combined","T029_1","胡國輝","11/13/2025"],
+  ["s029_post","Combined","T029_2","胡國輝","12/20/2025"],
+  ["s030_pre","Control","T030_1","王伟文","12/11/2025"],
+  ["s030_post","Control","T030_2","王伟文","2/24/2026"],
+  ["s031_pre","Combined","T031_1","Chris Wu","12/23/2025"],
+  ["s031_post","Combined","T031_2","Chris Wu","2/11/2026"],
+  ["s032_pre","quit","T032_1","siu","1/8/2026"],
+  ["s033_pre","Combined","T033_1","卢嘉达","1/12/2026"],
+  ["s033_post","Combined","T033_2","卢嘉达","3/4/2026"],
+  ["s034_pre","Combined","T034_1","丁美云","1/16/2026"],
+  ["s035_pre","Control","T035_1","譚金勝","1/24/2026"],
+  ["s036_pre","Combined","T036_1","林志強","1/31/2026"],
+  ["s036_post","Combined","T036_2","林志強","3/15/2026"],
+  ["s037_pre","quit（图像质量太差）","T037_1","黄婉年","2/3/2026"],
+  ["s038_pre","Combined","T038_1","吴一勉","2/9/2026"],
+  ["s038_post","Combined","T038_2","吴一勉","4/9/2026"],
+  ["s039_pre","Combined","T039_1","黃苑興","2/9/2026"],
+  ["s039_post","Combined","T039_2","黃苑興","4/2/2026"],
+  ["s040_pre","Combined","T040_1","何宏龙","2/13/2026"],
+  ["s040_post","Combined","T040_2","何宏龙","4/8/2026"],
+  ["s041_pre","Combined","T041_1","梁翠芬","4/10/2026"],
+  ["s042_pre","Combined","T042_1","陈桂珍","4/15/2026"],
+  ["s043_pre","Combined","T043_1","吴秀碧","4/16/2026"],
 ];
 
-// 分区位置：0-22 basic, 23-38 pre, 39-53 post
-const BASIC_END = 22;
-const PRE_START = 23;
-const PRE_END = 38;
-const POST_START = 39;
-const POST_END = 53;
-
-const PARQ_KEYS = ["parq1","parq2","parq3","parq4","parq5","parq6","parq7"];
-const TXT_NAME_CANDIDATES = ["name","姓名","participant","subject"];
-const TXT_DATE_CANDIDATES = ["timestamp","localSaveTime","testDate","date"];
-
-/* =========================
-   UI
-========================= */
-function setStatus(msg, type=""){
-  const el = document.getElementById("status");
-  el.textContent = msg;
-  el.className = "status " + type;
-}
-function safeStr(v){ return v == null ? "" : String(v).trim(); }
-function coalesce(...vals){
-  for(const v of vals){ if(safeStr(v)!=="") return v; }
-  return "";
-}
-function setText(id, text){
-  const el = document.getElementById(id);
-  if(el) el.textContent = text;
-}
-
-/* =========================
-   Local Store
-========================= */
-function loadStore(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    if(!raw) return { txtRows: [], clinicalRows: [] };
-    const obj = JSON.parse(raw);
-    return {
-      txtRows: Array.isArray(obj.txtRows) ? obj.txtRows : [],
-      clinicalRows: Array.isArray(obj.clinicalRows) ? obj.clinicalRows : []
-    };
-  }catch(e){
-    return { txtRows: [], clinicalRows: [] };
-  }
-}
-function saveStore(store){
-  localStorage.setItem(STORE_KEY, JSON.stringify(store));
-}
-function clearStore(){
-  localStorage.removeItem(STORE_KEY);
-}
-function dedupeBy(rows, keyFn){
-  const seen = new Set();
-  const out = [];
-  for(const row of rows){
-    const key = keyFn(row);
-    if(seen.has(key)) continue;
-    seen.add(key);
-    out.push(row);
-  }
-  return out;
-}
-function summarizeStore(store){
-  return `TXT 行数：${store.txtRows.length}；Clinical 记录数：${store.clinicalRows.length}`;
-}
-
-/* =========================
-   简繁体归一（常见姓名字）
-   说明：这里只做“尽量”合并，alias 仍然最稳
-========================= */
-const CHS_MAP = {
-  "張":"张","學":"学","強":"强","陳":"陈","偉":"伟","蓮":"莲","國":"国","輝":"辉","盧":"卢","達":"达",
-  "雲":"云","譚":"谭","勝":"胜","黃":"黄","吳":"吴","興":"兴","龍":"龙","麗":"丽","劉":"刘","楊":"杨",
-  "鄭":"郑","謝":"谢","葉":"叶","鍾":"钟","蘇":"苏","趙":"赵","錢":"钱","孫":"孙","馮":"冯","馬":"马",
-  "蕭":"萧","麥":"麦","許":"许","羅":"罗","關":"关","開":"开","來":"来","電":"电","圖":"图","質":"质",
-  "歲":"岁","醫":"医","藥":"药","體":"体","後":"后","發":"发","時":"时","間":"间","腦":"脑","萬":"万",
-  "與":"与","樣":"样","實":"实","臺":"台","灣":"湾","門":"门","風":"风","長":"长","樂":"乐","麗":"丽",
-  "彥":"彦","傑":"杰","瑩":"莹","蘭":"兰","華":"华","賢":"贤","榮":"荣","凱":"凯","潔":"洁","楨":"桢",
-  "穎":"颖","嫻":"娴","寧":"宁","靜":"静","濤":"涛","潔":"洁","漢":"汉","欽":"钦","樹":"树","澤":"泽",
-  "曉":"晓","鳳":"凤","濱":"滨","堯":"尧","慶":"庆","堅":"坚","寶":"宝","義":"义","媛":"媛","蘊":"蕴",
-  "彤":"彤","卿":"卿","啟":"启","晉":"晋","業":"业","銘":"铭","珮":"佩","妍":"妍","鋒":"锋","瑤":"瑶"
+const EXTRA_ALIAS_PRESET = {
+  "张先生":"張學強",
+  "张学强":"張學強",
+  "zhang xue qiang":"張學強",
+  "lam chi keung":"林志強",
+  "lin zhi qiang":"林志強",
+  "go siu peck":"吴秀碧",
+  "chan cuizzhen":"陈桂珍",
+  "wong yue hing":"黃苑興",
+  "why":"黃苑興",
+  "hocassia":"何慧蓮",
+  "calvin ho":"何宏龙",
+  "calvin":"何宏龙",
+  "tam kam shing":"譚金勝",
+  "chan yee wai":"陳伊偉",
+  "huing suk ha":"Huing suk ha",
+  "ngai wing on":"__IGNORE__",
+  "shirley":"__IGNORE__"
 };
-function toSimplifiedLikely(s){
-  let out = "";
-  for(const ch of safeStr(s)){
-    out += CHS_MAP[ch] || ch;
-  }
+
+const SIMP_TRAD_MAP = {
+  "张":"張","强":"強","林":"林","志":"志","吴":"吳","黄":"黃","陈":"陳","卢":"盧","谭":"譚","龙":"龍","伟":"偉","达":"達","国":"國","辉":"輝","莲":"蓮","云":"雲","学":"學","珍":"珍","碧":"碧","婉":"婉","年":"年","桂":"桂","苑":"苑","兴":"興","勉":"勉","宏":"宏","宏龙":"宏龍","学强":"學強","嘉":"嘉","达":"達"
+};
+
+const GROUP_SORT = {"Combined":1,"Control":2,"quit":3,"quit（图像质量太差）":4};
+
+const FINAL_COLUMNS = [
+  "id","Group","name","progress(green=intervention; blue=control; yellow=pending;red=dropped)","age","diagnosisDuration","educationYears","dominantHand","implants","wheelchair","medicationDetails","totalLEDD","medFirstTime","medDuration","medFrequency","training1","training2","training3","legLength","height","weigth","fci","contact",
+  "pre_date","tester","medtime","hadsAnxiety","hadsDepression","PDQ","fogqTotal","moca","PAR-Q","updrs","hyStage","tug_avg","avgSpeed","avgStepLength","avgCadence","remark",
+  "post_date2","staff","Med","hadA","hadD","PD_Q","fogSum","Moc_a","up_drs","H&Y","TUG_av","avg_Speed","avg_StepLength","avg_Cadence","re_mark"
+];
+
+const SECTION_MERGES = [
+  {s:{r:0,c:0},e:{r:0,c:22}},
+  {s:{r:0,c:23},e:{r:0,c:39}},
+  {s:{r:0,c:40},e:{r:0,c:53}}
+];
+
+/***********************
+ * 1) 全局状态
+ ***********************/
+const state = {
+  basicRows: [],
+  clinicalRows: [],
+  mergedRows: [],
+  unrecognized: [],
+  rawDebug: [],
+  manualBindings: {},
+  aliasMap: {},
+  master: buildMaster(),
+};
+
+function buildMaster(){
+  const byTid = {};
+  const order = [];
+  MRI_MASTER_RAW.forEach((row, idx) => {
+    const [mri, group, parti, name, date] = row;
+    const tid = canonTid(parti);
+    const phase = /_2$/.test(parti) || /post$/i.test(mri) ? "post" : "pre";
+    if(!byTid[tid]){
+      byTid[tid] = {tid, name, group, order: idx, mriCode: mri.replace(/_(pre|post)$/i, ""), preDate:"", postDate:"", partiPre:"", partiPost:"", rows:[]};
+      order.push(tid);
+    }
+    byTid[tid].rows.push({mri, group, parti, name, date, phase});
+    if(phase === "pre"){ byTid[tid].preDate = normalizeDate(date); byTid[tid].partiPre = parti; }
+    if(phase === "post"){ byTid[tid].postDate = normalizeDate(date); byTid[tid].partiPost = parti; }
+  });
+  return {byTid, order};
+}
+
+/***********************
+ * 2) 工具函数
+ ***********************/
+function canonTid(v){
+  if(v == null) return "";
+  const m = String(v).toUpperCase().match(/T\s*0*(\d{1,3})/);
+  return m ? `T${m[1].padStart(3,"0")}` : "";
+}
+function convertSimpTradLite(s){
+  let out = String(s || "");
+  Object.keys(SIMP_TRAD_MAP).sort((a,b)=>b.length-a.length).forEach(k=>{ out = out.split(k).join(SIMP_TRAD_MAP[k]); });
   return out;
 }
-function normalizeNameBase(s){
-  return toSimplifiedLikely(
-    safeStr(s)
-      .normalize("NFKC")
-      .toLowerCase()
-      .replace(/[\u3000\s]+/g, "")
-      .replace(/[.,/#!$%^&*;:{}=\-_`~()（）[\]【】'"“”‘’、，。！？?<>《》|\\]/g, "")
-  );
+function normalizeName(s){
+  let x = convertSimpTradLite(String(s||"")).trim().toLowerCase();
+  x = x.replace(/[（）()\[\]{}，,.;:'"`~!@#$%^&*+=|\\/?<>_-]/g, " ");
+  x = x.replace(/\s+/g, " ").trim();
+  return x;
 }
-
-/* =========================
-   Alias
-========================= */
-function buildAliasMap(text){
-  const map = new Map();
-  const lines = safeStr(text).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  for(const line of lines){
-    if(!line.includes("=")) continue;
-    const [left, right] = line.split("=").map(x=>x.trim());
-    if(!left || !right) continue;
-    map.set(normalizeNameBase(left), right);
-    map.set(normalizeNameBase(toSimplifiedLikely(left)), right);
-  }
-  return map;
-}
-function canonicalName(name, aliasMap){
-  const raw = safeStr(name);
-  if(!raw) return "";
-  const base = normalizeNameBase(raw);
-  if(aliasMap.has(base)) return aliasMap.get(base);
-  return raw;
-}
-function normalizeName(name, aliasMap){
-  return normalizeNameBase(canonicalName(name, aliasMap));
-}
-
-/* =========================
-   日期处理
-========================= */
-function parseMaybeDate(v){
-  if(!v) return null;
-  if(v instanceof Date && !isNaN(v)) return v;
-
-  let s = String(v).trim();
-  if(!s) return null;
-
-  // Unix timestamp
-  if(/^\d{10,13}$/.test(s)){
-    const n = Number(s);
-    const d = new Date(s.length===13 ? n : n*1000);
-    return isNaN(d) ? null : d;
-  }
-
-  // Excel serial
-  if(/^\d+(\.\d+)?$/.test(s)){
-    const n = Number(s);
-    if(n > 20000 && n < 80000){
-      const excelEpoch = new Date(Date.UTC(1899, 11, 30));
-      const d = new Date(excelEpoch.getTime() + n*24*60*60*1000);
-      return isNaN(d) ? null : d;
-    }
-  }
-
-  // normalize dots
-  s = s.replace(/\./g, "/");
-  const d = new Date(s);
-  return isNaN(d) ? null : d;
-}
-function fmtDate(d){
-  if(!d || isNaN(d)) return "";
-  return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
-}
-function dateDiffDays(a,b){
-  if(!a || !b) return Number.MAX_SAFE_INTEGER;
-  return Math.abs(a.getTime() - b.getTime()) / (1000*60*60*24);
-}
-function parseForceBindings(text){
-  const map = new Map(); // key = id|stage => Date
-  const lines = safeStr(text).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  for(const line of lines){
-    const parts = line.split("|").map(x=>x.trim());
-    if(parts.length < 3) continue;
-    const [id, stage, dateText] = parts;
-    const st = stage.toLowerCase();
-    if(!id || !["pre","post"].includes(st)) continue;
-    const d = parseMaybeDate(dateText);
-    if(d) map.set(`${id}|${st}`, d);
-  }
-  return map;
-}
-
-/* =========================
-   诊断时长
-========================= */
-function formatNumberMaybe(v){
-  const n = Number(v);
-  if(isNaN(n)) return safeStr(v);
-  if(Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
-  return String(Math.round(n*10)/10);
-}
-function computeDiagnosisDuration(diagnosisYearRaw, assessmentDate){
-  const s = safeStr(diagnosisYearRaw);
+function normalizeDate(d){
+  if(!d) return "";
+  if(d instanceof Date && !isNaN(d)) return fmtDate(d);
+  let s = String(d).trim();
   if(!s) return "";
-
-  if(/^\d+(\.\d+)?$/.test(s)){
-    const num = Number(s);
-
-    // 1900-2100 当年份
-    if(num >= 1900 && num <= 2100 && assessmentDate){
-      const years = assessmentDate.getFullYear() - num;
-      return years >= 0 ? formatNumberMaybe(years) : "";
-    }
-
-    // 0-100 当时长
-    if(num >= 0 && num < 100){
-      return formatNumberMaybe(num);
-    }
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){
+    const z = new Date(s);
+    if(!isNaN(z)) return fmtDate(z);
+    const [y,m,da] = s.slice(0,10).split("-").map(Number);
+    return `${m}/${da}/${y}`;
   }
-
-  // 日期 => 计算年差
-  const d = parseMaybeDate(s);
-  if(d && assessmentDate){
-    const months = (assessmentDate.getFullYear() - d.getFullYear())*12 + (assessmentDate.getMonth() - d.getMonth());
-    const years = months / 12;
-    return years >= 0 ? formatNumberMaybe(years) : "";
-  }
-
+  const z = new Date(s);
+  if(!isNaN(z)) return fmtDate(z);
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m) return `${Number(m[1])}/${Number(m[2])}/${m[3]}`;
   return s;
 }
-
-/* =========================
-   on/off
-========================= */
-function normalizeOnOff(v){
-  const raw = safeStr(v);
-  if(!raw) return "";
-
-  const s = normalizeNameBase(raw);
-
-  if(/^(on|onstate|服药后|吃药后|食药后|已服药|有服药|開|开启|開啟|来电|來電)$/.test(s)) return "on";
-  if(/^(off|offstate|未服药|未吃药|未食药|停药|關|关闭|關閉)$/.test(s)) return "off";
-
-  if(s.includes("on")) return "on";
-  if(s.includes("off")) return "off";
-
-  return raw;
+function fmtDate(d){ return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`; }
+function daysDiff(a,b){
+  if(!a || !b) return 999999;
+  const da = new Date(a), db = new Date(b);
+  if(isNaN(da) || isNaN(db)) return 999999;
+  return Math.abs((da-db)/(1000*3600*24));
 }
-
-/* =========================
-   相似度（用于未识别姓名建议）
-========================= */
+function safeNum(v){
+  if(v === null || v === undefined || v === "") return "";
+  const n = Number(v);
+  return isNaN(n) ? String(v) : n;
+}
+function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+function uniq(arr){ return [...new Set(arr.filter(Boolean))]; }
+function normalizeYesNo(v){
+  const s = String(v||"").trim().toLowerCase();
+  if(["是","yes","y","true","1","同意","有"].includes(s)) return "Y";
+  if(["否","no","n","false","0","不同意","无","沒有","没有"].includes(s)) return "N";
+  return s ? s : "";
+}
+function onOffText(v){
+  const s = String(v||"").trim().toLowerCase();
+  if(!s) return "";
+  if(["on","是","開","开","來電","来电"].some(k=>s.includes(k.toLowerCase()))) return "on";
+  if(["off","否","關","关"].some(k=>s.includes(k.toLowerCase()))) return "off";
+  return String(v||"");
+}
+function isBlankRow(obj){ return !Object.values(obj).some(v=>String(v??"").trim()!==""); }
 function levenshtein(a,b){
-  a = safeStr(a); b = safeStr(b);
-  const m = a.length, n = b.length;
-  if(!m) return n;
-  if(!n) return m;
-  const dp = Array.from({length:m+1}, ()=>Array(n+1).fill(0));
-  for(let i=0;i<=m;i++) dp[i][0] = i;
-  for(let j=0;j<=n;j++) dp[0][j] = j;
-  for(let i=1;i<=m;i++){
-    for(let j=1;j<=n;j++){
-      const cost = a[i-1]===b[j-1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i-1][j] + 1,
-        dp[i][j-1] + 1,
-        dp[i-1][j-1] + cost
-      );
-    }
-  }
+  a = normalizeName(a); b = normalizeName(b); const m=a.length,n=b.length;
+  const dp = Array.from({length:m+1},()=>Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0]=i; for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j] = Math.min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
   return dp[m][n];
 }
-function nameSimilarity(a,b){
-  const x = normalizeNameBase(a), y = normalizeNameBase(b);
-  if(!x || !y) return 0;
-  if(x === y) return 1;
-  const maxLen = Math.max(x.length, y.length);
-  const lev = levenshtein(x, y);
-  const ratio = 1 - (lev / maxLen);
-
-  // 字符集合重叠
-  const sx = new Set(x.split(""));
-  const sy = new Set(y.split(""));
-  let inter = 0;
-  sx.forEach(ch => { if(sy.has(ch)) inter++; });
-  const union = new Set([...sx, ...sy]).size || 1;
-  const jacc = inter / union;
-
-  return Math.max(ratio, jacc);
-}
-function suggestNames(targetName, candidateNames, topN=3){
-  const scored = candidateNames.map(name => ({
-    name,
-    score: nameSimilarity(targetName, name)
-  }))
-  .filter(x => x.score >= 0.25)
-  .sort((a,b) => b.score - a.score)
-  .slice(0, topN);
-
-  return scored.map(x => `${x.name} (${x.score.toFixed(2)})`).join("; ");
-}
-
-/* =========================
-   TXT 解析
-========================= */
-function parseDelimitedText(text){
-  const raw = safeStr(text);
-  if(!raw) return [];
-  const lines = raw.split(/\r?\n/).filter(x=>x.trim().length>0);
-  if(!lines.length) return [];
-
-  let delimiter = "\t";
-  if(!lines[0].includes("\t") && lines[0].includes(",")) delimiter = ",";
-
-  const header = lines[0].split(delimiter).map(h=>h.trim());
-  const rows = [];
-  for(let i=1;i<lines.length;i++){
-    const cols = lines[i].split(delimiter);
-    const obj = {};
-    for(let j=0;j<header.length;j++){
-      obj[header[j]] = cols[j] == null ? "" : cols[j].trim();
-    }
-    rows.push(obj);
-  }
-  return rows;
-}
-function guessTxtName(row){
-  for(const key of TXT_NAME_CANDIDATES){
-    if(row[key]) return row[key];
-  }
+function prettyProgress(group, hasPre, hasPost){
+  const g = String(group||"");
+  if(g.startsWith("quit")) return "dropped";
+  if(hasPre && hasPost) return "completed";
+  if(hasPre || hasPost) return "pending";
   return "";
 }
-function guessTxtDate(row){
-  for(const key of TXT_DATE_CANDIDATES){
-    if(row[key]){
-      const d = parseMaybeDate(row[key]);
-      if(d) return d;
-    }
-  }
-  return null;
-}
-function normalizeTxtRows(txtRows, aliasMap){
-  return txtRows.map((row, idx) => ({
-    raw: row,
-    _txtIndex: idx,
-    txtNameRaw: guessTxtName(row),
-    txtName: canonicalName(guessTxtName(row), aliasMap),
-    txtNameNorm: normalizeName(guessTxtName(row), aliasMap),
-    txtDate: guessTxtDate(row)
-  }));
+function groupBucket(group){
+  const g = String(group||"");
+  if(g.startsWith("Combined")) return "Combined";
+  if(g.startsWith("Control")) return "Control";
+  return "Quit";
 }
 
-/* =========================
-   参考表
-========================= */
-function parseRefTable(text, aliasMap){
-  const lines = safeStr(text).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  const rows = [];
-  for(const line of lines){
-    if(/^mri\b/i.test(line)) continue;
-    const parts = line.split(/\t+| {2,}/).map(x=>x.trim()).filter(Boolean);
-    if(parts.length < 5) continue;
-    const [mri, group, parti, name, date] = parts;
-    const baseId = safeStr(parti).split("_")[0] || "";
-    const stage = /post/i.test(mri) || /_2$/.test(parti) ? "post" : "pre";
-    rows.push({
-      mri,
-      group,
-      parti,
-      baseId,
-      stage,
-      name: canonicalName(name, aliasMap),
-      date: parseMaybeDate(date),
-      order: rows.length
-    });
-  }
-
-  const byId = new Map();
-  for(const row of rows){
-    if(!row.baseId) continue;
-    if(!byId.has(row.baseId)){
-      byId.set(row.baseId, {
-        baseId: row.baseId,
-        group: row.group,
-        name: row.name,
-        order: row.order,
-        preDate: "",
-        postDate: ""
-      });
-    }
-    const cur = byId.get(row.baseId);
-    cur.group = cur.group || row.group;
-    cur.name = cur.name || row.name;
-    cur.order = Math.min(cur.order, row.order);
-    if(row.stage === "pre" && row.date) cur.preDate = fmtDate(row.date);
-    if(row.stage === "post" && row.date) cur.postDate = fmtDate(row.date);
-  }
-  return byId;
-}
-
-/* =========================
-   Clinical 读取
-========================= */
-async function readJsonFile(file){
-  const text = await file.text();
-  const parsed = JSON.parse(text);
-  return Array.isArray(parsed) ? parsed : [parsed];
-}
-async function readExcelFile(file, sheetNameContains=""){
-  const buffer = await file.arrayBuffer();
-  const wb = XLSX.read(buffer, { type:"array", cellDates:true });
-  const rows = [];
-  const filter = safeStr(sheetNameContains).toLowerCase();
-  wb.SheetNames.forEach(sheetName => {
-    if(filter && !sheetName.toLowerCase().includes(filter)) return;
-    const ws = wb.Sheets[sheetName];
-    const arr = XLSX.utils.sheet_to_json(ws, { defval:"" });
-    rows.push(...arr);
+function buildAliasMap(){
+  const map = {};
+  Object.entries(EXTRA_ALIAS_PRESET).forEach(([k,v])=> map[normalizeName(k)] = v);
+  Object.values(state.master.byTid).forEach(m=>{
+    map[normalizeName(m.name)] = m.name;
+    map[normalizeName(canonTid(m.tid))] = m.name;
   });
+  const extra = document.getElementById("extraAlias").value.split(/\r?\n/);
+  extra.forEach(line=>{
+    const m = line.split("=");
+    if(m.length >= 2){ map[normalizeName(m[0])] = m.slice(1).join("=").trim(); }
+  });
+  return map;
+}
+
+function resolveToMaster({name, id, date, source}){
+  const tid = canonTid(id);
+  if(tid && state.master.byTid[tid]) return {status:"matched", tid, name:state.master.byTid[tid].name, by:"id"};
+  const nn = normalizeName(name);
+  const aliasVal = state.aliasMap[nn];
+  if(aliasVal === "__IGNORE__") return {status:"ignore", reason:"alias_ignore"};
+  if(aliasVal){
+    const tid2 = Object.values(state.master.byTid).find(x=>normalizeName(x.name)===normalizeName(aliasVal))?.tid;
+    if(tid2) return {status:"matched", tid:tid2, name:state.master.byTid[tid2].name, by:"alias"};
+  }
+  // exact name match
+  const exact = Object.values(state.master.byTid).find(x=>normalizeName(x.name) === nn);
+  if(exact) return {status:"matched", tid:exact.tid, name:exact.name, by:"name_exact"};
+  // candidate by date proximity + name distance
+  const candidates = Object.values(state.master.byTid).map(x=>{
+    const nameDist = levenshtein(nn, normalizeName(x.name));
+    const dateDist = Math.min(daysDiff(normalizeDate(date), x.preDate||""), daysDiff(normalizeDate(date), x.postDate||""));
+    const score = nameDist*10 + Math.min(dateDist,365);
+    return {tid:x.tid,name:x.name,score,nameDist,dateDist};
+  }).sort((a,b)=>a.score-b.score).slice(0,5);
+  state.unrecognized.push({source, rawName:name||"", candidates, reason:"name_not_resolved"});
+  return {status:"unmatched", candidates};
+}
+
+function bestPhaseByDate(tid, date, explicitType){
+  const forced = state.manualBindings[tid];
+  const d = normalizeDate(date);
+  if(explicitType === "pre" || explicitType === "post") return explicitType;
+  if(forced){
+    if(forced.pre && normalizeDate(forced.pre) === d) return "pre";
+    if(forced.post && normalizeDate(forced.post) === d) return "post";
+  }
+  const master = state.master.byTid[tid];
+  if(!master) return d ? "pre" : "";
+  if(master.preDate && master.postDate){
+    return daysDiff(d, master.preDate) <= daysDiff(d, master.postDate) ? "pre" : "post";
+  }
+  if(master.preDate) return "pre";
+  if(master.postDate) return "post";
+  return d ? "pre" : "";
+}
+
+function getParqFlag(rec){
+  const keys = ["parq1","parq2","parq3","parq4","parq5","parq6","parq7"];
+  const yes = keys.some(k=>String(rec[k]||"").trim()==="是" || String(rec[k]||"").trim().toLowerCase()==="yes");
+  return yes ? "T" : "F";
+}
+function calcUPDRS(rec){
+  let total = 0;
+  Object.keys(rec).forEach(k=>{
+    if(/^updrs3_/.test(k)){
+      const n = Number(rec[k]);
+      if(!isNaN(n)) total += n;
+    }
+  });
+  return total || "";
+}
+
+/***********************
+ * 3) 解析 basic TXT
+ ***********************/
+function parseDelimited(text){
+  const lines = String(text||"").replace(/^\uFEFF/,"").split(/\r?\n/).filter(x=>x.trim()!=="");
+  if(!lines.length) return [];
+  const sep = lines[0].includes("\t") ? "\t" : lines[0].includes(",") ? "," : null;
+  if(!sep) return [];
+  const headers = lines[0].split(sep).map(h=>h.trim());
+  const rows = [];
+  for(let i=1;i<lines.length;i++){
+    const vals = lines[i].split(sep);
+    const obj = {};
+    headers.forEach((h,idx)=> obj[h] = (vals[idx] ?? "").trim());
+    if(!isBlankRow(obj)) rows.push(obj);
+  }
   return rows;
 }
-async function readTextFile(file){
-  const text = await file.text();
-  return parseDelimitedText(text);
+
+function ingestBasicRows(rows){
+  rows.forEach(r=>{
+    const resolved = resolveToMaster({name:r.name, id:r.id, date:r.timestamp, source:"basic_txt"});
+    if(resolved.status === "ignore") return;
+    const tid = resolved.status === "matched" ? resolved.tid : (canonTid(r.id) || "ZZZ_"+String(state.rawDebug.length+1).padStart(3,"0"));
+    const phase = bestPhaseByDate(tid, r.timestamp, "");
+    state.basicRows.push({
+      source:"basic_txt",
+      tid,
+      canonicalName: resolved.status === "matched" ? resolved.name : (r.name || tid),
+      phase,
+      timestamp: normalizeDate(r.timestamp),
+      raw: r,
+      matched: resolved.status === "matched"
+    });
+    state.rawDebug.push({type:"basic", tid, phase, name:r.name, timestamp:r.timestamp, raw:r});
+  });
 }
-async function ingestCurrentInputs(){
-  const files = document.getElementById("fileInput").files;
-  const txtPasted = document.getElementById("txtInput").value;
-  const sheetNameContains = document.getElementById("sheetNameContains").value.trim();
 
-  const txtRows = [];
-  const clinicalRows = [];
+/***********************
+ * 4) 解析 JSON / Excel
+ ***********************/
+function normalizeClinicalRecord(obj){
+  const rec = {...obj};
+  rec.id = canonTid(rec.id || rec.ID || rec.participantId || rec.parti || "");
+  rec.name = rec.name || rec.Name || rec.participantName || "";
+  rec.testType = String(rec.testType || rec.phase || "").toLowerCase();
+  rec.testDate = normalizeDate(rec.testDate || rec.date || rec.Date || rec.localSaveTime || "");
+  rec.localSaveTime = rec.localSaveTime || "";
+  return rec;
+}
 
-  if(safeStr(txtPasted)){
-    txtRows.push(...parseDelimitedText(txtPasted));
-  }
+function ingestClinicalRows(rows, sourceName){
+  rows.forEach(obj=>{
+    const rec = normalizeClinicalRecord(obj);
+    if(isBlankRow(rec)) return;
+    const resolved = resolveToMaster({name:rec.name, id:rec.id, date:rec.testDate, source:sourceName});
+    if(resolved.status === "ignore") return;
+    const tid = resolved.status === "matched" ? resolved.tid : (canonTid(rec.id) || "ZZZ_"+String(state.rawDebug.length+1).padStart(3,"0"));
+    const phase = bestPhaseByDate(tid, rec.testDate || rec.localSaveTime, ["pre","post"].includes(rec.testType)?rec.testType:"");
+    state.clinicalRows.push({
+      source: sourceName,
+      tid,
+      canonicalName: resolved.status === "matched" ? resolved.name : (rec.name || tid),
+      phase,
+      testDate: normalizeDate(rec.testDate || rec.localSaveTime),
+      raw: rec,
+      matched: resolved.status === "matched"
+    });
+    state.rawDebug.push({type:"clinical", tid, phase, name:rec.name, testDate:rec.testDate, raw:rec});
+  });
+}
 
+async function readUploadedFiles(files){
   for(const file of files){
-    const lower = file.name.toLowerCase();
-
-    if(lower.endsWith(".json")){
-      const arr = await readJsonFile(file);
-      clinicalRows.push(...arr);
-    } else if(lower.endsWith(".xlsx") || lower.endsWith(".xls")){
-      const arr = await readExcelFile(file, sheetNameContains);
-      clinicalRows.push(...arr);
-    } else if(lower.endsWith(".txt") || lower.endsWith(".tsv")){
-      const arr = await readTextFile(file);
-      txtRows.push(...arr);
-    } else if(lower.endsWith(".csv")){
-      // CSV 既可能是 txt 类，也可能是 clinical 类
-      const arr = await readExcelFile(file, sheetNameContains);
-      if(arr.length){
-        const keys = Object.keys(arr[0] || {}).map(k => safeStr(k).toLowerCase());
-        const looksClinical = keys.includes("testtype") || keys.includes("updrs3_1") || keys.includes("moca");
-        if(looksClinical) clinicalRows.push(...arr);
-        else txtRows.push(...arr);
+    const name = file.name.toLowerCase();
+    if(name.endsWith('.json')){
+      const txt = await file.text();
+      let parsed = [];
+      try{
+        const j = JSON.parse(txt);
+        parsed = Array.isArray(j) ? j : [j];
+      }catch(err){ alert(`JSON 解析失败：${file.name}`); continue; }
+      ingestClinicalRows(parsed, file.name);
+    }else if(name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv')){
+      const ab = await file.arrayBuffer();
+      const wb = XLSX.read(ab, {type:'array'});
+      const all = [];
+      wb.SheetNames.forEach(sn=>{
+        const arr = XLSX.utils.sheet_to_json(wb.Sheets[sn], {defval:""});
+        arr.forEach(x=>all.push(x));
+      });
+      // 判断是不是 basic txt 导出的表结构
+      const isBasicLike = all.length && Object.keys(all[0]).includes('timestamp') && Object.keys(all[0]).includes('diagnosisYear');
+      if(isBasicLike) ingestBasicRows(all); else ingestClinicalRows(all, file.name);
+    }else if(name.endsWith('.txt')){
+      const txt = await file.text();
+      const rows = parseDelimited(txt);
+      if(rows.length && Object.keys(rows[0]).includes('timestamp')) ingestBasicRows(rows); else {
+        // 尝试当 JSONL / 临床 txt
+        const arr = txt.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(x=>{try{return JSON.parse(x)}catch{return null}}).filter(Boolean);
+        if(arr.length) ingestClinicalRows(arr, file.name);
       }
     }
   }
-
-  return { txtRows, clinicalRows };
-}
-function normalizeClinicalRecord(rec, aliasMap){
-  const id = safeStr(rec.id || rec.ID || rec.Id);
-  const name = canonicalName(rec.name || rec.Name || rec.participant || rec.subject || "", aliasMap);
-
-  const testTypeRaw = safeStr(rec.testType || rec.type || rec.stage).toLowerCase();
-  let testType = "";
-  if(testTypeRaw.includes("pre")) testType = "pre";
-  else if(testTypeRaw.includes("post")) testType = "post";
-
-  const testDate = parseMaybeDate(rec.testDate) || parseMaybeDate(rec.localSaveTime) || parseMaybeDate(rec.date);
-
-  return {
-    raw: rec,
-    id,
-    name,
-    nameNorm: normalizeName(name, aliasMap),
-    testType,
-    testDate,
-    updrsTotal: sumUPDRS(rec),
-    parqSummary: summarizePARQ(rec),
-    medStatus: normalizeOnOff(rec.updrs3b_on || rec.medStatus || "")
-  };
-}
-function sumUPDRS(rec){
-  let sum = 0;
-  let found = false;
-  for(const [k,v] of Object.entries(rec || {})){
-    if(/^updrs3_\d+/i.test(k)){
-      const n = Number(String(v).trim());
-      if(!isNaN(n)){
-        sum += n;
-        found = true;
-      }
-    }
-  }
-  return found ? sum : "";
-}
-function summarizePARQ(rec){
-  let anyYes = false;
-  let anyFilled = false;
-  for(const key of PARQ_KEYS){
-    const v = rec?.[key];
-    const s = normalizeNameBase(v);
-    if(safeStr(v)!=="") anyFilled = true;
-    if(["是","yes","y","true","1"].includes(s) || s.includes("是")) anyYes = true;
-  }
-  if(!anyFilled) return "";
-  return anyYes ? "T" : "F";
 }
 
-/* =========================
-   分组 & 选择 clinical
-========================= */
-function chooseClosestRecord(records, targetDate){
-  if(!records || !records.length) return null;
-  if(!targetDate) return records[0];
-  let best = records[0];
-  let bestDiff = dateDiffDays(records[0].testDate, targetDate);
-  for(let i=1;i<records.length;i++){
-    const diff = dateDiffDays(records[i].testDate, targetDate);
-    if(diff < bestDiff){
-      best = records[i];
-      bestDiff = diff;
-    }
-  }
-  return best;
+/***********************
+ * 5) 合并逻辑
+ ***********************/
+function chooseBasicForPhase(arr, phase, master){
+  const items = arr.filter(x=>x.phase===phase);
+  if(!items.length) return null;
+  const targetDate = phase==='pre' ? master?.preDate : master?.postDate;
+  return items.slice().sort((a,b)=> daysDiff(a.timestamp, targetDate)-daysDiff(b.timestamp, targetDate))[0];
 }
-function groupClinicalRecords(clinicalRows, refMap, forceMap, issues){
-  const grouped = new Map();
-
-  for(const c of clinicalRows){
-    if(!c.id){
-      issues.push({
-        type:"clinical_missing_id",
-        id:"",
-        name:c.name || "",
-        date:c.testDate ? fmtDate(c.testDate) : "",
-        detail:"该 clinical 记录没有 id，已跳过"
-      });
-      continue;
-    }
-    if(!grouped.has(c.id)){
-      grouped.set(c.id, { id:c.id, name:c.name, all:[], preList:[], postList:[], otherList:[] });
-    }
-    const g = grouped.get(c.id);
-    g.all.push(c);
-    g.name = g.name || c.name;
-    if(c.testType === "pre") g.preList.push(c);
-    else if(c.testType === "post") g.postList.push(c);
-    else g.otherList.push(c);
-  }
-
-  const result = new Map();
-
-  for(const [id, g] of grouped.entries()){
-    const ref = refMap.get(id);
-    const preForce = forceMap.get(`${id}|pre`) || null;
-    const postForce = forceMap.get(`${id}|post`) || null;
-    const preRefDate = preForce || (ref?.preDate ? parseMaybeDate(ref.preDate) : null);
-    const postRefDate = postForce || (ref?.postDate ? parseMaybeDate(ref.postDate) : null);
-
-    let pre = null;
-    let post = null;
-
-    if(g.preList.length > 1){
-      pre = chooseClosestRecord(g.preList, preRefDate);
-      issues.push({
-        type:"duplicate_pre_clinical",
-        id, name:g.name || "",
-        date: pre?.testDate ? fmtDate(pre.testDate) : "",
-        detail:`同一 ID 有 ${g.preList.length} 条 pre clinical，已按${preForce ? "强制绑定日期" : "参考日期"}选择最接近的一条`
-      });
-    } else if(g.preList.length === 1){
-      pre = g.preList[0];
-    }
-
-    if(g.postList.length > 1){
-      post = chooseClosestRecord(g.postList, postRefDate);
-      issues.push({
-        type:"duplicate_post_clinical",
-        id, name:g.name || "",
-        date: post?.testDate ? fmtDate(post.testDate) : "",
-        detail:`同一 ID 有 ${g.postList.length} 条 post clinical，已按${postForce ? "强制绑定日期" : "参考日期"}选择最接近的一条`
-      });
-    } else if(g.postList.length === 1){
-      post = g.postList[0];
-    }
-
-    if(!pre && g.otherList.length === 1 && !post){
-      pre = g.otherList[0];
-      issues.push({
-        type:"clinical_stage_missing_assume_pre",
-        id, name:g.name || "",
-        date: pre?.testDate ? fmtDate(pre.testDate) : "",
-        detail:"该记录没有 testType，暂按 pre 处理"
-      });
-    }
-
-    result.set(id, { id, name:g.name, pre, post, all:g.all });
-  }
-
-  return result;
+function chooseClinicalForPhase(arr, phase, master){
+  const items = arr.filter(x=>x.phase===phase);
+  if(!items.length) return null;
+  const targetDate = phase==='pre' ? master?.preDate : master?.postDate;
+  return items.slice().sort((a,b)=> daysDiff(a.testDate, targetDate)-daysDiff(b.testDate, targetDate))[0];
 }
 
-/* =========================
-   TXT 匹配
-========================= */
-function chooseBestTxtCandidate(candidates, targetDate, usedTxtIndices){
-  const available = candidates.filter(c => !usedTxtIndices.has(c._txtIndex));
-  if(!available.length) return null;
-  available.sort((a,b) => dateDiffDays(a.txtDate, targetDate) - dateDiffDays(b.txtDate, targetDate));
-  return available[0] || null;
-}
-function matchTxtForPerson(person, refInfo, txtNormalizedRows, aliasMap, usedTxtIndices, issues, forceMap){
-  const nameCandidates = new Set();
+function buildMergedRows(){
+  state.unrecognized = []; // reset and rebuild by resolving done already? keep from parse-time; we won't drop parse-time suggestions
+  const allTids = new Set([...state.master.order, ...state.basicRows.map(x=>x.tid), ...state.clinicalRows.map(x=>x.tid)]);
+  const rows = [];
 
-  if(person.name) nameCandidates.add(normalizeName(person.name, aliasMap));
-  if(person.pre?.name) nameCandidates.add(normalizeName(person.pre.name, aliasMap));
-  if(person.post?.name) nameCandidates.add(normalizeName(person.post.name, aliasMap));
-  if(refInfo?.name) nameCandidates.add(normalizeName(refInfo.name, aliasMap));
+  [...allTids].forEach((tid, idx)=>{
+    const master = state.master.byTid[tid] || {tid, name:(findAnyName(tid)||tid), group:"", order:999999+idx, preDate:"", postDate:""};
+    const basics = state.basicRows.filter(x=>x.tid===tid);
+    const clinics = state.clinicalRows.filter(x=>x.tid===tid);
+    const bPre = chooseBasicForPhase(basics, 'pre', master);
+    const bPost = chooseBasicForPhase(basics, 'post', master); // mostly unused, but may help if only basic exists twice
+    const cPre = chooseClinicalForPhase(clinics, 'pre', master);
+    const cPost = chooseClinicalForPhase(clinics, 'post', master);
 
-  const candidates = txtNormalizedRows.filter(t => nameCandidates.has(t.txtNameNorm));
+    const bAny = bPre || bPost || basics[0] || null;
+    const preHas = !!(bPre || cPre);
+    const postHas = !!(bPost || cPost);
+    const group = master.group || "";
 
-  const preTargetDate = forceMap.get(`${person.id}|pre`) ||
-                        person.pre?.testDate ||
-                        parseMaybeDate(refInfo?.preDate) ||
-                        null;
-  const postTargetDate = forceMap.get(`${person.id}|post`) ||
-                         person.post?.testDate ||
-                         parseMaybeDate(refInfo?.postDate) ||
-                         null;
+    const fci = val(bAny,'fciTotal');
+    const row = {
+      id: tid,
+      Group: groupBucket(group),
+      name: master.name,
+      "progress(green=intervention; blue=control; yellow=pending;red=dropped)": prettyProgress(group, preHas, postHas),
+      age: val(bAny,'age'),
+      diagnosisDuration: val(bAny,'diagnosisYear'),
+      educationYears: val(bAny,'educationYears'),
+      dominantHand: val(bAny,'dominantHand'),
+      implants: val(bAny,'implants'),
+      wheelchair: val(bAny,'wheelchair'),
+      medicationDetails: cPre?.raw.medicationDetails || cPost?.raw.medicationDetails || "",
+      totalLEDD: cPre?.raw.totalLEDD || cPost?.raw.totalLEDD || "",
+      medFirstTime: val(bAny,'medFirstTime'),
+      medDuration: val(bAny,'medDuration'),
+      medFrequency: val(bAny,'medFrequency'),
+      training1: val(bAny,'training1'),
+      training2: val(bAny,'training2'),
+      training3: val(bAny,'training3'),
+      legLength: cPre?.raw.legLength || cPost?.raw.legLength || "",
+      height: val(bAny,'fci18_height'),
+      weigth: val(bAny,'fci18_weight'),
+      fci: fci,
+      contact: "",
 
-  let preTxt = null, postTxt = null;
+      pre_date: master.preDate || cPre?.testDate || bPre?.timestamp || "",
+      tester: cPre?.raw.tester || "",
+      medtime: cPre ? onOffText(cPre.raw.updrs3b_on) : "",
+      hadsAnxiety: val(bPre,'hadsAnxiety') || val(bAny,'hadsAnxiety'),
+      hadsDepression: val(bPre,'hadsDepression') || val(bAny,'hadsDepression'),
+      PDQ: val(bPre,'pdqTotal') || val(bAny,'pdqTotal'),
+      fogqTotal: val(bPre,'fogqTotal') || val(bAny,'fogqTotal'),
+      moca: cPre?.raw.moca || "",
+      "PAR-Q": cPre ? getParqFlag(cPre.raw) : "",
+      updrs: cPre ? calcUPDRS(cPre.raw) : "",
+      hyStage: cPre?.raw.hyStage || "",
+      tug_avg: cPre?.raw.tug_avg || "",
+      avgSpeed: cPre?.raw.avgSpeed || "",
+      avgStepLength: cPre?.raw.avgStepLength || "",
+      avgCadence: cPre?.raw.avgCadence || "",
+      remark: "",
 
-  if(person.pre){
-    preTxt = chooseBestTxtCandidate(candidates, preTargetDate, usedTxtIndices);
-    if(preTxt) usedTxtIndices.add(preTxt._txtIndex);
-  }
-  if(person.post){
-    postTxt = chooseBestTxtCandidate(candidates, postTargetDate, usedTxtIndices);
-    if(postTxt) usedTxtIndices.add(postTxt._txtIndex);
-  }
+      post_date2: master.postDate || cPost?.testDate || bPost?.timestamp || "",
+      staff: cPost?.raw.tester || "",
+      Med: cPost ? onOffText(cPost.raw.updrs3b_on) : "",
+      hadA: val(bPost,'hadsAnxiety') || "",
+      hadD: val(bPost,'hadsDepression') || "",
+      PD_Q: val(bPost,'pdqTotal') || "",
+      fogSum: val(bPost,'fogqTotal') || "",
+      Moc_a: cPost?.raw.moca || "",
+      up_drs: cPost ? calcUPDRS(cPost.raw) : "",
+      "H&Y": cPost?.raw.hyStage || "",
+      TUG_av: cPost?.raw.tug_avg || "",
+      avg_Speed: cPost?.raw.avgSpeed || "",
+      avg_StepLength: cPost?.raw.avgStepLength || "",
+      avg_Cadence: cPost?.raw.avgCadence || "",
+      re_mark: "",
 
-  if(preTxt && preTargetDate && preTxt.txtDate){
-    const d = dateDiffDays(preTxt.txtDate, preTargetDate);
-    if(d > 45){
-      issues.push({
-        type:"txt_pre_date_far",
-        id:person.id,
-        name:person.name || refInfo?.name || "",
-        date:fmtDate(preTargetDate),
-        detail:`匹配到的 pre TXT 日期相差 ${Math.round(d)} 天，请人工检查`
-      });
-    }
-  }
-  if(postTxt && postTargetDate && postTxt.txtDate){
-    const d = dateDiffDays(postTxt.txtDate, postTargetDate);
-    if(d > 45){
-      issues.push({
-        type:"txt_post_date_far",
-        id:person.id,
-        name:person.name || refInfo?.name || "",
-        date:fmtDate(postTargetDate),
-        detail:`匹配到的 post TXT 日期相差 ${Math.round(d)} 天，请人工检查`
-      });
-    }
-  }
-
-  return { preTxt, postTxt, candidateCount:candidates.length, candidateNames:[...new Set(candidates.map(x=>x.txtName))] };
-}
-
-/* =========================
-   输出行
-========================= */
-function buildEmptyOutputRow(id){
-  const row = {};
-  OUTPUT_HEADERS.forEach(h => row[h] = "");
-  row.id = id || "";
-  return row;
-}
-function setProgress(row, value){
-  row["progress(green=intervention; blue=control; yellow=pending;red=dropped)"] = value;
-}
-function buildProgress(group, hasPre, hasPost){
-  const g = safeStr(group).toLowerCase();
-  if(g.includes("quit") || g.includes("drop")) return "red";
-  if(!(hasPre && hasPost)) return "yellow";
-  if(g.includes("combined")) return "green";
-  if(g.includes("control")) return "blue";
-  return "yellow";
-}
-function fillStaticFromTxt(outRow, txtRaw, assessmentDateForDx){
-  if(!txtRaw) return;
-  outRow.age = coalesce(outRow.age, txtRaw.age);
-  outRow.educationYears = coalesce(outRow.educationYears, txtRaw.educationYears);
-  outRow.dominantHand = coalesce(outRow.dominantHand, txtRaw.dominantHand);
-  outRow.implants = coalesce(outRow.implants, txtRaw.implants);
-  outRow.wheelchair = coalesce(outRow.wheelchair, txtRaw.wheelchair);
-
-  // Basic 服药
-  outRow.medFirstTime = coalesce(outRow.medFirstTime, txtRaw.medFirstTime);
-  outRow.medDuration = coalesce(outRow.medDuration, txtRaw.medDuration);
-  outRow.medFrequency = coalesce(outRow.medFrequency, txtRaw.medFrequency);
-
-  outRow.training1 = coalesce(outRow.training1, txtRaw.training1);
-  outRow.training2 = coalesce(outRow.training2, txtRaw.training2);
-  outRow.training3 = coalesce(outRow.training3, txtRaw.training3);
-
-  outRow.height = coalesce(outRow.height, txtRaw.fci18_height);
-  outRow.weigth = coalesce(outRow.weigth, txtRaw.fci18_weight);
-  outRow.fci = coalesce(outRow.fci, txtRaw.fciTotal);
-
-  if(!outRow.diagnosisDuration){
-    outRow.diagnosisDuration = computeDiagnosisDuration(txtRaw.diagnosisYear, assessmentDateForDx || null);
-  }
-}
-function fillAssessment(outRow, clinical, txtRaw, stage, issues){
-  if(!clinical) return;
-  const rec = clinical.raw || {};
-
-  // shared
-  outRow.name = coalesce(outRow.name, clinical.name);
-  outRow.medicationDetails = coalesce(outRow.medicationDetails, rec.medicationDetails);
-  outRow.totalLEDD = coalesce(outRow.totalLEDD, rec.totalLEDD);
-  outRow.legLength = coalesce(outRow.legLength, rec.legLength);
-
-  fillStaticFromTxt(outRow, txtRaw, clinical.testDate);
-
-  const medStatus = clinical.medStatus;
-  if(medStatus && medStatus !== "on" && medStatus !== "off"){
-    issues.push({
-      type:"med_status_unrecognized",
-      id:clinical.id,
-      name:clinical.name || "",
-      date:clinical.testDate ? fmtDate(clinical.testDate) : "",
-      detail:`updrs3b_on 无法标准化为 on/off，已保留原值：${medStatus}`
-    });
-  }
-
-  if(stage === "pre"){
-    outRow.pre_date = clinical.testDate ? fmtDate(clinical.testDate) : "";
-    outRow.tester = coalesce(outRow.tester, rec.tester);
-    outRow.medtime = medStatus;
-    outRow.hadsAnxiety = txtRaw ? coalesce(outRow.hadsAnxiety, txtRaw.hadsAnxiety) : outRow.hadsAnxiety;
-    outRow.hadsDepression = txtRaw ? coalesce(outRow.hadsDepression, txtRaw.hadsDepression) : outRow.hadsDepression;
-    outRow.PDQ = txtRaw ? coalesce(outRow.PDQ, txtRaw.pdqTotal) : outRow.PDQ;
-    outRow.fogqTotal = txtRaw ? coalesce(outRow.fogqTotal, txtRaw.fogqTotal) : outRow.fogqTotal;
-    outRow.moca = coalesce(outRow.moca, rec.moca);
-    outRow["PAR-Q"] = coalesce(outRow["PAR-Q"], clinical.parqSummary);
-    outRow.updrs = coalesce(outRow.updrs, clinical.updrsTotal);
-    outRow.hyStage = coalesce(outRow.hyStage, rec.hyStage);
-    outRow.tug_avg = coalesce(outRow.tug_avg, rec.tug_avg);
-    outRow.avgSpeed = coalesce(outRow.avgSpeed, rec.avgSpeed);
-    outRow.avgStepLength = coalesce(outRow.avgStepLength, rec.avgStepLength);
-    outRow.avgCadence = coalesce(outRow.avgCadence, rec.avgCadence);
-  } else {
-    outRow.post_date2 = clinical.testDate ? fmtDate(clinical.testDate) : "";
-    outRow.staff = coalesce(outRow.staff, rec.tester);
-    outRow.Med = medStatus;
-    outRow.hadA = txtRaw ? coalesce(outRow.hadA, txtRaw.hadsAnxiety) : outRow.hadA;
-    outRow.hadD = txtRaw ? coalesce(outRow.hadD, txtRaw.hadsDepression) : outRow.hadD;
-    outRow.PD_Q = txtRaw ? coalesce(outRow.PD_Q, txtRaw.pdqTotal) : outRow.PD_Q;
-    outRow.fogSum = txtRaw ? coalesce(outRow.fogSum, txtRaw.fogqTotal) : outRow.fogSum;
-    outRow.Moc_a = coalesce(outRow.Moc_a, rec.moca);
-    outRow.up_drs = coalesce(outRow.up_drs, clinical.updrsTotal);
-    outRow["H&Y"] = coalesce(outRow["H&Y"], rec.hyStage);
-    outRow.TUG_av = coalesce(outRow.TUG_av, rec.tug_avg);
-    outRow.avg_Speed = coalesce(outRow.avg_Speed, rec.avgSpeed);
-    outRow.avg_StepLength = coalesce(outRow.avg_StepLength, rec.avgStepLength);
-    outRow.avg_Cadence = coalesce(outRow.avg_Cadence, rec.avgCadence);
-  }
-}
-function finalizeRow(outRow, refInfo, person){
-  outRow.Group = coalesce(outRow.Group, refInfo?.group);
-  outRow.name = coalesce(outRow.name, refInfo?.name, person.name);
-  if(!outRow.pre_date && refInfo?.preDate) outRow.pre_date = refInfo.preDate;
-  if(!outRow.post_date2 && refInfo?.postDate) outRow.post_date2 = refInfo.postDate;
-  setProgress(outRow, buildProgress(outRow.Group, !!person.pre, !!person.post));
-}
-
-/* =========================
-   主构建流程
-========================= */
-function dedupeTxtRawRows(rows){
-  return dedupeBy(rows, row => {
-    const nm = normalizeNameBase(guessTxtName(row));
-    const dt = fmtDate(guessTxtDate(row));
-    const age = safeStr(row.age);
-    const dx = safeStr(row.diagnosisYear);
-    return `${nm}|${dt}|${age}|${dx}`;
-  });
-}
-function dedupeClinicalRawRows(rows){
-  return dedupeBy(rows, row => {
-    const id = safeStr(row.id || row.ID || row.Id);
-    const tt = safeStr(row.testType || row.type || row.stage).toLowerCase();
-    const dt = fmtDate(parseMaybeDate(row.testDate) || parseMaybeDate(row.localSaveTime) || parseMaybeDate(row.date));
-    const nm = normalizeNameBase(row.name || row.Name || row.participant || row.subject || "");
-    return `${id}|${tt}|${dt}|${nm}`;
-  });
-}
-function collectCandidateTxtNames(txtRowsNorm){
-  return [...new Set(txtRowsNorm.map(x => x.txtName).filter(Boolean))];
-}
-function buildBundle(txtRawRows, clinicalRawRows, refText, aliasText, forceBindText){
-  const issues = [];
-  const unmatchedLog = [];
-
-  const aliasMap = buildAliasMap(aliasText);
-  const forceMap = parseForceBindings(forceBindText);
-  const refMap = parseRefTable(refText, aliasMap);
-
-  const txtRawClean = dedupeTxtRawRows(txtRawRows);
-  const clinicalRawClean = dedupeClinicalRawRows(clinicalRawRows);
-
-  const txtRows = normalizeTxtRows(txtRawClean, aliasMap);
-  const clinicalRows = clinicalRawClean.map(r => normalizeClinicalRecord(r, aliasMap))
-                                      .filter(r => r.id || r.name);
-
-  const groupedClinical = groupClinicalRecords(clinicalRows, refMap, forceMap, issues);
-  const usedTxtIndices = new Set();
-  const outputRows = [];
-  const allTxtCandidateNames = collectCandidateTxtNames(txtRows);
-
-  for(const [id, person] of groupedClinical.entries()){
-    const refInfo = refMap.get(id);
-    const outRow = buildEmptyOutputRow(id);
-
-    const { preTxt, postTxt, candidateCount, candidateNames } = matchTxtForPerson(
-      person, refInfo, txtRows, aliasMap, usedTxtIndices, issues, forceMap
-    );
-
-    if(person.pre && !preTxt){
-      unmatchedLog.push({
-        type:"clinical_pre_without_txt",
-        id,
-        name: person.name || refInfo?.name || "",
-        stage:"pre",
-        clinical_date: person.pre.testDate ? fmtDate(person.pre.testDate) : "",
-        suggestions: suggestNames(person.name || refInfo?.name || "", allTxtCandidateNames),
-        detail: candidateCount > 0 ? "有同名/近似同名 TXT 候选，但没有成功匹配到 pre" : "找不到可匹配 TXT"
-      });
-    }
-    if(person.post && !postTxt){
-      unmatchedLog.push({
-        type:"clinical_post_without_txt",
-        id,
-        name: person.name || refInfo?.name || "",
-        stage:"post",
-        clinical_date: person.post.testDate ? fmtDate(person.post.testDate) : "",
-        suggestions: suggestNames(person.name || refInfo?.name || "", allTxtCandidateNames),
-        detail: candidateCount > 0 ? "有同名/近似同名 TXT 候选，但没有成功匹配到 post" : "找不到可匹配 TXT"
-      });
-    }
-
-    if(preTxt) fillAssessment(outRow, person.pre, preTxt.raw, "pre", issues);
-    else if(person.pre) fillAssessment(outRow, person.pre, null, "pre", issues);
-
-    if(postTxt) fillAssessment(outRow, person.post, postTxt.raw, "post", issues);
-    else if(person.post) fillAssessment(outRow, person.post, null, "post", issues);
-
-    // 如果 pre/post 都没配到 txt，尝试用同名未使用 txt 补 basic
-    if(!preTxt && !postTxt){
-      const personNames = new Set();
-      if(person.name) personNames.add(normalizeName(person.name, aliasMap));
-      if(refInfo?.name) personNames.add(normalizeName(refInfo.name, aliasMap));
-
-      const fallbackCandidates = txtRows.filter(t =>
-        !usedTxtIndices.has(t._txtIndex) && personNames.has(t.txtNameNorm)
-      );
-
-      if(fallbackCandidates.length){
-        const fallback = fallbackCandidates[0];
-        usedTxtIndices.add(fallback._txtIndex);
-        fillStaticFromTxt(outRow, fallback.raw, person.pre?.testDate || person.post?.testDate || null);
-        outRow.name = coalesce(outRow.name, fallback.txtName);
-      }
-    }
-
-    finalizeRow(outRow, refInfo, person);
-
-    outputRows.push({
-      ...outRow,
-      __sortOrder: refInfo ? refInfo.order : 999999,
-      __sortId: id
-    });
-  }
-
-  // 未被用到的 TXT
-  txtRows.forEach(t => {
-    if(!usedTxtIndices.has(t._txtIndex)){
-      unmatchedLog.push({
-        type:"txt_without_clinical_match",
-        id:"",
-        name:t.txtName || "",
-        stage:"",
-        clinical_date:"",
-        suggestions:"",
-        detail:`TXT 未匹配到 clinical；TXT 时间=${t.txtDate ? fmtDate(t.txtDate) : ""}`
-      });
-    }
+      __sortGroup: GROUP_SORT[group] ?? 9,
+      __sortOrder: master.order ?? 999999 + idx,
+      __debug: { master, bPre, bPost, cPre, cPost, basics, clinics }
+    };
+    rows.push(row);
   });
 
-  // MRI 表有但 clinical 没有
-  for(const [id, refInfo] of refMap.entries()){
-    if(!groupedClinical.has(id)){
-      issues.push({
-        type:"id_in_ref_but_missing_clinical",
-        id,
-        name:refInfo.name || "",
-        date:"",
-        detail:"MRI 参考表里有该 ID，但当前数据中没有 clinical 记录"
-      });
-    }
-  }
-
-  outputRows.sort((a,b) => {
-    if(a.__sortOrder !== b.__sortOrder) return a.__sortOrder - b.__sortOrder;
-    return a.__sortId.localeCompare(b.__sortId, "zh-Hans-CN", { numeric:true, sensitivity:"base" });
-  });
-
-  const merged_output = outputRows.map(r => {
-    const o = {};
-    OUTPUT_HEADERS.forEach(h => o[h] = r[h] ?? "");
-    return o;
-  });
-
-  return {
-    merged_output,
-    unmatched_log: unmatchedLog,
-    issues,
-    stats: {
-      txtRows: txtRawClean.length,
-      clinicalRows: clinicalRawClean.length,
-      subjects: merged_output.length,
-      refCount: refMap.size
-    }
-  };
+  rows.sort((a,b)=> (a.__sortOrder-b.__sortOrder) || (a.__sortGroup-b.__sortGroup) || String(a.id).localeCompare(String(b.id)));
+  state.mergedRows = rows;
+  renderPreview();
+  renderStats();
 }
 
-/* =========================
-   预览表
-========================= */
-function renderGenericTable(tableId, rows){
-  const table = document.getElementById(tableId);
-  table.innerHTML = "";
-  if(!rows || !rows.length){
-    table.innerHTML = "<tr><td style='padding:12px;'>暂无数据</td></tr>";
-    return;
-  }
-  const headers = Object.keys(rows[0]);
-  const thead = document.createElement("thead");
-  const trh = document.createElement("tr");
-  headers.forEach(h => {
-    const th = document.createElement("th");
-    th.textContent = h;
-    trh.appendChild(th);
-  });
-  thead.appendChild(trh);
-
-  const tbody = document.createElement("tbody");
-  rows.slice(0,20).forEach(row => {
-    const tr = document.createElement("tr");
-    headers.forEach(h => {
-      const td = document.createElement("td");
-      td.textContent = row[h] ?? "";
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(thead);
-  table.appendChild(tbody);
-}
-function renderBundle(bundle){
-  renderGenericTable("previewTable", bundle.merged_output);
-  renderGenericTable("issuesTable", bundle.issues);
-  renderGenericTable("unmatchedTable", bundle.unmatched_log);
+function val(wrapper, key){ return wrapper?.raw?.[key] ?? ""; }
+function findAnyName(tid){
+  const m = state.master.byTid[tid]; if(m) return m.name;
+  const x = state.basicRows.find(r=>r.tid===tid) || state.clinicalRows.find(r=>r.tid===tid);
+  return x?.canonicalName || "";
 }
 
-/* =========================
-   导出 Excel
-========================= */
-function autoColWidths(rows, headers){
-  const widths = headers.map(h => ({ wch: Math.max(12, String(h).length + 2) }));
-  rows.forEach(r => {
-    headers.forEach((h, i) => {
-      const len = String(r[h] ?? "").length;
-      widths[i].wch = Math.min(45, Math.max(widths[i].wch, len + 2));
-    });
-  });
-  return widths;
+/***********************
+ * 6) 预览 / 导出
+ ***********************/
+function renderStats(){
+  const total = state.mergedRows.length;
+  const pre = state.mergedRows.filter(r=>r.pre_date).length;
+  const post = state.mergedRows.filter(r=>r.post_date2).length;
+  const combined = state.mergedRows.filter(r=>r.Group==='Combined').length;
+  const control = state.mergedRows.filter(r=>r.Group==='Control').length;
+  const quit = state.mergedRows.filter(r=>r.Group==='Quit').length;
+  const html = [
+    ["总行数", total],["有 pre", pre],["有 post", post],["Combined", combined],["Control", control],["Quit", quit],["未识别", state.unrecognized.length]
+  ].map(([k,v])=>`<div class="box"><div class="small muted">${escapeHtml(k)}</div><div style="font-size:24px;font-weight:800">${escapeHtml(v)}</div></div>`).join("");
+  document.getElementById('stats').innerHTML = html;
+  renderSuggest();
 }
-function buildMergedOutputSheet(rows){
+
+function renderSuggest(){
+  const tbody = document.querySelector('#suggestTable tbody');
+  tbody.innerHTML = state.unrecognized.map(x=>{
+    const cand = (x.candidates||[]).slice(0,3).map(c=>`${c.name} (${c.tid})`).join(' / ');
+    return `<tr><td>${escapeHtml(x.source||'')}</td><td>${escapeHtml(x.rawName||'')}</td><td>${escapeHtml(cand)}</td><td>${escapeHtml(x.reason||'')}</td></tr>`;
+  }).join('') || '<tr><td colspan="4" class="muted">目前没有未识别姓名。</td></tr>';
+}
+
+function renderPreview(){
+  const table = document.getElementById('previewTable');
+  const top = ['BASIC INFO','','','','','','','','','','','','','','','','','','','','','','','PRE Assessment','','','','','','','','','','','','','','','','Post Assessment','','','','','','','','','','','','',''];
+  let html = '<thead><tr>'+ top.map((x,i)=>`<th ${i===0?'colspan="23"':''} ${i===23?'colspan="17"':''} ${i===40?'colspan="14"':''}>${escapeHtml((i===0||i===23||i===40)?x:'')}</th>`).join('') +'</tr>';
+  html += '<tr>'+ FINAL_COLUMNS.map(h=>`<th>${escapeHtml(h)}</th>`).join('') +'</tr></thead><tbody>';
+  html += state.mergedRows.map(r=>'<tr>'+FINAL_COLUMNS.map(c=>`<td>${escapeHtml(r[c] ?? '')}</td>`).join('')+'</tr>').join('');
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function exportExcel(){
+  const wb = XLSX.utils.book_new();
   const aoa = [];
-  const row1 = new Array(OUTPUT_HEADERS.length).fill("");
-  row1[0] = "BASIC INFO";
-  row1[PRE_START] = "PRE Assessment";
-  row1[POST_START] = "Post Assessment";
-  aoa.push(row1);
-  aoa.push(OUTPUT_HEADERS);
-
+  aoa.push(["BASIC INFO : tx / ctrl / quit", ...Array(22).fill(""), "PRE Assessment", ...Array(16).fill(""), "Post Assessment", ...Array(13).fill("")]);
+  aoa.push(FINAL_COLUMNS);
+  state.mergedRows.forEach(r=>{ aoa.push(FINAL_COLUMNS.map(c=>r[c] ?? "")); });
   const ws = XLSX.utils.aoa_to_sheet(aoa);
-  XLSX.utils.sheet_add_json(ws, rows, {
-    header: OUTPUT_HEADERS,
-    skipHeader: true,
-    origin: "A3"
-  });
+  ws['!merges'] = SECTION_MERGES;
+  ws['!cols'] = FINAL_COLUMNS.map((c,i)=>({wch: Math.max(10, Math.min(28, String(c).length + 2))}));
+  XLSX.utils.book_append_sheet(wb, ws, 'merged_output');
 
-  ws["!merges"] = [
-    { s:{r:0,c:0}, e:{r:0,c:BASIC_END} },
-    { s:{r:0,c:PRE_START}, e:{r:0,c:PRE_END} },
-    { s:{r:0,c:POST_START}, e:{r:0,c:POST_END} }
-  ];
+  const unrecAoa = [["source","rawName","candidates","reason"]];
+  state.unrecognized.forEach(x=> unrecAoa.push([x.source||"", x.rawName||"", (x.candidates||[]).map(c=>`${c.name} (${c.tid})`).join(' | '), x.reason||""]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(unrecAoa), 'unrecognized');
 
-  ws["!cols"] = autoColWidths(rows, OUTPUT_HEADERS);
+  const debugAoa = [["type","tid","phase","name","date","raw"]];
+  state.rawDebug.forEach(x=> debugAoa.push([x.type, x.tid, x.phase, x.name, x.timestamp || x.testDate || "", JSON.stringify(x.raw)]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(debugAoa), 'raw_debug');
 
-  // 冻结前两行（兼容性不是所有软件都完美，但 Excel 一般可识别）
-  ws["!freeze"] = { xSplit: 0, ySplit: 2 };
-
-  return ws;
-}
-function exportBundle(bundle){
-  const wb = XLSX.utils.book_new();
-
-  const wsMain = buildMergedOutputSheet(bundle.merged_output);
-  XLSX.utils.book_append_sheet(wb, wsMain, "merged_output");
-
-  const unmatchedHeaders = bundle.unmatched_log.length
-    ? Object.keys(bundle.unmatched_log[0])
-    : ["type","id","name","stage","clinical_date","suggestions","detail"];
-  const wsUn = XLSX.utils.json_to_sheet(bundle.unmatched_log, { header: unmatchedHeaders });
-  wsUn["!cols"] = autoColWidths(bundle.unmatched_log, unmatchedHeaders);
-  XLSX.utils.book_append_sheet(wb, wsUn, "unmatched_log");
-
-  const issueHeaders = bundle.issues.length
-    ? Object.keys(bundle.issues[0])
-    : ["type","id","name","date","detail"];
-  const wsIssue = XLSX.utils.json_to_sheet(bundle.issues, { header: issueHeaders });
-  wsIssue["!cols"] = autoColWidths(bundle.issues, issueHeaders);
-  XLSX.utils.book_append_sheet(wb, wsIssue, "issues");
-
-  const now = new Date();
-  const filename = `assessment_master_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.xlsx`;
-  XLSX.writeFile(wb, filename);
+  const fn = `mri_merged_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.xlsx`;
+  XLSX.writeFile(wb, fn);
 }
 
-/* =========================
-   模板下载
-========================= */
-function downloadTemplate(){
-  const wb = XLSX.utils.book_new();
-
-  const wsMain = buildMergedOutputSheet([]);
-  XLSX.utils.book_append_sheet(wb, wsMain, "merged_output_template");
-
-  const txtHeader = [[
-    "timestamp","id","name","age","diagnosisYear","educationYears","dominantHand","implants","wheelchair",
-    "medFirstTime","medDuration","medFrequency","training1","training2","training3",
-    "fci1_arthritis","fci2_osteoporosis","fci3_asthma","fci4_copd","fci5_angina","fci6_heart_failure",
-    "fci7_heart_attack","fci8_neuro_disease","fci10_peripheral_vascular","fci11_diabetes","fci12_gastro",
-    "fci16_hearing","fci17_disc_disease","fci18_height","fci18_weight","fci18_obesity","fciTotal",
-    "hads1","hads2","hads3","hads4","hads5","hads6","hads7","hads8","hads9","hads10","hads11","hads12","hads13","hads14",
-    "hadsAnxiety","hadsDepression",
-    "pdq1","pdq2","pdq3","pdq4","pdq5","pdq6","pdq7","pdq8","pdq9","pdq10","pdq11","pdq12","pdq13","pdq14",
-    "pdq15","pdq16","pdq17","pdq18","pdq19","pdq20","pdq21","pdq22","pdq23","pdq24","pdq25","pdq26","pdq27","pdq28",
-    "pdq29","pdq30","pdq31","pdq32","pdq33","pdq34","pdq35","pdq36","pdq37","pdq38","pdq39","pdqTotal",
-    "fogq1","fogq2","fogq3","fogq4","fogq5","fogq6","fogqTotal"
-  ]];
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(txtHeader), "basic_txt_header");
-
-  const clinicalHeader = [[
-    "testType","id","name","testDate","tester","legLength","moca",
-    "parq1","parq2","parq3","parq4","parq5","parq6","parq7","parqAgreement",
-    "medicationDetails","totalLEDD",
-    "updrs3a","updrs3b_on","updrs3c1",
-    "updrs3_1","updrs3_2","updrs3_3a","updrs3_3b","updrs3_3c","updrs3_3d","updrs3_3e",
-    "updrs3_4a","updrs3_4b","updrs3_5a","updrs3_5b","updrs3_6a","updrs3_6b","updrs3_7a","updrs3_7b",
-    "updrs3_8a","updrs3_8b","updrs3_9","updrs3_10","updrs3_11","updrs3_12","updrs3_13","updrs3_14",
-    "updrs3_15a","updrs3_15b","updrs3_16a","updrs3_16b","updrs3_17a","updrs3_17b","updrs3_17c","updrs3_17d","updrs3_17e","updrs3_18",
-    "updrsA","updrsB","hyStage","tug1","tug2","tug3","tug_avg","walkDistance",
-    "walk1_time","walk1_steps","walk2_time","walk2_steps","walk3_time","walk3_steps",
-    "avgSpeed","avgStepLength","avgCadence","localSaveTime"
-  ]];
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(clinicalHeader), "clinical_header");
-
-  const wsRule = XLSX.utils.aoa_to_sheet([
-    ["Force bind format"],
-    ["T036|pre|1/31/2026"],
-    ["T036|post|3/15/2026"]
-  ]);
-  XLSX.utils.book_append_sheet(wb, wsRule, "force_bind_example");
-
-  XLSX.writeFile(wb, "assessment_master_template.xlsx");
+function downloadJson(){
+  const blob = new Blob([JSON.stringify({mergedRows:state.mergedRows, unrecognized:state.unrecognized, rawDebug:state.rawDebug}, null, 2)], {type:'application/json;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `merge_debug_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
-/* =========================
-   汇总显示
-========================= */
-function updateStoreSummary(){
-  const store = loadStore();
-  setText("storeSummary", summarizeStore(store));
+/***********************
+ * 7) 交互
+ ***********************/
+function resetDerived(){
+  state.basicRows = [];
+  state.clinicalRows = [];
+  state.mergedRows = [];
+  state.unrecognized = [];
+  state.rawDebug = [];
 }
-function updateCurrentSummary(txtRows, clinicalRows){
-  setText("currentSummary", `当前读取：TXT 行数 ${txtRows.length}；Clinical 记录数 ${clinicalRows.length}`);
-}
-
-/* =========================
-   主操作
-========================= */
-async function buildPreviewFromCurrentOnly(){
-  const current = await ingestCurrentInputs();
-  updateCurrentSummary(current.txtRows, current.clinicalRows);
-
-  const refText = document.getElementById("refTableInput").value;
-  const aliasText = document.getElementById("aliasInput").value;
-  const forceText = document.getElementById("forceBindInput").value;
-
-  const bundle = buildBundle(current.txtRows, current.clinicalRows, refText, aliasText, forceText);
-  renderBundle(bundle);
-  setStatus(
-    `已按“当前上传”预览。\n` +
-    `TXT 行数：${bundle.stats.txtRows}\n` +
-    `Clinical 记录数：${bundle.stats.clinicalRows}\n` +
-    `输出受试者数：${bundle.stats.subjects}\n` +
-    `Issues：${bundle.issues.length}\n` +
-    `Unmatched log：${bundle.unmatched_log.length}`,
-    "good"
-  );
-}
-async function appendCurrentToStoreAndPreview(){
-  const current = await ingestCurrentInputs();
-  updateCurrentSummary(current.txtRows, current.clinicalRows);
-
-  const store = loadStore();
-  const mergedStore = {
-    txtRows: dedupeTxtRawRows([...store.txtRows, ...current.txtRows]),
-    clinicalRows: dedupeClinicalRawRows([...store.clinicalRows, ...current.clinicalRows])
-  };
-  saveStore(mergedStore);
-  updateStoreSummary();
-
-  const refText = document.getElementById("refTableInput").value;
-  const aliasText = document.getElementById("aliasInput").value;
-  const forceText = document.getElementById("forceBindInput").value;
-
-  const bundle = buildBundle(mergedStore.txtRows, mergedStore.clinicalRows, refText, aliasText, forceText);
-  renderBundle(bundle);
-
-  setStatus(
-    `已追加到本地总库并预览。\n` +
-    `本地总库 TXT 行数：${mergedStore.txtRows.length}\n` +
-    `本地总库 Clinical 记录数：${mergedStore.clinicalRows.length}\n` +
-    `输出受试者数：${bundle.stats.subjects}\n` +
-    `Issues：${bundle.issues.length}\n` +
-    `Unmatched log：${bundle.unmatched_log.length}`,
-    "good"
-  );
-}
-function exportFromStore(){
-  const store = loadStore();
-  const refText = document.getElementById("refTableInput").value;
-  const aliasText = document.getElementById("aliasInput").value;
-  const forceText = document.getElementById("forceBindInput").value;
-
-  const bundle = buildBundle(store.txtRows, store.clinicalRows, refText, aliasText, forceText);
-  renderBundle(bundle);
-  exportBundle(bundle);
-
-  setStatus(
-    `已导出当前本地总表 Excel。\n` +
-    `本地总库 TXT 行数：${store.txtRows.length}\n` +
-    `本地总库 Clinical 记录数：${store.clinicalRows.length}\n` +
-    `输出受试者数：${bundle.stats.subjects}\n` +
-    `已导出 3 个 sheet：merged_output / unmatched_log / issues`,
-    "good"
-  );
-}
-
-/* =========================
-   初始化
-========================= */
-document.getElementById("previewCurrentBtn").addEventListener("click", async () => {
+function loadRules(){
+  state.aliasMap = buildAliasMap();
   try{
-    setStatus("正在按当前上传预览，请稍候…", "warn");
-    await buildPreviewFromCurrentOnly();
-  }catch(err){
-    console.error(err);
-    setStatus("预览失败：\n" + (err?.message || err), "bad");
+    state.manualBindings = JSON.parse(document.getElementById('bindingJson').value || '{}');
+  }catch(err){ alert('强制绑定 JSON 格式有误，请检查。'); state.manualBindings = {}; }
+}
+
+// Buttons
+const demoBasic = `timestamp\tid\tname\tage\tdiagnosisYear\teducationYears\tdominantHand\timplants\twheelchair\tmedFirstTime\tmedDuration\tmedFrequency\ttraining1\ttraining2\ttraining3\tfci1_arthritis\tfci2_osteoporosis\tfci3_asthma\tfci4_copd\tfci5_angina\tfci6_heart_failure\tfci7_heart_attack\tfci8_neuro_disease\tfci10_peripheral_vascular\tfci11_diabetes\tfci12_gastro\tfci16_hearing\tfci17_disc_disease\tfci18_height\tfci18_weight\tfci18_obesity\tfciTotal\thads1\thads2\thads3\thads4\thads5\thads6\thads7\thads8\thads9\thads10\thads11\thads12\thads13\thads14\thadsAnxiety\thadsDepression\tpdq1\tpdq2\tpdq3\tpdq4\tpdq5\tpdq6\tpdq7\tpdq8\tpdq9\tpdq10\tpdq11\tpdq12\tpdq13\tpdq14\tpdq15\tpdq16\tpdq17\tpdq18\tpdq19\tpdq20\tpdq21\tpdq22\tpdq23\tpdq24\tpdq25\tpdq26\tpdq27\tpdq28\tpdq29\tpdq30\tpdq31\tpdq32\tpdq33\tpdq34\tpdq35\tpdq36\tpdq37\tpdq38\tpdq39\tpdqTotal\tfogq1\tfogq2\tfogq3\tfogq4\tfogq5\tfogq6\tfogqTotal
+2026-01-31T08:00:00.000Z\trandom-1\tlam chi keung\t70\t6\t6\t右\t否\t不使用\t6:00\t2\t5\t星期二上午\t星期四上午\t星期六下午\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t160\t50\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t5\t11\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t61\t1\t2\t3\t4\t2\t3\t15
+2026-03-15T09:00:00.000Z\trandom-2\t林志强\t70\t6\t6\t右\t否\t不使用\t6:00\t2\t5\t星期二上午\t星期四上午\t星期六下午\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t160\t50\t0\t1\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t8\t12\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t68\t1\t2\t3\t4\t2\t2\t14`;
+const demoJson = {
+  testType: "pre",
+  id: "T036",
+  name: "林志强",
+  testDate: "2026-01-31",
+  tester: "Cassia",
+  legLength: "0.95",
+  moca: "30",
+  parq1: "否", parq2: "否", parq3: "否", parq4: "否", parq5: "是", parq6: "否", parq7: "否",
+  medicationDetails: "carbidopa 25/100mg 1.5 pill/time for 3 times per day",
+  totalLEDD: "",
+  updrs3a: "是", updrs3b_on: "來電", updrs3c1: "120",
+  updrs3_1: "2", updrs3_2: "1", updrs3_3a: "1", updrs3_3b: "0", updrs3_3c: "0", updrs3_3d: "0", updrs3_3e: "0", updrs3_4a: "1", updrs3_4b: "1", updrs3_5a: "1", updrs3_5b: "1", updrs3_6a: "0", updrs3_6b: "0", updrs3_7a: "2", updrs3_7b: "3", updrs3_8a: "1", updrs3_8b: "2", updrs3_9: "0", updrs3_10: "3", updrs3_11: "4", updrs3_12: "2", updrs3_13: "2", updrs3_14: "2", updrs3_15a: "1", updrs3_15b: "1", updrs3_16a: "0", updrs3_16b: "0", updrs3_17a: "0", updrs3_17b: "0", updrs3_17c: "0", updrs3_17d: "0", updrs3_17e: "0", updrs3_18: "0",
+  hyStage: "3", tug_avg: "", avgSpeed: "", avgStepLength: "", avgCadence: "", localSaveTime: "2026-01-31T07:35:36.900Z"
+};
+
+document.getElementById('loadDemoBasicBtn').onclick = ()=> document.getElementById('basicTxt').value = demoBasic;
+document.getElementById('clearBasicBtn').onclick = ()=> document.getElementById('basicTxt').value = '';
+document.getElementById('loadDemoJsonBtn').onclick = ()=> {
+  const blob = new Blob([JSON.stringify(demoJson,null,2)], {type:'application/json'});
+  const f = new File([blob], 'demo_pre_T036.json', {type:'application/json'});
+  document.getElementById('fileInput')._demoFiles = [f];
+  alert('已载入 demo JSON（点击“读取上传文件”即可导入）');
+};
+document.getElementById('parseBasicBtn').onclick = ()=> {
+  loadRules();
+  const txt = document.getElementById('basicTxt').value;
+  const rows = parseDelimited(txt);
+  if(!rows.length){ alert('没有解析到 basic TXT 行，请检查是否包含表头并用 tab 分隔。'); return; }
+  resetDerived();
+  ingestBasicRows(rows);
+  buildMergedRows();
+};
+document.getElementById('processFilesBtn').onclick = async ()=> {
+  loadRules();
+  resetDerived();
+  const txt = document.getElementById('basicTxt').value.trim();
+  if(txt){
+    const rows = parseDelimited(txt);
+    if(rows.length) ingestBasicRows(rows);
   }
-});
+  const input = document.getElementById('fileInput');
+  const list = [...(input.files || []), ...((input._demoFiles)||[])];
+  if(list.length) await readUploadedFiles(list);
+  buildMergedRows();
+  input._demoFiles = [];
+};
+document.getElementById('applyRulesBtn').onclick = async ()=> {
+  // 重新以现有输入全量跑一遍
+  document.getElementById('processFilesBtn').click();
+};
+document.getElementById('mergeBtn').onclick = ()=> {
+  loadRules();
+  buildMergedRows();
+};
+document.getElementById('exportBtn').onclick = ()=> {
+  if(!state.mergedRows.length) buildMergedRows();
+  exportExcel();
+};
+document.getElementById('downloadJsonBtn').onclick = ()=> downloadJson();
 
-document.getElementById("appendStoreBtn").addEventListener("click", async () => {
-  try{
-    setStatus("正在追加到本地总库并预览，请稍候…", "warn");
-    await appendCurrentToStoreAndPreview();
-  }catch(err){
-    console.error(err);
-    setStatus("追加失败：\n" + (err?.message || err), "bad");
-  }
-});
-
-document.getElementById("exportStoreBtn").addEventListener("click", () => {
-  try{
-    setStatus("正在导出当前本地总表，请稍候…", "warn");
-    exportFromStore();
-  }catch(err){
-    console.error(err);
-    setStatus("导出失败：\n" + (err?.message || err), "bad");
-  }
-});
-
-document.getElementById("downloadTemplateBtn").addEventListener("click", () => {
-  try{
-    downloadTemplate();
-    setStatus("已下载模板 assessment_master_template.xlsx", "good");
-  }catch(err){
-    console.error(err);
-    setStatus("下载模板失败：\n" + (err?.message || err), "bad");
-  }
-});
-
-document.getElementById("clearStoreBtn").addEventListener("click", () => {
-  if(!confirm("确定要清空本地总库吗？此操作不可撤销。")) return;
-  clearStore();
-  updateStoreSummary();
-  setStatus("本地总库已清空。", "good");
-});
-
-updateStoreSummary();
+// 首次渲染
+state.aliasMap = buildAliasMap();
+renderStats();
+renderPreview();
 </script>
 </body>
 </html>
