@@ -1,9 +1,13 @@
-<!DOCTYPE html><!DOCTYPE html">
+<!DOCTYPE html>
+<html lang="zh-HK">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MRI Merge Export Tool</title>
+
+  <!-- 这个一定要保留 -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <style>
     :root{
       --bg:#f7f8fb;
@@ -12,6 +16,10 @@
       --muted:#5f6b7a;
       --line:#e5e7eb;
       --primary:#2563eb;
+      --ok:#0f766e;
+      --warn:#b45309;
+      --bad:#b91c1c;
+      --soft:#f8fafc;
     }
     *{box-sizing:border-box}
     body{
@@ -20,44 +28,116 @@
       background:var(--bg);
       color:var(--text);
     }
-    .wrap{max-width:1460px;margin:0 auto;padding:18px}
+    .wrap{max-width:1500px;margin:0 auto;padding:18px}
     .card{
-      background:#fff;border:1px solid var(--line);border-radius:18px;
-      box-shadow:0 6px 18px rgba(0,0,0,.04);padding:16px;margin-bottom:16px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,.04);
+      padding:16px;
+      margin-bottom:16px;
     }
-    h1,h2{margin:0 0 10px}
+    h1,h2,h3{margin:0 0 10px}
     h1{font-size:28px}
     h2{font-size:20px}
+    h3{font-size:15px;color:var(--muted)}
     .muted{color:var(--muted)}
     .small{font-size:12px}
-    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px}
     .cols-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    textarea,input[type="file"]{
-      width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
-      font-size:14px;background:#fff;
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+    textarea,input[type="file"],input[type="text"]{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      font-size:14px;
+      background:#fff;
     }
-    textarea{min-height:120px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    textarea{
+      min-height:120px;
+      resize:vertical;
+      font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    }
     button{
-      border:none;background:var(--primary);color:#fff;padding:10px 14px;
-      border-radius:12px;font-weight:700;cursor:pointer;
+      border:none;
+      background:var(--primary);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
     }
     button.secondary{background:#eef2ff;color:#1e40af}
     button.ghost{background:#f3f4f6;color:#111827}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
     .pill{
-      display:inline-block;padding:4px 8px;border-radius:999px;
-      background:#eef2ff;color:#1e40af;font-size:12px;margin-right:6px;margin-bottom:6px;
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#1e40af;
+      font-size:12px;
+      margin-right:6px;
+      margin-bottom:6px;
     }
     .note{
-      padding:10px 12px;border-radius:12px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e
+      padding:10px 12px;
+      border-radius:12px;
+      background:#fffbeb;
+      border:1px solid #fcd34d;
+      color:#92400e;
     }
+    .status{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#f8fafc;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .ok{color:var(--ok)}
+    .warn{color:var(--warn)}
+    .bad{color:var(--bad)}
     .stat{display:flex;gap:10px;flex-wrap:wrap}
-    .stat .box{padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}
-    .sticky{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+    .stat .box{
+      padding:12px 14px;
+      border-radius:14px;
+      background:var(--soft);
+      border:1px solid var(--line);
+      min-width:110px;
+    }
+    .sticky{
+      max-height:420px;
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:12px;
+    }
     table{width:100%;border-collapse:collapse;font-size:13px}
-    th,td{border:1px solid var(--line);padding:6px 8px;vertical-align:top}
+    th,td{
+      border:1px solid var(--line);
+      padding:6px 8px;
+      vertical-align:top;
+    }
     th{background:#f8fafc}
     .mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    .log{
+      max-height:320px;
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#0b1020;
+      color:#d1d5db;
+      padding:10px 12px;
+      font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+      font-size:12px;
+      white-space:pre-wrap;
+      line-height:1.45;
+    }
+    .sectionTitle{
+      font-size:14px;
+      font-weight:700;
+      margin-bottom:8px;
+    }
     @media (max-width:1100px){
       .grid,.cols-2{grid-template-columns:1fr}
     }
@@ -68,25 +148,25 @@
   <div class="card">
     <h1>MRI 总表合并与 Excel 导出</h1>
     <div class="muted">
-      <span class="pill">basic TXT</span>
-      <span class="pill">JSON / CSV / XLSX</span>
-      <span class="pill">clinical 表单型 CSV/Excel 可读</span>
+      <span class="pill">basic TXT（多行 tab 分隔）</span>
+      <span class="pill">clinical JSON / CSV / XLSX</span>
+      <span class="pill">clinical 两列表单自动识别</span>
       <span class="pill">MRI master 强制归一</span>
-      <span class="pill">姓名候选建议</span>
-      <span class="pill">pre/post 强制绑定</span>
+      <span class="pill">导入日志窗口</span>
+      <span class="pill">Excel 导出</span>
     </div>
   </div>
 
   <div class="grid">
     <div>
       <div class="card">
-        <h2>1) basic TXT（tab 分隔）</h2>
+        <h2>1) basic TXT（多行 tab 分隔）</h2>
         <div class="muted small">
-          会忽略 basic TXT 的随机 id；同一人两次记录会按时间戳 + MRI 日期自动归为 pre / post。
+          这里贴的是 <b>basic TXT</b>，通常包含很多行。会忽略 basic 里的随机 id，并按 MRI 日期自动归 pre / post。
         </div>
-        <textarea id="basicTxt" placeholder="把 basic TXT 整段贴到这里（含表头）"></textarea>
+        <textarea id="basicTxt" placeholder="把 basic TXT 整段贴到这里（包含表头，多行）"></textarea>
         <div class="toolbar" style="margin-top:10px">
-          <button id="parseBasicBtn">解析 basic TXT</button>
+          <button id="parseBasicBtn">仅解析 basic TXT</button>
           <button class="ghost" id="clearBasicBtn">清空</button>
         </div>
       </div>
@@ -96,7 +176,7 @@
         <div class="muted small">
           支持：
           <span class="mono">.json / .csv / .xlsx / .xls / .txt</span><br/>
-          clinical 如果是“編號 / 姓名 / 測試日期”这种两列表单，也会自动识别成一条记录。
+          clinical 的 JSON / CSV / Excel 很多是两列表单，这版会自动识别。
         </div>
         <input type="file" id="fileInput" multiple accept=".json,.xlsx,.xls,.csv,.txt" />
         <div class="toolbar" style="margin-top:10px">
@@ -108,7 +188,7 @@
         <h2>3) 手工规则（可选）</h2>
         <div class="cols-2">
           <div>
-            <div style="font-weight:700;margin-bottom:8px">强制绑定 pre / post 日期</div>
+            <div class="sectionTitle">强制绑定 pre / post 日期</div>
             <textarea id="bindingJson" placeholder='例如：
 {
   "T036": {"pre":"2026-01-31","post":"2026-03-15"},
@@ -116,7 +196,7 @@
 }'></textarea>
           </div>
           <div>
-            <div style="font-weight:700;margin-bottom:8px">额外别名（可选）</div>
+            <div class="sectionTitle">额外别名（可选）</div>
             <textarea id="extraAlias" placeholder='格式：别名 = MRI标准名
 例如：
 张先生 = 張學強
@@ -132,13 +212,23 @@ lam chi keung = 林志強'></textarea>
     <div>
       <div class="card">
         <h2>状态</h2>
-        <div class="stat" id="stats"></div>
+        <div id="statusBox" class="status"></div>
+        <div class="stat" id="stats" style="margin-top:12px"></div>
         <div class="note" style="margin-top:10px">
-          规则：<br/>
-          1. 所有人以 MRI master 的 <span class="mono">Parti / Name / Date / Group</span> 为准；<br/>
-          2. clinical 优先使用 <span class="mono">id + name + date</span> 匹配；<br/>
-          3. clinical CSV/Excel 若为两列表单，会整份合成一条记录，而不是逐行拆散；<br/>
-          4. 导出 Excel 第一行会自动做成：<span class="mono">BASIC INFO / PRE Assessment / Post Assessment</span>。
+          说明：<br/>
+          1. <b>basic TXT</b> 是多行 tab 数据；<br/>
+          2. 很多 <b>clinical JSON / CSV / Excel</b> 是“两列表单”，会整份合成 1 条 clinical 记录；<br/>
+          3. 所有人最终以 MRI master 的 <span class="mono">Parti / Name / Date / Group</span> 为准；<br/>
+          4. 导出 Excel 第一行自动做分区表头：<span class="mono">BASIC INFO / PRE Assessment / Post Assessment</span>。
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>导入日志窗口</h2>
+        <div class="muted small">会显示：识别成 basic / clinical_form / clinical_table，匹配到谁，为什么忽略，哪里报错。</div>
+        <div id="logBox" class="log" style="margin-top:10px"></div>
+        <div class="toolbar" style="margin-top:10px">
+          <button class="ghost" id="clearLogBtn">清空日志</button>
         </div>
       </div>
 
@@ -172,16 +262,24 @@ lam chi keung = 林志強'></textarea>
 
   <div class="card">
     <h2>总表预览</h2>
-    <div class="sticky">
-      <table id="previewTable"></table>
-    </div>
+    <div class="sticky"><table id="previewTable"></table></div>
   </div>
 </div>
 
 <script>
-/* =========================
-   MRI MASTER
-========================= */
+/* =========================================================
+ * 0) Global error capture
+ * ========================================================= */
+window.addEventListener("error", function (e) {
+  try {
+    pushLog("JS_ERROR", (e.message || "Unknown error") + " @ " + (e.filename || "") + ":" + (e.lineno || ""));
+    renderStatus();
+  } catch (_) {}
+});
+
+/* =========================================================
+ * 1) MRI MASTER
+ * ========================================================= */
 const MRI_MASTER_RAW = [
   ["s025_pre","Combined","T025_1","張學強","10/25/2025"],
   ["s025_post","Combined","T025_2","張學強","12/6/2025"],
@@ -213,7 +311,7 @@ const MRI_MASTER_RAW = [
   ["s040_post","Combined","T040_2","何宏龙","4/8/2026"],
   ["s041_pre","Combined","T041_1","梁翠芬","4/10/2026"],
   ["s042_pre","Combined","T042_1","陈桂珍","4/15/2026"],
-  ["s043_pre","Combined","T043_1","吴秀碧","4/16/2026"],
+  ["s043_pre","Combined","T043_1","吴秀碧","4/16/2026"]
 ];
 
 const FINAL_COLUMNS = [
@@ -238,13 +336,14 @@ const GROUP_SORT = {
   "quit（图像质量太差）":4
 };
 
-/* =========================
-   Alias & Maps
-========================= */
+/* =========================================================
+ * 2) Alias / Simplified-Traditional
+ * ========================================================= */
 const EXTRA_ALIAS_PRESET = {
   "张先生":"張學強",
   "张学强":"張學強",
   "zhang xue qiang":"張學強",
+
   "lam chi keung":"林志強",
   "lam chi keung simon":"林志強",
   "lin zhi qiang":"林志強",
@@ -279,21 +378,17 @@ const SIMP_TRAD_MAP = {
   "苑":"苑","兴":"興","勉":"勉","桂":"桂","学强":"學強","启":"啟","萧":"蕭"
 };
 
+/* =========================================================
+ * 3) Clinical form label map (two-column clinical files)
+ * ========================================================= */
 const FORM_LABEL_MAP = {
-  "編號":"id",
-  "编号":"id",
-  "姓名":"name",
-  "Name":"name",
-  "測試日期":"testDate",
-  "测试日期":"testDate",
-  "測試員":"tester",
-  "测试员":"tester",
-  "腿長(米)":"legLength",
-  "腿长(米)":"legLength",
-  "MOCA分數":"moca",
-  "MOCA分数":"moca",
-  "測試類型":"testType",
-  "测试类型":"testType",
+  "編號":"id","编号":"id","ID":"id","id":"id",
+  "姓名":"name","Name":"name","name":"name",
+  "測試日期":"testDate","测试日期":"testDate","Date":"testDate",
+  "測試員":"tester","测试员":"tester","Tester":"tester",
+  "腿長(米)":"legLength","腿长(米)":"legLength",
+  "MOCA分數":"moca","MOCA分数":"moca",
+  "測試類型":"testType","测试类型":"testType","Type":"testType",
 
   "醫生曾否說過你的心臟有問題":"parq1",
   "你進行體能活動時會否感到胸口痛":"parq2",
@@ -305,24 +400,18 @@ const FORM_LABEL_MAP = {
   "同意確認":"parqAgreement",
   "同意":"parqAgreement",
 
-  "用藥詳情":"medicationDetails",
-  "用药详情":"medicationDetails",
-  "總LEDD量":"totalLEDD",
-  "总LEDD量":"totalLEDD",
+  "用藥詳情":"medicationDetails","用药详情":"medicationDetails",
+  "總LEDD量":"totalLEDD","总LEDD量":"totalLEDD",
 
   "是否正接受巴金森病藥物治療":"updrs3a",
   "是否正接受巴金森病药物治疗":"updrs3a",
-  "來電狀態":"updrs3b_on",
-  "来电状态":"updrs3b_on",
-  "停電狀態":"updrs3b_off",
-  "停电状态":"updrs3b_off",
-  "是否有服用左多巴藥物":"updrs3c",
-  "是否有服用左多巴药物":"updrs3c",
+  "來電狀態":"updrs3b_on","来电状态":"updrs3b_on",
+  "停電狀態":"updrs3b_off","停电状态":"updrs3b_off",
+  "是否有服用左多巴藥物":"updrs3c","是否有服用左多巴药物":"updrs3c",
   "距離最後一次服用左多巴藥物(分鐘)":"updrs3c1",
   "距离最后一次服用左多巴药物(分钟)":"updrs3c1",
 
-  "言語":"updrs3_1",
-  "言语":"updrs3_1",
+  "言語":"updrs3_1","言语":"updrs3_1",
   "面部表情":"updrs3_2",
   "僵硬(脖子)":"updrs3_3a",
   "僵硬(右上肢)":"updrs3_3b",
@@ -340,16 +429,11 @@ const FORM_LABEL_MAP = {
   "兩腳靈敏度測試(右)":"updrs3_8a",
   "兩腳靈敏度測試(左)":"updrs3_8b",
   "從椅子上站起來":"updrs3_9",
-  "步態":"updrs3_10",
-  "步态":"updrs3_10",
-  "步態凍結的評估":"updrs3_11",
-  "步态冻结的评估":"updrs3_11",
-  "姿勢平穩度":"updrs3_12",
-  "姿势平稳度":"updrs3_12",
-  "姿勢":"updrs3_13",
-  "姿势":"updrs3_13",
-  "全身自發性的動作評估":"updrs3_14",
-  "全身自发性的动作评估":"updrs3_14",
+  "步態":"updrs3_10","步态":"updrs3_10",
+  "步態凍結的評估":"updrs3_11","步态冻结的评估":"updrs3_11",
+  "姿勢平穩度":"updrs3_12","姿势平稳度":"updrs3_12",
+  "姿勢":"updrs3_13","姿势":"updrs3_13",
+  "全身自發性的動作評估":"updrs3_14","全身自发性的动作评估":"updrs3_14",
   "雙手姿態型顫抖(右)":"updrs3_15a",
   "雙手姿態型顫抖(左)":"updrs3_15b",
   "雙手動作型顫抖(右)":"updrs3_16a",
@@ -360,21 +444,17 @@ const FORM_LABEL_MAP = {
   "靜止型顫抖幅度(左下肢)":"updrs3_17d",
   "靜止型顫抖幅度(嘴唇/下巴)":"updrs3_17e",
   "靜止型顫抖持續性":"updrs3_18",
-  "異動症是否出現":"updrsA",
-  "异动症是否出现":"updrsA",
-  "異動症是否干擾檢查":"updrsB",
-  "异动症是否干扰检查":"updrsB",
+  "異動症是否出現":"updrsA","异动症是否出现":"updrsA",
+  "異動症是否干擾檢查":"updrsB","异动症是否干扰检查":"updrsB",
 
   "H&Y分期":"hyStage",
 
   "第一次TUG(秒)":"tug1",
   "第二次TUG(秒)":"tug2",
   "第三次TUG(秒)":"tug3",
-  "TUG平均時間(秒)":"tug_avg",
-  "TUG平均时间(秒)":"tug_avg",
+  "TUG平均時間(秒)":"tug_avg","TUG平均时间(秒)":"tug_avg",
 
-  "步行距離(米)":"walkDistance",
-  "步行距离(米)":"walkDistance",
+  "步行距離(米)":"walkDistance","步行距离(米)":"walkDistance",
   "第一次時間(秒)":"walk1_time",
   "第一次步數":"walk1_steps",
   "第二次時間(秒)":"walk2_time",
@@ -383,19 +463,19 @@ const FORM_LABEL_MAP = {
   "第三次步數":"walk3_steps",
   "平均速度(米/秒)":"avgSpeed",
   "平均步距(米)":"avgStepLength",
-  "平均步頻(步/分鐘)":"avgCadence",
-  "平均步频(步/分钟)":"avgCadence"
+  "平均步頻(步/分鐘)":"avgCadence","平均步频(步/分钟)":"avgCadence"
 };
 
-/* =========================
-   State
-========================= */
+/* =========================================================
+ * 4) State
+ * ========================================================= */
 const state = {
   basicRows: [],
   clinicalRows: [],
   mergedRows: [],
   unrecognized: [],
   rawDebug: [],
+  logs: [],
   manualBindings: {},
   aliasMap: {},
   master: buildMaster()
@@ -404,6 +484,7 @@ const state = {
 function buildMaster(){
   const byTid = {};
   const order = [];
+
   MRI_MASTER_RAW.forEach((row, idx)=>{
     const [mri, group, parti, name, date] = row;
     const tid = canonTid(parti);
@@ -411,26 +492,60 @@ function buildMaster(){
 
     if(!byTid[tid]){
       byTid[tid] = {
-        tid, name, group, order: idx,
-        preDate:"", postDate:"", partiPre:"", partiPost:"", rows:[]
+        tid,
+        name,
+        group,
+        order: idx,
+        preDate: "",
+        postDate: "",
+        rows: []
       };
       order.push(tid);
     }
+
     byTid[tid].rows.push({mri, group, parti, name, date, phase});
-    if(phase === "pre"){ byTid[tid].preDate = normalizeDate(date); byTid[tid].partiPre = parti; }
-    if(phase === "post"){ byTid[tid].postDate = normalizeDate(date); byTid[tid].partiPost = parti; }
+    if(phase === "pre") byTid[tid].preDate = normalizeDate(date);
+    if(phase === "post") byTid[tid].postDate = normalizeDate(date);
   });
+
   return {byTid, order};
 }
 
-/* =========================
-   Utils
-========================= */
+/* =========================================================
+ * 5) Utils
+ * ========================================================= */
+function pushLog(level, msg){
+  const stamp = new Date().toLocaleTimeString();
+  state.logs.push(`[${stamp}] [${level}] ${msg}`);
+  renderLogs();
+}
+
+function renderLogs(){
+  const box = document.getElementById("logBox");
+  if(!box) return;
+  box.textContent = state.logs.join("\n") || "（目前还没有日志）";
+  box.scrollTop = box.scrollHeight;
+}
+
+function renderStatus(){
+  const box = document.getElementById("statusBox");
+  if(!box) return;
+  const xlsxLoaded = typeof XLSX !== "undefined";
+  const errCount = state.logs.filter(x=>x.includes("[JS_ERROR]")).length;
+  box.innerHTML = `
+    <div><b>页面脚本：</b> ${errCount ? '<span class="bad">有错误</span>' : '<span class="ok">已运行</span>'}</div>
+    <div><b>XLSX 库：</b> ${xlsxLoaded ? '<span class="ok">已加载</span>' : '<span class="bad">未加载</span>'}</div>
+    <div><b>basic 行数：</b> ${state.basicRows.length}</div>
+    <div><b>clinical 行数：</b> ${state.clinicalRows.length}</div>
+    <div><b>总表行数：</b> ${state.mergedRows.length}</div>
+    <div><b>未识别：</b> ${state.unrecognized.length}</div>
+  `;
+}
+
 function canonTid(v){
   if(v == null) return "";
-  let s = String(v).trim().toUpperCase();
+  const s = String(v).trim().toUpperCase();
 
-  // T042 / S042 / SO42 / T042_1 / s042_pre 都可抓到
   let m = s.match(/(?:^|[^A-Z0-9])(T|S|SO)\s*0*(\d{1,3})(?:[^0-9]|$)/i);
   if(m) return `T${m[2].padStart(3,"0")}`;
 
@@ -452,9 +567,9 @@ function convertSimpTradLite(s){
 }
 
 function normalizeName(s){
-  let x = convertSimpTradLite(String(s||"")).trim().toLowerCase();
-  x = x.replace(/[（）()\\[\\]{}，,.;:'"`~!@#$%^&*+=|\\\\/?<>_-]/g, " ");
-  x = x.replace(/\\s+/g, " ").trim();
+  let x = convertSimpTradLite(String(s || "")).trim().toLowerCase();
+  x = x.replace(/[（）()\[\]{}，,.;:'"`~!@#$%^&*+=|\\/?<>_-]/g, " ");
+  x = x.replace(/\s+/g, " ").trim();
   return x;
 }
 
@@ -462,53 +577,59 @@ function normalizeDate(d){
   if(!d) return "";
   if(d instanceof Date && !isNaN(d)) return fmtDate(d);
 
-  const s0 = String(d).trim();
-  if(!s0) return "";
-  if(/^\\d{4}-\\d{2}-\\d{2}/.test(s0)){
-    const z = new Date(s0);
+  const s = String(d).trim();
+  if(!s) return "";
+
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){
+    const z = new Date(s);
     if(!isNaN(z)) return fmtDate(z);
-    const [y,m,da] = s0.slice(0,10).split("-").map(Number);
-    return `${m}/${da}/${y}`;
+    const parts = s.slice(0,10).split("-");
+    return `${Number(parts[1])}/${Number(parts[2])}/${parts[0]}`;
   }
-  const z = new Date(s0);
+
+  const z = new Date(s);
   if(!isNaN(z)) return fmtDate(z);
 
-  const m = s0.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if(m) return `${Number(m[1])}/${Number(m[2])}/${m[3]}`;
-  return s0;
+
+  return s;
 }
 
-function fmtDate(d){ return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`; }
+function fmtDate(d){
+  return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
+}
 
 function daysDiff(a,b){
   if(!a || !b) return 999999;
   const da = new Date(a), db = new Date(b);
   if(isNaN(da) || isNaN(db)) return 999999;
-  return Math.abs((da-db)/(1000*3600*24));
+  return Math.abs((da - db) / (1000*3600*24));
+}
+
+function escapeHtml(s){
+  return String(s ?? "").replace(/[&<>"']/g, function(m){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];
+  });
 }
 
 function isBlankRow(obj){
   return !Object.values(obj).some(v=>String(v ?? "").trim() !== "");
 }
 
-function escapeHtml(s){
-  return String(s ?? "").replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
-  }[m]));
-}
-
 function levenshtein(a,b){
-  a = normalizeName(a); b = normalizeName(b);
-  const m=a.length,n=b.length;
+  a = normalizeName(a);
+  b = normalizeName(b);
+  const m = a.length, n = b.length;
   const dp = Array.from({length:m+1},()=>Array(n+1).fill(0));
   for(let i=0;i<=m;i++) dp[i][0]=i;
   for(let j=0;j<=n;j++) dp[0][j]=j;
   for(let i=1;i<=m;i++){
     for(let j=1;j<=n;j++){
       dp[i][j] = Math.min(
-        dp[i-1][j]+1,
-        dp[i][j-1]+1,
-        dp[i-1][j-1] + (a[i-1]===b[j-1] ? 0 : 1)
+        dp[i-1][j] + 1,
+        dp[i][j-1] + 1,
+        dp[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1)
       );
     }
   }
@@ -516,15 +637,15 @@ function levenshtein(a,b){
 }
 
 function onOffText(v){
-  const s = String(v||"").trim().toLowerCase();
+  const s = String(v || "").trim().toLowerCase();
   if(!s) return "";
   if(["on","是","開","开","來電","来电"].some(k=>s.includes(k.toLowerCase()))) return "on";
   if(["off","否","關","关","停電","停电"].some(k=>s.includes(k.toLowerCase()))) return "off";
-  return String(v||"");
+  return String(v || "");
 }
 
 function prettyProgress(group, hasPre, hasPost){
-  const g = String(group||"");
+  const g = String(group || "");
   if(g.startsWith("quit")) return "dropped";
   if(hasPre && hasPost) return "completed";
   if(hasPre || hasPost) return "pending";
@@ -532,13 +653,16 @@ function prettyProgress(group, hasPre, hasPost){
 }
 
 function groupBucket(group){
-  const g = String(group||"");
+  const g = String(group || "");
   if(g.startsWith("Combined")) return "Combined";
   if(g.startsWith("Control")) return "Control";
   return "Quit";
 }
 
-function val(wrapper, key){ return wrapper?.raw?.[key] ?? ""; }
+function val(wrapper, key){
+  return wrapper?.raw?.[key] ?? "";
+}
+
 function findAnyName(tid){
   const m = state.master.byTid[tid];
   if(m) return m.name;
@@ -546,32 +670,41 @@ function findAnyName(tid){
   return x?.canonicalName || "";
 }
 
-/* =========================
-   Alias / Resolve
-========================= */
+/* =========================================================
+ * 6) Alias / Resolve
+ * ========================================================= */
 function buildAliasMap(){
   const map = {};
-  Object.entries(EXTRA_ALIAS_PRESET).forEach(([k,v])=>{ map[normalizeName(k)] = v; });
+
+  Object.entries(EXTRA_ALIAS_PRESET).forEach(([k,v])=>{
+    map[normalizeName(k)] = v;
+  });
 
   Object.values(state.master.byTid).forEach(m=>{
     map[normalizeName(m.name)] = m.name;
     map[normalizeName(m.tid)] = m.name;
   });
 
-  const extra = document.getElementById("extraAlias").value.split(/\\r?\\n/);
-  extra.forEach(line=>{
-    const m = line.split("=");
-    if(m.length >= 2){
-      map[normalizeName(m[0])] = m.slice(1).join("=").trim();
+  const extraText = document.getElementById("extraAlias").value || "";
+  extraText.split(/\r?\n/).forEach(line=>{
+    const parts = line.split("=");
+    if(parts.length >= 2){
+      map[normalizeName(parts[0])] = parts.slice(1).join("=").trim();
     }
   });
 
   return map;
 }
 
-function resolveToMaster({name, id, date, source}){
+function resolveToMaster(info){
+  const name = info.name || "";
+  const id = info.id || "";
+  const date = info.date || "";
+  const source = info.source || "";
+
   const tid = canonTid(id);
   if(tid && state.master.byTid[tid]){
+    pushLog("MATCH", `${source} -> ${id || "(no id)"} / ${name || "(no name)"} => ${tid} by id`);
     return {status:"matched", tid, name:state.master.byTid[tid].name, by:"id"};
   }
 
@@ -579,28 +712,32 @@ function resolveToMaster({name, id, date, source}){
   const aliasVal = state.aliasMap[nn];
 
   if(aliasVal === "__IGNORE__"){
+    pushLog("IGNORE", `${source} -> ${name} ignored by alias rule`);
     return {status:"ignore", reason:"alias_ignore"};
   }
 
   if(aliasVal){
-    const tid2 = Object.values(state.master.byTid)
-      .find(x=>normalizeName(x.name)===normalizeName(aliasVal))?.tid;
+    const tid2 = Object.values(state.master.byTid).find(x=>normalizeName(x.name) === normalizeName(aliasVal))?.tid;
     if(tid2){
+      pushLog("MATCH", `${source} -> ${name} => ${tid2} by alias`);
       return {status:"matched", tid:tid2, name:state.master.byTid[tid2].name, by:"alias"};
     }
   }
 
-  const exact = Object.values(state.master.byTid)
-    .find(x=>normalizeName(x.name) === nn);
+  const exact = Object.values(state.master.byTid).find(x=>normalizeName(x.name) === nn);
   if(exact){
+    pushLog("MATCH", `${source} -> ${name} => ${exact.tid} by exact name`);
     return {status:"matched", tid:exact.tid, name:exact.name, by:"name_exact"};
   }
 
   const candidates = Object.values(state.master.byTid).map(x=>{
     const nameDist = levenshtein(nn, normalizeName(x.name));
-    const dateDist = Math.min(daysDiff(normalizeDate(date), x.preDate || ""), daysDiff(normalizeDate(date), x.postDate || ""));
+    const dateDist = Math.min(
+      daysDiff(normalizeDate(date), x.preDate || ""),
+      daysDiff(normalizeDate(date), x.postDate || "")
+    );
     const score = nameDist * 10 + Math.min(dateDist, 365);
-    return {tid:x.tid,name:x.name,score,nameDist,dateDist};
+    return {tid:x.tid, name:x.name, score, nameDist, dateDist};
   }).sort((a,b)=>a.score-b.score).slice(0,5);
 
   state.unrecognized.push({
@@ -610,12 +747,13 @@ function resolveToMaster({name, id, date, source}){
     reason:"name_not_resolved"
   });
 
+  pushLog("UNMATCHED", `${source} -> ${name || "(no name)"} / ${id || "(no id)"} not resolved`);
   return {status:"unmatched", candidates};
 }
 
 function bestPhaseByDate(tid, date, explicitType){
-  const forced = state.manualBindings[tid];
   const d = normalizeDate(date);
+  const forced = state.manualBindings[tid];
 
   if(explicitType === "pre" || explicitType === "post") return explicitType;
 
@@ -655,13 +793,14 @@ function calcUPDRS(rec){
   return total || "";
 }
 
-/* =========================
-   basic TXT
-========================= */
+/* =========================================================
+ * 7) Basic TXT parsing (many lines)
+ * ========================================================= */
 function parseDelimited(text){
-  const lines = String(text || "").replace(/^\\uFEFF/, "").split(/\\r?\\n/).filter(x=>x.trim() !== "");
+  const lines = String(text || "").replace(/^\uFEFF/, "").split(/\r?\n/).filter(x=>x.trim() !== "");
   if(!lines.length) return [];
-  const sep = lines[0].includes("\\t") ? "\\t" : (lines[0].includes(",") ? "," : null);
+
+  const sep = lines[0].includes("\t") ? "\t" : (lines[0].includes(",") ? "," : null);
   if(!sep) return [];
 
   const headers = lines[0].split(sep).map(h=>h.trim());
@@ -670,17 +809,24 @@ function parseDelimited(text){
   for(let i=1;i<lines.length;i++){
     const vals = lines[i].split(sep);
     const obj = {};
-    headers.forEach((h,idx)=> obj[h] = (vals[idx] ?? "").trim());
+    headers.forEach((h,idx)=>{
+      obj[h] = (vals[idx] ?? "").trim();
+    });
     if(!isBlankRow(obj)) rows.push(obj);
   }
+
   return rows;
 }
 
-function ingestBasicRows(rows){
-  rows.forEach(r=>{
+function ingestBasicRows(rows, sourceName){
+  rows.forEach((r, idx)=>{
     const resolved = resolveToMaster({
-      name:r.name, id:r.id, date:r.timestamp, source:"basic_txt"
+      name:r.name,
+      id:r.id,
+      date:r.timestamp,
+      source: sourceName || "basic_txt"
     });
+
     if(resolved.status === "ignore") return;
 
     const tid = resolved.status === "matched"
@@ -690,7 +836,7 @@ function ingestBasicRows(rows){
     const phase = bestPhaseByDate(tid, r.timestamp, "");
 
     state.basicRows.push({
-      source:"basic_txt",
+      source: sourceName || "basic_txt",
       tid,
       canonicalName: resolved.status === "matched" ? resolved.name : (r.name || tid),
       phase,
@@ -700,70 +846,88 @@ function ingestBasicRows(rows){
     });
 
     state.rawDebug.push({
-      type:"basic", tid, phase, name:r.name, timestamp:r.timestamp, raw:r
+      type:"basic",
+      source: sourceName || "basic_txt",
+      tid,
+      phase,
+      name:r.name,
+      timestamp:r.timestamp,
+      raw:r
     });
+
+    pushLog("BASIC", `${sourceName || "basic_txt"} row ${idx+1}: ${r.name || "(no name)"} -> ${tid} / ${phase || "(no phase)"}`);
   });
 }
 
-/* =========================
-   Clinical form/table parsing
-========================= */
+/* =========================================================
+ * 8) Clinical parsing
+ *    - JSON object / array
+ *    - CSV / XLSX: two-column form OR normal table
+ * ========================================================= */
 function normalizeCell(v){
   return String(v ?? "").replace(/^"+|"+$/g, "").trim();
 }
 
 function detectClinicalFormAoA(aoa){
-  if(!Array.isArray(aoa) || aoa.length < 5) return false;
-
-  const sectionTitles = new Set([
-    "帕金森評估數據","帕金森评估数据","基本信息","基本資料",
-    "PAR-Q問卷","PAR-Q问卷","用藥詳情","用药详情",
-    "UPDRS-3評估","UPDRS-3评估","其他評估","其他评估","TUG測試","TUG测试","步行測試","步行测试"
-  ]);
+  if(!Array.isArray(aoa) || aoa.length < 4) return false;
 
   let nonEmptyFirstCol = 0;
-  let matchCount = 0;
+  let labelHits = 0;
+  let secondColCount = 0;
 
   for(let i=0;i<aoa.length;i++){
     const row = aoa[i] || [];
-    const key = normalizeCell(row[0]);
-    if(!key) continue;
-    nonEmptyFirstCol++;
-    if(FORM_LABEL_MAP[key] || sectionTitles.has(key)) matchCount++;
+    const c0 = normalizeCell(row[0]);
+    const c1 = normalizeCell(row[1]);
+    const c2 = normalizeCell(row[2]);
+
+    if(c0) nonEmptyFirstCol++;
+    if(c1) secondColCount++;
+
+    if(FORM_LABEL_MAP[c0]) labelHits++;
+
+    if(c2){
+      // 如果第三列经常有内容，像真正横向表，不像两列表单
+      return false;
+    }
   }
 
   if(nonEmptyFirstCol === 0) return false;
-  return (matchCount / nonEmptyFirstCol) >= 0.3 || matchCount >= 8;
+  if(labelHits >= 4 && secondColCount >= 3) return true;
+
+  return false;
 }
 
 function aoaFormToRecord(aoa){
   const rec = {};
-  for(const row of aoa){
-    if(!row || !row.length) continue;
+
+  aoa.forEach(row=>{
+    if(!row || !row.length) return;
     const key = normalizeCell(row[0]);
     const val = normalizeCell(row[1]);
-    if(!key) continue;
+
+    if(!key) return;
     if(FORM_LABEL_MAP[key]){
       rec[FORM_LABEL_MAP[key]] = val;
     }
-  }
+  });
 
-  // fallback: 万一表里有中文标签但没被映射，尽量扫关键字
-  if(!rec.name){
-    for(const row of aoa){
-      const k = normalizeCell(row[0]);
-      const v = normalizeCell(row[1]);
-      if(["姓名","Name"].includes(k) && v){
-        rec.name = v; break;
-      }
-    }
-  }
+  // fallback for common key names
   if(!rec.id){
     for(const row of aoa){
       const k = normalizeCell(row[0]);
       const v = normalizeCell(row[1]);
       if(["編號","编号","ID","id"].includes(k) && v){
         rec.id = v; break;
+      }
+    }
+  }
+  if(!rec.name){
+    for(const row of aoa){
+      const k = normalizeCell(row[0]);
+      const v = normalizeCell(row[1]);
+      if(["姓名","Name","name"].includes(k) && v){
+        rec.name = v; break;
       }
     }
   }
@@ -789,29 +953,73 @@ function aoaFormToRecord(aoa){
   return rec;
 }
 
+function sheetToRecords(sheet, sourceLabel){
+  const aoa = XLSX.utils.sheet_to_json(sheet, {
+    header:1,
+    defval:"",
+    blankrows:false,
+    raw:false
+  });
+
+  if(detectClinicalFormAoA(aoa)){
+    const rec = aoaFormToRecord(aoa);
+    pushLog("DETECT", `${sourceLabel} recognized as clinical_form`);
+    return rec && Object.keys(rec).length ? [{...rec, __detectedType:"clinical_form"}] : [];
+  }
+
+  const rows = XLSX.utils.sheet_to_json(sheet, {
+    defval:"",
+    raw:false
+  });
+
+  const looksUseful = rows.some(r=>{
+    const keys = Object.keys(r);
+    return keys.some(k=>["id","ID","name","Name","testDate","date","timestamp","姓名","編號","编号"].includes(k));
+  });
+
+  if(looksUseful){
+    pushLog("DETECT", `${sourceLabel} recognized as clinical_table`);
+    return rows.map(r=>({ ...r, __detectedType:"clinical_table" }));
+  }
+
+  // fallback: if not useful as table, try form anyway
+  const fallbackRec = aoaFormToRecord(aoa);
+  if(fallbackRec && (fallbackRec.id || fallbackRec.name || fallbackRec.testDate)){
+    pushLog("DETECT", `${sourceLabel} recognized as clinical_form (fallback)`);
+    return [{...fallbackRec, __detectedType:"clinical_form"}];
+  }
+
+  pushLog("DETECT", `${sourceLabel} not recognized as valid clinical/basic sheet`);
+  return [];
+}
+
 function normalizeClinicalRecord(obj){
   const rec = {...obj};
+
   rec.id = canonTid(rec.id || rec.ID || rec.participantId || rec.parti || rec.code || "");
   rec.name = rec.name || rec.Name || rec.participantName || rec.姓名 || "";
   rec.testType = String(rec.testType || rec.phase || rec.測試類型 || rec.测试类型 || "").toLowerCase();
   rec.testDate = normalizeDate(rec.testDate || rec.date || rec.Date || rec.測試日期 || rec.测试日期 || rec.localSaveTime || "");
   rec.localSaveTime = rec.localSaveTime || "";
+
   return rec;
 }
 
 function ingestClinicalRows(rows, sourceName){
-  rows.forEach(obj=>{
+  rows.forEach((obj, idx)=>{
     const rec = normalizeClinicalRecord(obj);
     if(isBlankRow(rec)) return;
 
-    // 如果 clinical 文件读出来既没有 name 也没有 id，则直接忽略，不进 unrecognized
-    if(!String(rec.name||"").trim() && !String(rec.id||"").trim()) return;
+    if(!String(rec.name || "").trim() && !String(rec.id || "").trim()){
+      pushLog("SKIP", `${sourceName} row ${idx+1}: skipped because both id and name are empty`);
+      return;
+    }
 
     const resolved = resolveToMaster({
-      name:rec.name,
-      id:rec.id,
-      date:rec.testDate,
-      source:sourceName
+      name: rec.name,
+      id: rec.id,
+      date: rec.testDate,
+      source: sourceName
     });
 
     if(resolved.status === "ignore") return;
@@ -820,11 +1028,8 @@ function ingestClinicalRows(rows, sourceName){
       ? resolved.tid
       : (canonTid(rec.id) || "ZZZ_"+String(state.rawDebug.length+1).padStart(3,"0"));
 
-    const phase = bestPhaseByDate(
-      tid,
-      rec.testDate || rec.localSaveTime,
-      ["pre","post"].includes(rec.testType) ? rec.testType : ""
-    );
+    const explicitPhase = ["pre","post"].includes(rec.testType) ? rec.testType : "";
+    const phase = bestPhaseByDate(tid, rec.testDate || rec.localSaveTime, explicitPhase);
 
     state.clinicalRows.push({
       source: sourceName,
@@ -838,162 +1043,141 @@ function ingestClinicalRows(rows, sourceName){
 
     state.rawDebug.push({
       type:"clinical",
+      source: sourceName,
+      detectedType: obj.__detectedType || "",
       tid,
       phase,
-      name:rec.name,
-      testDate:rec.testDate,
-      raw:rec
+      name: rec.name,
+      testDate: rec.testDate,
+      raw: rec
     });
+
+    pushLog(
+      "CLINICAL",
+      `${sourceName} row ${idx+1}: id=${rec.id || "(no id)"} name=${rec.name || "(no name)"} date=${rec.testDate || "(no date)"} phase=${phase || "(no phase)"}`
+    );
   });
-}
-
-function sheetToRecords(sheet){
-  const aoa = XLSX.utils.sheet_to_json(sheet, {
-    header:1,
-    defval:"",
-    blankrows:false,
-    raw:false
-  });
-
-  if(detectClinicalFormAoA(aoa)){
-    const rec = aoaFormToRecord(aoa);
-    return rec && Object.keys(rec).length ? [rec] : [];
-  }
-
-  // 普通横向表
-  const rows = XLSX.utils.sheet_to_json(sheet, {
-    defval:"",
-    raw:false
-  });
-
-  // 如果普通解析出来的每行都没有像样字段，尝试用前两列转成 form
-  const hasUseful = rows.some(r => {
-    const keys = Object.keys(r);
-    return keys.some(k => ["id","ID","name","Name","testDate","date","timestamp","姓名","編號","编号"].includes(k));
-  });
-
-  if(hasUseful) return rows;
-
-  // fallback：某些 CSV 会被解析成 __EMPTY / __EMPTY_1 两列
-  if(aoa && aoa.length){
-    const rec = aoaFormToRecord(aoa);
-    if(rec && (rec.id || rec.name || rec.testDate)) return [rec];
-  }
-
-  return [];
 }
 
 async function readUploadedFiles(files){
   if(typeof XLSX === "undefined"){
     alert("XLSX 库没有加载成功，请检查网络。");
+    pushLog("ERROR", "XLSX not loaded");
     return;
   }
 
   for(const file of files){
     const lower = file.name.toLowerCase();
+    pushLog("FILE", `Reading ${file.name}`);
 
-    if(lower.endsWith(".json")){
-      const txt = await file.text();
-      let parsed;
-      try{
-        parsed = JSON.parse(txt.replace(/^\\uFEFF/, ""));
-      }catch(err){
-        alert(`JSON 解析失败：${file.name}\\n${err.message}`);
+    try{
+      if(lower.endsWith(".json")){
+        const txt = await file.text();
+        const parsed = JSON.parse(txt.replace(/^\uFEFF/, ""));
+        const rows = Array.isArray(parsed) ? parsed : [parsed];
+        pushLog("DETECT", `${file.name} recognized as json (${rows.length} record(s))`);
+        ingestClinicalRows(rows, file.name);
         continue;
       }
 
-      const rows = Array.isArray(parsed) ? parsed : [parsed];
-      ingestClinicalRows(rows, file.name);
-      continue;
-    }
+      if(lower.endsWith(".csv")){
+        const text = await file.text();
+        const wb = XLSX.read(text, {
+          type:"string",
+          raw:false
+        });
 
-    if(lower.endsWith(".csv")){
-      const text = await file.text();
-      let wb;
-      try{
-        wb = XLSX.read(text, {type:"string", raw:false, codepage:65001});
-      }catch(err){
-        alert(`CSV 读取失败：${file.name}\\n${err.message}`);
+        const all = [];
+        wb.SheetNames.forEach(sn=>{
+          const part = sheetToRecords(wb.Sheets[sn], `${file.name}::${sn}`);
+          part.forEach(x=>all.push(x));
+        });
+
+        const isBasicLike = all.length &&
+          Object.keys(all[0]).includes("timestamp") &&
+          Object.keys(all[0]).includes("diagnosisYear");
+
+        if(isBasicLike){
+          pushLog("DETECT", `${file.name} recognized as basic table`);
+          ingestBasicRows(all, file.name);
+        }else{
+          ingestClinicalRows(all, file.name);
+        }
         continue;
       }
 
-      const all = [];
-      wb.SheetNames.forEach(sn=>{
-        const part = sheetToRecords(wb.Sheets[sn]);
-        part.forEach(x=>all.push(x));
-      });
+      if(lower.endsWith(".xlsx") || lower.endsWith(".xls")){
+        const ab = await file.arrayBuffer();
+        const wb = XLSX.read(ab, {
+          type:"array",
+          raw:false
+        });
 
-      const isBasicLike = all.length &&
-        Object.keys(all[0]).includes("timestamp") &&
-        Object.keys(all[0]).includes("diagnosisYear");
+        const all = [];
+        wb.SheetNames.forEach(sn=>{
+          const part = sheetToRecords(wb.Sheets[sn], `${file.name}::${sn}`);
+          part.forEach(x=>all.push(x));
+        });
 
-      if(isBasicLike) ingestBasicRows(all);
-      else ingestClinicalRows(all, file.name);
+        const isBasicLike = all.length &&
+          Object.keys(all[0]).includes("timestamp") &&
+          Object.keys(all[0]).includes("diagnosisYear");
 
-      continue;
-    }
-
-    if(lower.endsWith(".xlsx") || lower.endsWith(".xls")){
-      const ab = await file.arrayBuffer();
-      let wb;
-      try{
-        wb = XLSX.read(ab, {type:"array", raw:false});
-      }catch(err){
-        alert(`Excel 读取失败：${file.name}\\n${err.message}`);
+        if(isBasicLike){
+          pushLog("DETECT", `${file.name} recognized as basic workbook`);
+          ingestBasicRows(all, file.name);
+        }else{
+          ingestClinicalRows(all, file.name);
+        }
         continue;
       }
 
-      const all = [];
-      wb.SheetNames.forEach(sn=>{
-        const part = sheetToRecords(wb.Sheets[sn]);
-        part.forEach(x=>all.push(x));
-      });
+      if(lower.endsWith(".txt")){
+        const txt = await file.text();
+        const rows = parseDelimited(txt);
 
-      const isBasicLike = all.length &&
-        Object.keys(all[0]).includes("timestamp") &&
-        Object.keys(all[0]).includes("diagnosisYear");
+        if(rows.length && Object.keys(rows[0]).includes("timestamp")){
+          pushLog("DETECT", `${file.name} recognized as basic txt`);
+          ingestBasicRows(rows, file.name);
+        }else{
+          const arr = txt.split(/\r?\n/)
+            .map(x=>x.trim())
+            .filter(Boolean)
+            .map(x=>{ try{return JSON.parse(x)}catch(e){return null;} })
+            .filter(Boolean);
 
-      if(isBasicLike) ingestBasicRows(all);
-      else ingestClinicalRows(all, file.name);
-
-      continue;
-    }
-
-    if(lower.endsWith(".txt")){
-      const txt = await file.text();
-      const rows = parseDelimited(txt);
-
-      if(rows.length && Object.keys(rows[0]).includes("timestamp")){
-        ingestBasicRows(rows);
-      }else{
-        const arr = txt.split(/\\r?\\n/)
-          .map(x=>x.trim())
-          .filter(Boolean)
-          .map(x=>{ try{return JSON.parse(x)}catch{return null} })
-          .filter(Boolean);
-
-        if(arr.length) ingestClinicalRows(arr, file.name);
+          if(arr.length){
+            pushLog("DETECT", `${file.name} recognized as json-lines clinical`);
+            ingestClinicalRows(arr, file.name);
+          }else{
+            pushLog("WARN", `${file.name} was not recognized as valid txt/json-lines`);
+          }
+        }
+        continue;
       }
-      continue;
+
+      pushLog("WARN", `${file.name} unsupported extension`);
+    }catch(err){
+      pushLog("ERROR", `${file.name} -> ${err.message || err}`);
     }
   }
 }
 
-/* =========================
-   Merge
-========================= */
+/* =========================================================
+ * 9) Build merged rows
+ * ========================================================= */
 function chooseBasicForPhase(arr, phase, master){
-  const items = arr.filter(x=>x.phase===phase);
+  const items = arr.filter(x=>x.phase === phase);
   if(!items.length) return null;
-  const targetDate = phase==="pre" ? master?.preDate : master?.postDate;
-  return items.slice().sort((a,b)=>daysDiff(a.timestamp, targetDate)-daysDiff(b.timestamp, targetDate))[0];
+  const targetDate = phase === "pre" ? master?.preDate : master?.postDate;
+  return items.slice().sort((a,b)=>daysDiff(a.timestamp, targetDate) - daysDiff(b.timestamp, targetDate))[0];
 }
 
 function chooseClinicalForPhase(arr, phase, master){
-  const items = arr.filter(x=>x.phase===phase);
+  const items = arr.filter(x=>x.phase === phase);
   if(!items.length) return null;
-  const targetDate = phase==="pre" ? master?.preDate : master?.postDate;
-  return items.slice().sort((a,b)=>daysDiff(a.testDate, targetDate)-daysDiff(b.testDate, targetDate))[0];
+  const targetDate = phase === "pre" ? master?.preDate : master?.postDate;
+  return items.slice().sort((a,b)=>daysDiff(a.testDate, targetDate) - daysDiff(b.testDate, targetDate))[0];
 }
 
 function buildMergedRows(){
@@ -1008,15 +1192,15 @@ function buildMergedRows(){
   [...allTids].forEach((tid, idx)=>{
     const master = state.master.byTid[tid] || {
       tid,
-      name:(findAnyName(tid)||tid),
-      group:"",
-      order:999999 + idx,
-      preDate:"",
-      postDate:""
+      name: (findAnyName(tid) || tid),
+      group: "",
+      order: 999999 + idx,
+      preDate: "",
+      postDate: ""
     };
 
-    const basics = state.basicRows.filter(x=>x.tid===tid);
-    const clinics = state.clinicalRows.filter(x=>x.tid===tid);
+    const basics = state.basicRows.filter(x=>x.tid === tid);
+    const clinics = state.clinicalRows.filter(x=>x.tid === tid);
 
     const bPre = chooseBasicForPhase(basics, "pre", master);
     const bPost = chooseBasicForPhase(basics, "post", master);
@@ -1101,20 +1285,22 @@ function buildMergedRows(){
   );
 
   state.mergedRows = rows;
+  pushLog("MERGE", `Merged rows built: ${rows.length}`);
   renderPreview();
   renderStats();
+  renderStatus();
 }
 
-/* =========================
-   Render / Export
-========================= */
+/* =========================================================
+ * 10) Render
+ * ========================================================= */
 function renderStats(){
   const total = state.mergedRows.length;
   const pre = state.mergedRows.filter(r=>r.pre_date).length;
   const post = state.mergedRows.filter(r=>r.post_date2).length;
-  const combined = state.mergedRows.filter(r=>r.Group==="Combined").length;
-  const control = state.mergedRows.filter(r=>r.Group==="Control").length;
-  const quit = state.mergedRows.filter(r=>r.Group==="Quit").length;
+  const combined = state.mergedRows.filter(r=>r.Group === "Combined").length;
+  const control = state.mergedRows.filter(r=>r.Group === "Control").length;
+  const quit = state.mergedRows.filter(r=>r.Group === "Quit").length;
 
   const html = [
     ["总行数", total],
@@ -1124,12 +1310,9 @@ function renderStats(){
     ["Control", control],
     ["Quit", quit],
     ["未识别", state.unrecognized.length]
-  ].map(([k,v])=>`
-    <div class="box">
-      <div class="small muted">${escapeHtml(k)}</div>
-      <div style="font-size:24px;font-weight:800">${escapeHtml(v)}</div>
-    </div>
-  `).join("");
+  ].map(([k,v])=>{
+    return `<div class="box"><div class="small muted">${escapeHtml(k)}</div><div style="font-size:24px;font-weight:800">${escapeHtml(v)}</div></div>`;
+  }).join("");
 
   document.getElementById("stats").innerHTML = html;
   renderSuggest();
@@ -1138,14 +1321,14 @@ function renderStats(){
 function renderSuggest(){
   const tbody = document.querySelector("#suggestTable tbody");
   tbody.innerHTML = state.unrecognized.map(x=>{
-    const cand = (x.candidates||[]).slice(0,3).map(c=>`${c.name} (${c.tid})`).join(" / ");
+    const cand = (x.candidates || []).slice(0,3).map(c=>`${c.name} (${c.tid})`).join(" / ");
     return `<tr>
-      <td>${escapeHtml(x.source||"")}</td>
-      <td>${escapeHtml(x.rawName||"")}</td>
+      <td>${escapeHtml(x.source || "")}</td>
+      <td>${escapeHtml(x.rawName || "")}</td>
       <td>${escapeHtml(cand)}</td>
-      <td>${escapeHtml(x.reason||"")}</td>
+      <td>${escapeHtml(x.reason || "")}</td>
     </tr>`;
-  }).join("") || '<tr><td colspan="4" class="muted">目前没有未识别姓名。</td></tr>';
+  }).join("") || `<tr><td colspan="4" class="muted">目前没有未识别姓名。</td></tr>`;
 }
 
 function renderPreview(){
@@ -1160,13 +1343,16 @@ function renderPreview(){
   `;
   html += "<tr>" + FINAL_COLUMNS.map(h=>`<th>${escapeHtml(h)}</th>`).join("") + "</tr>";
   html += "</thead><tbody>";
-  html += state.mergedRows.map(r =>
-    "<tr>" + FINAL_COLUMNS.map(c=>`<td>${escapeHtml(r[c] ?? "")}</td>`).join("") + "</tr>"
-  ).join("");
+  html += state.mergedRows.map(r=>{
+    return "<tr>" + FINAL_COLUMNS.map(c=>`<td>${escapeHtml(r[c] ?? "")}</td>`).join("") + "</tr>";
+  }).join("");
   html += "</tbody>";
   table.innerHTML = html;
 }
 
+/* =========================================================
+ * 11) Export
+ * ========================================================= */
 function exportExcel(){
   try{
     if(typeof XLSX === "undefined"){
@@ -1174,6 +1360,7 @@ function exportExcel(){
     }
 
     const wb = XLSX.utils.book_new();
+
     const aoa = [];
     aoa.push([
       "BASIC INFO : tx / ctrl / quit",
@@ -1184,6 +1371,7 @@ function exportExcel(){
       ...Array(13).fill("")
     ]);
     aoa.push(FINAL_COLUMNS);
+
     state.mergedRows.forEach(r=>{
       aoa.push(FINAL_COLUMNS.map(c=>r[c] ?? ""));
     });
@@ -1194,30 +1382,42 @@ function exportExcel(){
     XLSX.utils.book_append_sheet(wb, ws, "merged_output");
 
     const unrecAoa = [["source","rawName","candidates","reason"]];
-    state.unrecognized.forEach(x=>unrecAoa.push([
-      x.source || "",
-      x.rawName || "",
-      (x.candidates || []).map(c=>`${c.name} (${c.tid})`).join(" | "),
-      x.reason || ""
-    ]));
+    state.unrecognized.forEach(x=>{
+      unrecAoa.push([
+        x.source || "",
+        x.rawName || "",
+        (x.candidates || []).map(c=>`${c.name} (${c.tid})`).join(" | "),
+        x.reason || ""
+      ]);
+    });
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(unrecAoa), "unrecognized");
 
-    const debugAoa = [["type","tid","phase","name","date","raw"]];
-    state.rawDebug.forEach(x=>debugAoa.push([
-      x.type || "",
-      x.tid || "",
-      x.phase || "",
-      x.name || "",
-      x.timestamp || x.testDate || "",
-      JSON.stringify(x.raw || {})
-    ]));
+    const debugAoa = [["type","source","tid","phase","name","date","raw"]];
+    state.rawDebug.forEach(x=>{
+      debugAoa.push([
+        x.type || "",
+        x.source || "",
+        x.tid || "",
+        x.phase || "",
+        x.name || "",
+        x.timestamp || x.testDate || "",
+        JSON.stringify(x.raw || {})
+      ]);
+    });
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(debugAoa), "raw_debug");
+
+    const logAoa = [["log"]];
+    state.logs.forEach(line=>logAoa.push([line]));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(logAoa), "import_logs");
 
     const fn = `mri_merged_${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.xlsx`;
     XLSX.writeFile(wb, fn);
+    pushLog("EXPORT", `Excel exported: ${fn}`);
+    renderStatus();
   }catch(err){
-    console.error(err);
+    pushLog("ERROR", `Export failed: ${err.message || err}`);
     alert("导出 Excel 失败：" + (err?.message || err));
+    renderStatus();
   }
 }
 
@@ -1225,19 +1425,23 @@ function downloadJson(){
   const blob = new Blob([JSON.stringify({
     mergedRows: state.mergedRows,
     unrecognized: state.unrecognized,
-    rawDebug: state.rawDebug
-  }, null, 2)], {type:"application/json;charset=utf-8"});
+    rawDebug: state.rawDebug,
+    logs: state.logs
+  }, null, 2)], {
+    type:"application/json;charset=utf-8"
+  });
 
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = `merge_debug_${Date.now()}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
+  pushLog("EXPORT", "Intermediate JSON downloaded");
 }
 
-/* =========================
-   UI Actions
-========================= */
+/* =========================================================
+ * 12) UI actions
+ * ========================================================= */
 function resetDerived(){
   state.basicRows = [];
   state.clinicalRows = [];
@@ -1247,79 +1451,142 @@ function resetDerived(){
 }
 
 function loadRules(){
-  state.aliasMap = buildAliasMap();
   try{
-    state.manualBindings = JSON.parse(document.getElementById("bindingJson").value || "{}");
+    state.aliasMap = buildAliasMap();
+    const bindingText = document.getElementById("bindingJson").value || "{}";
+    state.manualBindings = JSON.parse(bindingText);
+    pushLog("RULES", "Alias map and manual bindings loaded");
   }catch(err){
-    alert("强制绑定 JSON 格式有误，请检查。");
     state.manualBindings = {};
+    pushLog("ERROR", "Binding JSON parse failed: " + (err.message || err));
+    alert("强制绑定 JSON 格式有误，请检查。");
   }
 }
 
-document.getElementById("parseBasicBtn").onclick = ()=>{
-  loadRules();
-  const txt = document.getElementById("basicTxt").value;
-  const rows = parseDelimited(txt);
+document.getElementById("parseBasicBtn").addEventListener("click", function(){
+  try{
+    pushLog("ACTION", "Parse basic TXT clicked");
+    loadRules();
+    resetDerived();
 
-  if(!rows.length){
-    alert("没有解析到 basic TXT 行，请检查是否包含表头并用 tab 分隔。");
-    return;
-  }
-
-  resetDerived();
-  ingestBasicRows(rows);
-  buildMergedRows();
-};
-
-document.getElementById("clearBasicBtn").onclick = ()=>{
-  document.getElementById("basicTxt").value = "";
-};
-
-document.getElementById("processFilesBtn").onclick = async ()=>{
-  loadRules();
-  resetDerived();
-
-  const txt = document.getElementById("basicTxt").value.trim();
-  if(txt){
+    const txt = document.getElementById("basicTxt").value || "";
     const rows = parseDelimited(txt);
-    if(rows.length) ingestBasicRows(rows);
+
+    if(!rows.length){
+      pushLog("WARN", "No basic rows parsed");
+      alert("没有解析到 basic TXT 行，请检查是否包含表头、并且是 tab 分隔。");
+      renderStatus();
+      return;
+    }
+
+    pushLog("DETECT", `basic textarea recognized as tabular basic txt (${rows.length} rows)`);
+    ingestBasicRows(rows, "basic_txt");
+    buildMergedRows();
+  }catch(err){
+    pushLog("ERROR", "parseBasicBtn failed: " + (err.message || err));
+    renderStatus();
   }
+});
 
-  const input = document.getElementById("fileInput");
-  const list = [...(input.files || [])];
+document.getElementById("clearBasicBtn").addEventListener("click", function(){
+  document.getElementById("basicTxt").value = "";
+  pushLog("ACTION", "Basic textarea cleared");
+});
 
-  if(list.length){
-    await readUploadedFiles(list);
+document.getElementById("processFilesBtn").addEventListener("click", async function(){
+  try{
+    pushLog("ACTION", "Read uploaded files clicked");
+    loadRules();
+    resetDerived();
+
+    const txt = document.getElementById("basicTxt").value.trim();
+    if(txt){
+      const rows = parseDelimited(txt);
+      if(rows.length){
+        pushLog("DETECT", `basic textarea recognized as tabular basic txt (${rows.length} rows)`);
+        ingestBasicRows(rows, "basic_txt");
+      }else{
+        pushLog("WARN", "basic textarea exists but not parsed as valid basic txt");
+      }
+    }
+
+    const input = document.getElementById("fileInput");
+    const list = [...(input.files || [])];
+
+    if(!list.length && !txt){
+      pushLog("WARN", "No input files and no basic text");
+      alert("请先贴 basic TXT 或上传文件。");
+      renderStatus();
+      return;
+    }
+
+    if(list.length){
+      await readUploadedFiles(list);
+    }
+
+    buildMergedRows();
+  }catch(err){
+    pushLog("ERROR", "processFilesBtn failed: " + (err.message || err));
+    renderStatus();
   }
+});
 
-  buildMergedRows();
-};
-
-document.getElementById("applyRulesBtn").onclick = ()=>{
+document.getElementById("applyRulesBtn").addEventListener("click", function(){
+  pushLog("ACTION", "Apply rules clicked");
   document.getElementById("processFilesBtn").click();
-};
+});
 
-document.getElementById("mergeBtn").onclick = ()=>{
-  loadRules();
-  buildMergedRows();
-};
+document.getElementById("mergeBtn").addEventListener("click", function(){
+  try{
+    pushLog("ACTION", "Build preview clicked");
+    loadRules();
+    buildMergedRows();
+  }catch(err){
+    pushLog("ERROR", "mergeBtn failed: " + (err.message || err));
+    renderStatus();
+  }
+});
 
-document.getElementById("exportBtn").onclick = ()=>{
+document.getElementById("exportBtn").addEventListener("click", function(){
+  pushLog("ACTION", "Export Excel clicked");
   if(typeof XLSX === "undefined"){
-    alert("Excel 导出库没有加载成功，请检查网络，或确认 HTML 中的 xlsx script 标签存在。");
+    pushLog("ERROR", "XLSX not loaded, export aborted");
+    alert("Excel 导出库没有加载成功，请检查网络。");
+    renderStatus();
     return;
   }
-  if(!state.mergedRows.length) buildMergedRows();
+  if(!state.mergedRows.length){
+    buildMergedRows();
+  }
   exportExcel();
-};
+});
 
-document.getElementById("downloadJsonBtn").onclick = ()=>{
+document.getElementById("downloadJsonBtn").addEventListener("click", function(){
   downloadJson();
-};
+});
 
-state.aliasMap = buildAliasMap();
-renderStats();
-renderPreview();
+document.getElementById("clearLogBtn").addEventListener("click", function(){
+  state.logs = [];
+  renderLogs();
+  renderStatus();
+});
+
+/* =========================================================
+ * 13) Init
+ * ========================================================= */
+(function init(){
+  pushLog("INIT", "Page script started");
+  if(typeof XLSX === "undefined"){
+    pushLog("WARN", "XLSX library is NOT loaded");
+  }else{
+    pushLog("INIT", "XLSX library loaded");
+  }
+  state.aliasMap = buildAliasMap();
+  renderStatus();
+  renderStats();
+  renderPreview();
+})();
 </script>
 </body>
 </html>
+``
