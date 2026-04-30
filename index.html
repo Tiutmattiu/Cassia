@@ -3,806 +3,626 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BASIC INFO 目標格式整理器</title>
+  <title>BASIC INFO 批量整理器</title>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --primary: #2563eb;
-      --primary-2: #1d4ed8;
-      --danger: #dc2626;
-      --success: #16a34a;
+      --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+      --primary:#2563eb; --primary2:#1d4ed8; --danger:#dc2626; --good:#16a34a;
     }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .wrap {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: 32px;
-    }
-
-    p {
-      color: var(--muted);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 1000px) {
-      .grid { grid-template-columns: 1fr; }
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 1px 2px rgba(0,0,0,.04);
-    }
-
-    .card h2 {
-      margin: 0 0 6px;
-      font-size: 20px;
-    }
-
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .row > * {
-      min-width: 0;
-    }
-
-    textarea, input, select {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 14px;
-      background: white;
-      color: var(--text);
-    }
-
-    textarea {
-      min-height: 320px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      margin-bottom: 6px;
-      color: #334155;
-    }
-
-    .field {
-      flex: 1 1 220px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      background: var(--primary);
-      color: white;
-    }
-
-    button:hover {
-      background: var(--primary-2);
-    }
-
-    button.secondary {
-      background: white;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    button.secondary:hover {
-      background: #f8fafc;
-    }
-
-    button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .stat {
-      background: #f1f5f9;
-      border-radius: 14px;
-      padding: 12px;
-    }
-
-    .stat .k {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .stat .v {
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .hint {
-      display: inline-block;
-      background: #e2e8f0;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
-      margin-right: 8px;
-      margin-bottom: 8px;
-    }
-
-    .error {
-      border: 1px solid #fecaca;
-      background: #fef2f2;
-      color: #b91c1c;
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 14px;
-      margin-top: 12px;
-      white-space: pre-wrap;
-    }
-
-    .table-wrap {
-      overflow: auto;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: white;
-      margin-top: 12px;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: max-content;
-      min-width: 100%;
-      font-size: 14px;
-    }
-
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      vertical-align: top;
-      white-space: nowrap;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      background: #f8fafc;
-      z-index: 1;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .dropzone {
-      border: 1px dashed #94a3b8;
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      background: #fff;
-    }
-
-    .small {
-      font-size: 12px;
-      color: var(--muted);
-    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width:1480px; margin:0 auto; padding:24px; }
+    h1 { margin:0 0 8px; font-size:30px; }
+    h2 { margin:0 0 8px; font-size:20px; }
+    p { color:var(--muted); }
+    .grid { display:grid; grid-template-columns:1.15fr .85fr; gap:20px; }
+    @media (max-width:1000px){ .grid { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .row { display:flex; flex-wrap:wrap; gap:10px; }
+    .field { flex:1 1 220px; }
+    textarea,input,select { width:100%; border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:14px; background:#fff; color:var(--text); }
+    textarea { min-height:280px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    label { display:block; font-size:13px; margin-bottom:6px; color:#334155; }
+    button { border:0; border-radius:12px; padding:10px 14px; font-size:14px; cursor:pointer; background:var(--primary); color:#fff; }
+    button:hover { background:var(--primary2); }
+    button.secondary { background:#fff; color:var(--text); border:1px solid var(--border); }
+    button.secondary:hover { background:#f8fafc; }
+    button.danger { background:var(--danger); }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .stat { background:#f1f5f9; border-radius:14px; padding:12px; }
+    .k { font-size:12px; color:var(--muted); }
+    .v { font-size:24px; font-weight:700; }
+    .hint { display:inline-block; background:#e2e8f0; border-radius:999px; padding:6px 10px; font-size:12px; margin-right:8px; margin-bottom:8px; }
+    .good { border:1px solid #bbf7d0; background:#f0fdf4; color:#166534; border-radius:12px; padding:10px 12px; margin-top:10px; font-size:14px; white-space:pre-wrap; }
+    .error { border:1px solid #fecaca; background:#fef2f2; color:#b91c1c; border-radius:12px; padding:10px 12px; margin-top:10px; font-size:14px; white-space:pre-wrap; }
+    .dropzone { border:1px dashed #94a3b8; border-radius:16px; padding:24px; text-align:center; background:#fff; }
+    .table-wrap { overflow:auto; border:1px solid var(--border); border-radius:16px; background:#fff; margin-top:12px; }
+    table { border-collapse:collapse; width:max-content; min-width:100%; font-size:14px; }
+    th,td { padding:10px 12px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; white-space:nowrap; }
+    thead th { position:sticky; top:0; background:#f8fafc; z-index:1; }
+    .small { font-size:12px; color:var(--muted); }
+    .footer-note { margin-top:14px; font-size:12px; color:var(--muted); }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>BASIC INFO 目標格式整理器</h1>
-    <p>支援貼上 TSV / CSV / JSON，或上傳 Excel / CSV / TSV / TXT / JSON。預設規則是：<strong>同名第一條 = pre，同名最後一條 = post</strong>；沒有對應資料就留空。</p>
+    <h1>BASIC INFO 批量整理器</h1>
+    <p>可以連續追加上傳很多份 Excel / JSON / CSV。程式會把資料累積到同一張主表，遇到詳細評估 JSON 會自動計算 <strong>UPDRS 總分</strong> 和 <strong>TUG 平均秒數</strong>，最後統一導出一張 Excel。</p>
 
     <div class="grid">
       <section class="card">
-        <h2>輸入資料</h2>
-        <p class="small">可以直接貼 Excel 複製出來的文字，也可以上傳檔案。</p>
+        <h2>輸入與追加</h2>
+        <p class="small">支援兩種資料來源：① 複製貼上的表格文字；② 單份或多份檔案。每次匯入都會「追加」進目前主表，而不是覆蓋。</p>
 
-        <label for="rawText">貼上文字</label>
-        <textarea id="rawText" placeholder="把 TSV/CSV/JSON 貼到這裡…"></textarea>
-
+        <label for="rawText">貼上 TSV / CSV / JSON</label>
+        <textarea id="rawText" placeholder="把 Excel 複製出來的 TSV / CSV / JSON 貼到這裡…"></textarea>
         <div class="row" style="margin-top:10px;">
-          <button id="parseBtn">開始整理</button>
+          <button id="appendTextBtn">追加貼上資料</button>
           <button class="secondary" id="exampleBtn">填入示例</button>
-          <button class="secondary" id="clearBtn">清空</button>
+          <button class="secondary" id="clearTextBtn">清空文字框</button>
         </div>
 
-        <div style="height:16px"></div>
+        <div style="height:18px"></div>
 
         <div class="dropzone">
-          <p style="margin-top:0; color:#334155; font-weight:600;">上傳檔案</p>
-          <p class="small">支援 .xlsx / .xls / .csv / .tsv / .txt / .json</p>
-          <input id="fileInput" type="file" accept=".xlsx,.xls,.csv,.tsv,.txt,.json" />
+          <p style="margin-top:0; color:#334155; font-weight:600;">批量上傳檔案</p>
+          <p class="small">支援 .xlsx / .xls / .csv / .tsv / .txt / .json，可一次選多個檔案（例如 40 份）。</p>
+          <input id="fileInput" type="file" multiple accept=".xlsx,.xls,.csv,.tsv,.txt,.json" />
         </div>
 
-        <div id="errors"></div>
+        <div id="messages"></div>
       </section>
 
       <section class="card">
-        <h2>規則與預設值</h2>
-        <p class="small">沒有對應資料的欄位會自動留空，你也可以填一些預設值批量帶入。</p>
-
+        <h2>預設值與管理</h2>
+        <p class="small">沒有對應資料就留空；若有固定欄位可在此批量補上。資料會自動暫存到瀏覽器（localStorage），重新打開頁面還在。</p>
         <div class="row">
-          <div class="field">
-            <label>預設 Group</label>
-            <input id="groupInput" placeholder="例如 Combined" />
+          <div class="field"><label>預設 Group</label><input id="groupInput" placeholder="例如 Combined" /></div>
+          <div class="field"><label>預設 progress</label><input id="progressInput" placeholder="例如 completed 12/12" /></div>
+          <div class="field"><label>預設 tester</label><input id="testerInput" placeholder="例如 Cassia" /></div>
+          <div class="field"><label>預設 staff</label><input id="staffInput" placeholder="例如 Cassia" /></div>
+          <div class="field"><label>預設 Med</label><input id="medInput" placeholder="例如 on" /></div>
+          <div class="field"><label>ID 自動生成</label>
+            <select id="autoIdInput"><option value="off">關閉</option><option value="on">開啟</option></select>
           </div>
-          <div class="field">
-            <label>預設 progress</label>
-            <input id="progressInput" placeholder="例如 completed 12/12" />
-          </div>
-          <div class="field">
-            <label>預設 tester</label>
-            <input id="testerInput" placeholder="例如 Cassia" />
-          </div>
-          <div class="field">
-            <label>預設 staff</label>
-            <input id="staffInput" placeholder="例如 Cassia" />
-          </div>
-          <div class="field">
-            <label>預設 Med</label>
-            <input id="medInput" placeholder="例如 on" />
-          </div>
-          <div class="field">
-            <label>ID 自動生成</label>
-            <select id="autoIdInput">
-              <option value="off">關閉</option>
-              <option value="on">開啟</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>ID 前綴</label>
-            <input id="idPrefixInput" value="T" />
-          </div>
-          <div class="field">
-            <label>ID 起始號</label>
-            <input id="idStartInput" type="number" value="1" />
-          </div>
-          <div class="field">
-            <label>ID 位數</label>
-            <input id="idPadInput" type="number" value="3" />
-          </div>
+          <div class="field"><label>ID 前綴</label><input id="idPrefixInput" value="T" /></div>
+          <div class="field"><label>ID 起始號</label><input id="idStartInput" type="number" value="1" /></div>
+          <div class="field"><label>ID 位數</label><input id="idPadInput" type="number" value="3" /></div>
         </div>
-
         <div class="row" style="margin-top:12px;">
-          <button class="secondary" id="regenBtn">重新按目前規則生成</button>
+          <button class="secondary" id="rebuildBtn">按目前規則重建主表</button>
+          <button class="secondary" id="saveBtn">手動保存暫存</button>
+          <button class="danger" id="clearAllBtn">清空所有累積資料</button>
         </div>
-
         <div style="height:16px"></div>
-
         <div class="stats">
-          <div class="stat"><div class="k">源行數</div><div class="v" id="sourceCount">0</div></div>
-          <div class="stat"><div class="k">唯一姓名</div><div class="v" id="uniqueCount">0</div></div>
-          <div class="stat"><div class="k">輸出行數</div><div class="v" id="outputCount">0</div></div>
+          <div class="stat"><div class="k">原始記錄</div><div class="v" id="rawCount">0</div></div>
+          <div class="stat"><div class="k">唯一參與者</div><div class="v" id="personCount">0</div></div>
+          <div class="stat"><div class="k">主表行數</div><div class="v" id="masterCount">0</div></div>
+          <div class="stat"><div class="k">已匯入檔案</div><div class="v" id="fileCount">0</div></div>
         </div>
       </section>
     </div>
 
     <section class="card" style="margin-top:20px;">
-      <h2>輸出預覽</h2>
-      <p class="small">完整欄位會在導出時保留；預覽只顯示前一部分。</p>
-
+      <h2>主表預覽</h2>
+      <p class="small">預覽只顯示前幾欄；導出 Excel / TSV / JSON 會包含完整欄位。</p>
       <div>
-        <span class="hint">同名第一條 = pre</span>
-        <span class="hint">同名最後一條 = post</span>
-        <span class="hint">無對應欄位 = 留空</span>
+        <span class="hint">可連續追加上傳</span>
+        <span class="hint">詳細 JSON 自動算 UPDRS</span>
+        <span class="hint">詳細 JSON 自動算 TUG 平均</span>
+        <span class="hint">同一參與者 pre/post 自動合併</span>
       </div>
-
       <div class="row" style="margin-top:10px;">
         <button id="exportXlsxBtn" disabled>導出 Excel</button>
         <button class="secondary" id="exportTsvBtn" disabled>導出 TSV</button>
         <button class="secondary" id="exportJsonBtn" disabled>導出 JSON</button>
       </div>
-
       <div class="table-wrap">
-        <table id="previewTable">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
+        <table id="previewTable"><thead></thead><tbody></tbody></table>
       </div>
+      <div class="footer-note">提示：建議每補充一批就導出一次 Excel 作本地備份，避免瀏覽器快取意外清除。</div>
     </section>
   </div>
 
   <script>
+    const STORAGE_KEY = 'basic_info_batch_tool_v3';
     const TARGET_HEADERS = [
-      "id","Group","name","progress(green=intervention; blue=control; yellow=pending;red=dropped)",
-      "age","diagnosisDuration","educationYears","dominantHand","implants","wheelchair",
-      "medicationDetails","totalLEDD","medFirstTime","medDuration","medFrequency","training1","training2","training3",
-      "legLength","height","weigth","fci","contact","pre_date","tester","medtime",
-      "hadsAnxiety","hadsDepression","PDQ","fogqTotal","moca","PAR-Q","updrs","hyStage","tug_avg","avgSpeed","avgStepLength","avgCadence","remark",
-      "post_date2","staff","Med","hadA","hadD","PD_Q","fogSum","Moc_a","up_drs","H&Y","TUG_av","avg_Speed","avg_StepLength","avg_Cadence","re_mark",
-      "列17","列18","列19","列20","列21","列22","列23","列24","列25","列26","列27","列28","列29","列30","列31","列32","列33","列34","列35","列36","列37","列38","列39","列40","列41","列42","列43","列44","列45","列46","列47","列48","列49","列50","列51","列52","列53","列54","列55","列56","列57","列58","列59","列60","列61","列62","列63","列64","列65","列66"
+      'id','Group','name','progress(green=intervention; blue=control; yellow=pending;red=dropped)',
+      'age','diagnosisDuration','educationYears','dominantHand','implants','wheelchair',
+      'medicationDetails','totalLEDD','medFirstTime','medDuration','medFrequency','training1','training2','training3',
+      'legLength','height','weigth','fci','contact','pre_date','tester','medtime',
+      'hadsAnxiety','hadsDepression','PDQ','fogqTotal','moca','PAR-Q','updrs','hyStage','tug_avg','avgSpeed','avgStepLength','avgCadence','remark',
+      'post_date2','staff','Med','hadA','hadD','PD_Q','fogSum','Moc_a','up_drs','H&Y','TUG_av','avg_Speed','avg_StepLength','avg_Cadence','re_mark',
+      '列17','列18','列19','列20','列21','列22','列23','列24','列25','列26','列27','列28','列29','列30','列31','列32','列33','列34','列35','列36','列37','列38','列39','列40','列41','列42','列43','列44','列45','列46','列47','列48','列49','列50','列51','列52','列53','列54','列55','列56','列57','列58','列59','列60','列61','列62','列63','列64','列65','列66'
     ];
 
     const DIRECT_MAP_PRE = {
-      id: ["id"],
-      Group: ["Group", "group"],
-      name: ["name", "姓名"],
-      "progress(green=intervention; blue=control; yellow=pending;red=dropped)": ["progress"],
-      age: ["age", "年齡"],
-      diagnosisDuration: ["diagnosisDuration", "diagnosisYear", "病程"],
-      educationYears: ["educationYears"],
-      dominantHand: ["dominantHand"],
-      implants: ["implants"],
-      wheelchair: ["wheelchair"],
-      medicationDetails: ["medicationDetails", "medication", "medDetails"],
-      totalLEDD: ["totalLEDD", "LEDD"],
-      medFirstTime: ["medFirstTime"],
-      medDuration: ["medDuration"],
-      medFrequency: ["medFrequency"],
-      training1: ["training1"],
-      training2: ["training2"],
-      training3: ["training3"],
-      legLength: ["legLength"],
-      height: ["height", "fci18_height"],
-      weigth: ["weigth", "weight", "fci18_weight"],
-      fci: ["fci", "fciTotal"],
-      contact: ["contact"],
-      pre_date: ["pre_date", "timestamp"],
-      tester: ["tester"],
-      medtime: ["medtime"],
-      hadsAnxiety: ["hadsAnxiety"],
-      hadsDepression: ["hadsDepression"],
-      PDQ: ["PDQ", "pdqTotal"],
-      fogqTotal: ["fogqTotal"],
-      moca: ["moca"],
-      "PAR-Q": ["PAR-Q", "PARQ"],
-      updrs: ["updrs"],
-      hyStage: ["hyStage", "H&Y", "hystage"],
-      tug_avg: ["tug_avg", "TUG_av"],
-      avgSpeed: ["avgSpeed", "avg_Speed"],
-      avgStepLength: ["avgStepLength", "avg_StepLength"],
-      avgCadence: ["avgCadence", "avg_Cadence"],
-      remark: ["remark", "re_mark", "備註"]
+      id:['id'], Group:['Group','group'], name:['name','姓名'],
+      'progress(green=intervention; blue=control; yellow=pending;red=dropped)':['progress'],
+      age:['age','年齡'], diagnosisDuration:['diagnosisDuration','diagnosisYear','病程'], educationYears:['educationYears'],
+      dominantHand:['dominantHand'], implants:['implants'], wheelchair:['wheelchair'],
+      medicationDetails:['medicationDetails','medication','medDetails'], totalLEDD:['totalLEDD','LEDD'],
+      medFirstTime:['medFirstTime'], medDuration:['medDuration'], medFrequency:['medFrequency'],
+      training1:['training1'], training2:['training2'], training3:['training3'], legLength:['legLength'],
+      height:['height','fci18_height'], weigth:['weigth','weight','fci18_weight'], fci:['fci','fciTotal'], contact:['contact'],
+      pre_date:['pre_date','timestamp','testDate'], tester:['tester'], medtime:['medtime'],
+      hadsAnxiety:['hadsAnxiety'], hadsDepression:['hadsDepression'], PDQ:['PDQ','pdqTotal'], fogqTotal:['fogqTotal'],
+      moca:['moca'], 'PAR-Q':['PAR-Q','PARQ'], updrs:['updrs'], hyStage:['hyStage','H&Y','hystage'],
+      tug_avg:['tug_avg','TUG_av'], avgSpeed:['avgSpeed','avg_Speed'], avgStepLength:['avgStepLength','avg_StepLength'], avgCadence:['avgCadence','avg_Cadence'], remark:['remark','re_mark','備註']
     };
 
     const DIRECT_MAP_POST = {
-      post_date2: ["post_date2", "timestamp", "post_date"],
-      staff: ["staff", "tester"],
-      Med: ["Med", "med", "medicationStatus"],
-      hadA: ["hadA", "hadsAnxiety"],
-      hadD: ["hadD", "hadsDepression"],
-      PD_Q: ["PD_Q", "PDQ", "pdqTotal"],
-      fogSum: ["fogSum", "fogqTotal"],
-      Moc_a: ["Moc_a", "moca"],
-      up_drs: ["up_drs", "updrs"],
-      "H&Y": ["H&Y", "hyStage"],
-      TUG_av: ["TUG_av", "tug_avg"],
-      avg_Speed: ["avg_Speed", "avgSpeed"],
-      avg_StepLength: ["avg_StepLength", "avgStepLength"],
-      avg_Cadence: ["avg_Cadence", "avgCadence"],
-      re_mark: ["re_mark", "remark"]
+      post_date2:['post_date2','timestamp','post_date','testDate'], staff:['staff','tester'], Med:['Med','med','medicationStatus'],
+      hadA:['hadA','hadsAnxiety'], hadD:['hadD','hadsDepression'], PD_Q:['PD_Q','PDQ','pdqTotal'], fogSum:['fogSum','fogqTotal'],
+      Moc_a:['Moc_a','moca'], up_drs:['up_drs','updrs'], 'H&Y':['H&Y','hyStage'], TUG_av:['TUG_av','tug_avg'],
+      avg_Speed:['avg_Speed','avgSpeed'], avg_StepLength:['avg_StepLength','avgStepLength'], avg_Cadence:['avg_Cadence','avgCadence'], re_mark:['re_mark','remark']
     };
 
     const SAMPLE_TEXT = `timestamp\tid\tname\tage\tdiagnosisYear\teducationYears\tdominantHand\timplants\twheelchair\tmedFirstTime\tmedDuration\tmedFrequency\ttraining1\ttraining2\ttraining3\tfci18_height\tfci18_weight\tfciTotal\thadsAnxiety\thadsDepression\tpdqTotal\tfogqTotal
 2025-12-05T09:10:01.670Z\t3\t張學强\t70\t6\t6\t右\t否\t不使用\t06:00\t3\t5\t星期一下午\t星期三下午\t星期五下午\t166\t51\t0\t8\t12\t68\t14
 2026-01-15T09:10:01.670Z\t3\t張學强\t70\t6\t6\t右\t否\t不使用\t06:00\t3\t5\t星期一下午\t星期三下午\t星期五下午\t166\t51\t0\t7\t10\t60\t12`;
 
-    let sourceRows = [];
-    let outputRows = [];
+    let rawRecords = [];
+    let importedFiles = [];
+    let masterRows = [];
 
-    function normalizeHeader(h) {
-      return String(h ?? "")
-        .replace(/\uFEFF/g, "")
-        .replace(/&amp;/g, "&")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function normalizeName(name) {
-      return String(name ?? "")
-        .replace(/\u3000/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-    }
-
-    function cleanValue(v) {
-      if (v == null) return "";
-      return typeof v === "string" ? v.trim() : v;
-    }
-
-    function firstNonEmpty(record, candidates) {
-      for (const key of candidates) {
-        if (record && Object.prototype.hasOwnProperty.call(record, key)) {
+    function normalizeHeader(h){ return String(h ?? '').replace(/\uFEFF/g,'').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim(); }
+    function normalizeName(name){ return String(name ?? '').replace(/\u3000/g,' ').replace(/\s+/g,' ').trim().toLowerCase(); }
+    function cleanValue(v){ if(v == null) return ''; return typeof v === 'string' ? v.trim() : v; }
+    function firstNonEmpty(record, candidates){
+      for(const key of candidates){
+        if(record && Object.prototype.hasOwnProperty.call(record,key)){
           const value = cleanValue(record[key]);
-          if (value !== "") return value;
+          if(value !== '') return value;
         }
       }
-      return "";
+      return '';
+    }
+    function isProbablyJSON(text){ const t=text.trim(); return t.startsWith('[') || t.startsWith('{'); }
+    function escapeHtml(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+    function parseNumber(v){
+      if(v == null || v === '') return null;
+      const n = Number(String(v).replace(/,/g,'').trim());
+      return Number.isFinite(n) ? n : null;
     }
 
-    function formatDateCell(v) {
-      if (v == null || v === "") return "";
-      if (typeof v === "number") {
+    function formatDateCell(v){
+      if(v == null || v === '') return '';
+      if(typeof v === 'number'){
         const d = XLSX.SSF.parse_date_code(v);
-        if (!d) return String(v);
-        return `${d.y}-${String(d.m).padStart(2, "0")}-${String(d.d).padStart(2, "0")}`;
+        if(!d) return String(v);
+        return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
       }
       const s = String(v).trim();
-      if (/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
-      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      if(/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0,10);
+      if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       const d = new Date(s);
-      if (!Number.isNaN(d.getTime())) {
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-      }
+      if(!Number.isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       return s;
     }
 
-    function isProbablyJSON(text) {
-      const t = text.trim();
-      return t.startsWith("[") || t.startsWith("{");
+    function splitSmartLine(line, delimiter){
+      const out=[]; let cur=''; let inQuotes=false;
+      for(let i=0;i<line.length;i++){
+        const ch=line[i], next=line[i+1];
+        if(ch === '"'){
+          if(inQuotes && next === '"'){ cur+='"'; i++; }
+          else inQuotes = !inQuotes;
+          continue;
+        }
+        if(ch === delimiter && !inQuotes){ out.push(cur); cur=''; continue; }
+        cur += ch;
+      }
+      out.push(cur);
+      return out.map(x=>x.trim());
     }
 
-    function normalizeObjectKeys(obj) {
-      const out = {};
-      Object.entries(obj || {}).forEach(([k, v]) => {
+    function normalizeObjectKeys(obj){
+      const out={};
+      Object.entries(obj||{}).forEach(([k,v])=>{
         out[normalizeHeader(k)] = cleanValue(v);
       });
       return out;
     }
 
-    function splitSmartLine(line, delimiter) {
-      const out = [];
-      let cur = "";
-      let inQuotes = false;
-
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        const next = line[i + 1];
-
-        if (ch === '"') {
-          if (inQuotes && next === '"') {
-            cur += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
-          }
-          continue;
-        }
-
-        if (ch === delimiter && !inQuotes) {
-          out.push(cur);
-          cur = "";
-          continue;
-        }
-
-        cur += ch;
-      }
-
-      out.push(cur);
-      return out.map(x => x.trim());
-    }
-
-    function parseDelimitedText(text) {
-      const cleaned = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
-      if (!cleaned) return [];
-
-      const firstLine = cleaned.split("\n").find(x => x.trim()) || "";
-      const tabCount = (firstLine.match(/\t/g) || []).length;
-      const commaCount = (firstLine.match(/,/g) || []).length;
-      const delimiter = tabCount >= commaCount ? "\t" : ",";
-
-      const lines = cleaned.split("\n").filter(x => x.trim() !== "");
+    function parseDelimitedText(text){
+      const cleaned = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim();
+      if(!cleaned) return [];
+      const firstLine = cleaned.split('\n').find(x=>x.trim()) || '';
+      const tabCount = (firstLine.match(/\t/g)||[]).length;
+      const commaCount = (firstLine.match(/,/g)||[]).length;
+      const delimiter = tabCount >= commaCount ? '\t' : ',';
+      const lines = cleaned.split('\n').filter(x=>x.trim() !== '');
       const headers = splitSmartLine(lines[0], delimiter).map(normalizeHeader);
-
-      return lines.slice(1).map(line => {
+      return lines.slice(1).map(line=>{
         const cells = splitSmartLine(line, delimiter);
-        const row = {};
-        headers.forEach((h, idx) => {
-          row[h] = cleanValue(cells[idx] ?? "");
-        });
+        const row={};
+        headers.forEach((h,idx)=> row[h] = cleanValue(cells[idx] ?? ''));
         return row;
       });
     }
 
-    function parsePastedText(text) {
-      if (!text.trim()) return [];
-
-      if (isProbablyJSON(text)) {
+    function parseText(text){
+      if(!text.trim()) return [];
+      if(isProbablyJSON(text)){
         const parsed = JSON.parse(text);
-        if (Array.isArray(parsed)) return parsed.map(normalizeObjectKeys);
-        if (Array.isArray(parsed?.data)) return parsed.data.map(normalizeObjectKeys);
+        if(Array.isArray(parsed)) return parsed.map(normalizeObjectKeys);
+        if(Array.isArray(parsed?.data)) return parsed.data.map(normalizeObjectKeys);
         return [normalizeObjectKeys(parsed)];
       }
-
       return parseDelimitedText(text).map(normalizeObjectKeys);
     }
 
-    function pairRecords(records) {
-      const buckets = new Map();
-
-      records.forEach((row, idx) => {
-        const name = firstNonEmpty(row, ["name", "姓名"]);
-        const key = normalizeName(name) || `__row_${idx}`;
-        if (!buckets.has(key)) buckets.set(key, []);
-        buckets.get(key).push(row);
-      });
-
-      const groups = [];
-      for (const [key, list] of buckets.entries()) {
-        const sorted = [...list].sort((a, b) => {
-          const av = formatDateCell(firstNonEmpty(a, ["timestamp", "pre_date", "post_date2"])) || "";
-          const bv = formatDateCell(firstNonEmpty(b, ["timestamp", "pre_date", "post_date2"])) || "";
-          return av.localeCompare(bv);
-        });
-
-        groups.push({
-          key,
-          pre: sorted[0],
-          post: sorted.length > 1 ? sorted[sorted.length - 1] : null
-        });
-      }
-
-      return groups;
+    function computeUPDRSTotal(record){
+      const keys = Object.keys(record).filter(k => /^updrs3_/i.test(k));
+      const nums = keys.map(k => parseNumber(record[k])).filter(v => v != null);
+      if(nums.length === 0) return '';
+      return nums.reduce((a,b)=>a+b,0);
     }
 
-    function readDefaults() {
+    function computeTUGAverage(record){
+      const vals = ['tug1','tug2','tug3'].map(k => parseNumber(record[k])).filter(v => v != null);
+      if(vals.length === 0) return '';
+      return +(vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(2);
+    }
+
+    function computePARQ(record){
+      const vals = ['parq1','parq2','parq3','parq4','parq5','parq6','parq7'].map(k => String(record[k] ?? '').trim());
+      const hasAny = vals.some(Boolean);
+      if(!hasAny) return '';
+      return vals.some(v => ['是','yes','true','1','y'].includes((v.toLowerCase?.() || v))) ? 'T' : 'F';
+    }
+
+    function maybeConvertDetailedAssessment(record){
+      const hasUPDRSItems = Object.keys(record).some(k => /^updrs3_/i.test(k));
+      const hasTUG = ['tug1','tug2','tug3','tug_avg'].some(k => k in record);
+      const hasTestType = 'testType' in record || 'testDate' in record || 'localSaveTime' in record;
+      if(!(hasUPDRSItems || hasTUG || hasTestType)) return record;
+
+      const out = { ...record };
+      const updrsTotal = computeUPDRSTotal(record);
+      const tugAvg = record.tug_avg || computeTUGAverage(record);
+      const parq = computePARQ(record);
+      const preOrPost = String(record.testType || '').trim().toLowerCase();
+
+      if(preOrPost === 'pre') {
+        out.pre_date = record.testDate || record.localSaveTime || '';
+        out.tester = record.tester || '';
+        out['PAR-Q'] = parq;
+        out.updrs = updrsTotal;
+        out.tug_avg = tugAvg;
+      } else if(preOrPost === 'post') {
+        out.post_date2 = record.testDate || record.localSaveTime || '';
+        out.staff = record.tester || '';
+        out.up_drs = updrsTotal;
+        out.TUG_av = tugAvg;
+      } else {
+        out.pre_date = record.testDate || record.localSaveTime || '';
+        out.tester = record.tester || '';
+        out['PAR-Q'] = parq;
+        out.updrs = updrsTotal;
+        out.tug_avg = tugAvg;
+      }
+
+      out.Med = record.updrs3b_on || out.Med || '';
+      out.medicationDetails = record.medicationDetails || out.medicationDetails || '';
+      out.totalLEDD = record.totalLEDD || out.totalLEDD || '';
+      out.hyStage = record.hyStage || out.hyStage || '';
+      out['H&Y'] = record.hyStage || out['H&Y'] || '';
+      out.legLength = record.legLength || out.legLength || '';
+      out.moca = record.moca || out.moca || '';
+      out.Moc_a = record.moca || out.Moc_a || '';
+      return out;
+    }
+
+    function readDefaults(){
       return {
-        group: document.getElementById("groupInput").value.trim(),
-        progress: document.getElementById("progressInput").value.trim(),
-        tester: document.getElementById("testerInput").value.trim(),
-        staff: document.getElementById("staffInput").value.trim(),
-        med: document.getElementById("medInput").value.trim(),
-        autoId: document.getElementById("autoIdInput").value === "on",
-        idPrefix: document.getElementById("idPrefixInput").value.trim() || "T",
-        idStart: Number(document.getElementById("idStartInput").value || 1),
-        idPad: Number(document.getElementById("idPadInput").value || 3),
+        group: document.getElementById('groupInput').value.trim(),
+        progress: document.getElementById('progressInput').value.trim(),
+        tester: document.getElementById('testerInput').value.trim(),
+        staff: document.getElementById('staffInput').value.trim(),
+        med: document.getElementById('medInput').value.trim(),
+        autoId: document.getElementById('autoIdInput').value === 'on',
+        idPrefix: document.getElementById('idPrefixInput').value.trim() || 'T',
+        idStart: Number(document.getElementById('idStartInput').value || 1),
+        idPad: Number(document.getElementById('idPadInput').value || 3),
       };
     }
 
-    function buildTargetRow(pre, post, defaults, seq) {
-      const row = Object.fromEntries(TARGET_HEADERS.map(h => [h, ""]));
-
-      for (const [target, candidates] of Object.entries(DIRECT_MAP_PRE)) {
-        row[target] = firstNonEmpty(pre, candidates);
-      }
-
-      if (post) {
-        for (const [target, candidates] of Object.entries(DIRECT_MAP_POST)) {
-          row[target] = firstNonEmpty(post, candidates);
-        }
-      }
+    function buildTargetRow(pre, post, defaults, seq){
+      const row = Object.fromEntries(TARGET_HEADERS.map(h=>[h,'']));
+      for(const [target, candidates] of Object.entries(DIRECT_MAP_PRE)) row[target] = firstNonEmpty(pre, candidates);
+      if(post) for(const [target, candidates] of Object.entries(DIRECT_MAP_POST)) row[target] = firstNonEmpty(post, candidates);
 
       row.pre_date = formatDateCell(row.pre_date);
       row.post_date2 = formatDateCell(row.post_date2);
 
-      if (!row.id && defaults.autoId) {
-        row.id = `${defaults.idPrefix}${String(defaults.idStart + seq).padStart(defaults.idPad, "0")}`;
+      if(!row.id && defaults.autoId) row.id = `${defaults.idPrefix}${String(defaults.idStart + seq).padStart(defaults.idPad,'0')}`;
+      if(!row.Group) row.Group = defaults.group || '';
+      if(!row['progress(green=intervention; blue=control; yellow=pending;red=dropped)']) {
+        row['progress(green=intervention; blue=control; yellow=pending;red=dropped)'] = defaults.progress || '';
       }
-
-      if (!row.Group) row.Group = defaults.group || "";
-      if (!row["progress(green=intervention; blue=control; yellow=pending;red=dropped)"]) {
-        row["progress(green=intervention; blue=control; yellow=pending;red=dropped)"] = defaults.progress || "";
-      }
-      if (!row.tester) row.tester = defaults.tester || "";
-      if (!row.staff) row.staff = defaults.staff || row.tester || "";
-      if (!row.Med) row.Med = defaults.med || "";
-
+      if(!row.tester) row.tester = defaults.tester || '';
+      if(!row.staff) row.staff = defaults.staff || row.tester || '';
+      if(!row.Med) row.Med = defaults.med || '';
       return row;
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    function groupKeyFromRecord(r){
+      const id = firstNonEmpty(r, ['id']);
+      const name = firstNonEmpty(r, ['name','姓名']);
+      return normalizeName(id || name) || Math.random().toString(36).slice(2);
     }
 
-    function setError(msg) {
-      document.getElementById("errors").innerHTML = msg
-        ? `<div class="error">${escapeHtml(msg)}</div>`
-        : "";
+    function sortByDate(a,b){
+      const av = formatDateCell(firstNonEmpty(a,['timestamp','pre_date','post_date2','testDate','localSaveTime'])) || '';
+      const bv = formatDateCell(firstNonEmpty(b,['timestamp','pre_date','post_date2','testDate','localSaveTime'])) || '';
+      return av.localeCompare(bv);
     }
 
-    function updateStats() {
-      const uniqueNames = new Set(
-        sourceRows
-          .map(r => normalizeName(firstNonEmpty(r, ["name", "姓名"])))
-          .filter(Boolean)
-      ).size;
+    function splitPrePost(records){
+      const byPerson = new Map();
+      records.forEach(r => {
+        const key = groupKeyFromRecord(r);
+        if(!byPerson.has(key)) byPerson.set(key, []);
+        byPerson.get(key).push(r);
+      });
 
-      document.getElementById("sourceCount").textContent = sourceRows.length;
-      document.getElementById("uniqueCount").textContent = uniqueNames;
-      document.getElementById("outputCount").textContent = outputRows.length;
+      const grouped = [];
+      for(const [key, list] of byPerson.entries()){
+        let explicitPre = list.filter(r => String(r.testType || '').trim().toLowerCase() === 'pre');
+        let explicitPost = list.filter(r => String(r.testType || '').trim().toLowerCase() === 'post');
+
+        if(explicitPre.length || explicitPost.length){
+          const pre = explicitPre.sort(sortByDate)[0] || list.slice().sort(sortByDate)[0];
+          const post = explicitPost.sort(sortByDate).slice(-1)[0] || null;
+          grouped.push({key, pre, post});
+        } else {
+          const sorted = [...list].sort(sortByDate);
+          grouped.push({ key, pre: sorted[0], post: sorted.length > 1 ? sorted[sorted.length-1] : null });
+        }
+      }
+      return grouped;
     }
 
-    function updateButtons() {
-      const disabled = outputRows.length === 0;
-      document.getElementById("exportXlsxBtn").disabled = disabled;
-      document.getElementById("exportTsvBtn").disabled = disabled;
-      document.getElementById("exportJsonBtn").disabled = disabled;
+    function getRecordSignature(record){
+      const id = firstNonEmpty(record, ['id']);
+      const name = firstNonEmpty(record, ['name','姓名']);
+      const testType = String(record.testType || '').trim().toLowerCase();
+      const date = formatDateCell(firstNonEmpty(record, ['timestamp','testDate','pre_date','post_date2','localSaveTime'])) || '';
+      return `${normalizeName(id)}|${normalizeName(name)}|${testType}|${date}`;
     }
 
-    function renderPreview() {
-      const previewHeaders = TARGET_HEADERS.slice(0, 24);
-      const thead = document.querySelector("#previewTable thead");
-      const tbody = document.querySelector("#previewTable tbody");
+    function rebuildMaster(){
+      const defaults = readDefaults();
+      const normalized = rawRecords.map(item => maybeConvertDetailedAssessment(item.record));
+      masterRows = splitPrePost(normalized).map((g,idx) => buildTargetRow(g.pre, g.post, defaults, idx));
+      renderAll();
+      autoSave();
+    }
 
-      thead.innerHTML = `<tr>${
-        previewHeaders.map(h => `<th>${escapeHtml(h)}</th>`).join("")
-      }<th>…</th></tr>`;
+    function updateStats(){
+      const personCount = new Set(rawRecords.map(x => groupKeyFromRecord(x.record))).size;
+      document.getElementById('rawCount').textContent = rawRecords.length;
+      document.getElementById('personCount').textContent = personCount;
+      document.getElementById('masterCount').textContent = masterRows.length;
+      document.getElementById('fileCount').textContent = importedFiles.length;
+    }
 
-      if (!outputRows.length) {
-        tbody.innerHTML = `<tr><td colspan="25" class="muted">還沒有輸出結果。先貼上或上傳資料，然後按「開始整理」。</td></tr>`;
+    function renderPreview(){
+      const previewHeaders = TARGET_HEADERS.slice(0, 28);
+      const thead = document.querySelector('#previewTable thead');
+      const tbody = document.querySelector('#previewTable tbody');
+      thead.innerHTML = `<tr>${previewHeaders.map(h=>`<th>${escapeHtml(h)}</th>`).join('')}<th>…</th></tr>`;
+
+      if(!masterRows.length){
+        tbody.innerHTML = `<tr><td colspan="29" class="small">目前還沒有主表資料。</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = outputRows.slice(0, 12).map(row => {
-        return `<tr>${
-          previewHeaders.map(h => `<td>${escapeHtml(String(row[h] ?? ""))}</td>`).join("")
-        }<td class="muted">…</td></tr>`;
-      }).join("");
+      tbody.innerHTML = masterRows.slice(0, 20).map(row =>
+        `<tr>${previewHeaders.map(h=>`<td>${escapeHtml(String(row[h] ?? ''))}</td>`).join('')}<td class="small">…</td></tr>`
+      ).join('');
     }
 
-    function regenerate() {
-      const defaults = readDefaults();
-      const paired = pairRecords(sourceRows).map((g, idx) =>
-        buildTargetRow(g.pre, g.post, defaults, idx)
-      );
+    function renderMessages(kind, text){
+      const el = document.getElementById('messages');
+      el.innerHTML = text ? `<div class="${kind}">${escapeHtml(text)}</div>` : '';
+    }
 
-      outputRows = paired;
+    function renderAll(){
       updateStats();
-      updateButtons();
       renderPreview();
+      const disabled = masterRows.length === 0;
+      document.getElementById('exportXlsxBtn').disabled = disabled;
+      document.getElementById('exportTsvBtn').disabled = disabled;
+      document.getElementById('exportJsonBtn').disabled = disabled;
     }
 
-    function handleParseText() {
-      try {
-        setError("");
-        const rawText = document.getElementById("rawText").value;
-        const parsed = parsePastedText(rawText);
+    function appendParsedRecords(records, sourceName){
+      const existingSignatures = new Set(rawRecords.map(x => getRecordSignature(x.record)));
+      let appended = 0, skipped = 0;
 
-        if (!parsed.length) {
-          throw new Error("沒有讀到任何資料。請貼上 TSV/CSV/JSON，或上傳檔案。");
+      records.forEach(record => {
+        const normalized = normalizeObjectKeys(record);
+        const signature = getRecordSignature(normalized);
+        if(existingSignatures.has(signature)) {
+          skipped += 1;
+          return;
         }
+        rawRecords.push({ sourceFile: sourceName || 'pasted-text', record: normalized });
+        existingSignatures.add(signature);
+        appended += 1;
+      });
 
-        sourceRows = parsed;
-        regenerate();
-      } catch (err) {
-        setError(String(err?.message || err));
-      }
+      return { appended, skipped };
     }
 
-    async function handleFile(file) {
-      if (!file) return;
+    async function appendFiles(fileList){
+      let addedFiles = 0, addedRecords = 0, skippedRecords = 0;
 
-      try {
-        setError("");
+      for(const file of fileList){
         const name = file.name.toLowerCase();
         let parsed = [];
 
-        if (name.endsWith(".json")) {
+        if(name.endsWith('.json')){
           const text = await file.text();
-          parsed = parsePastedText(text);
-        } else if (
-          name.endsWith(".csv") ||
-          name.endsWith(".tsv") ||
-          name.endsWith(".txt")
-        ) {
+          parsed = parseText(text);
+        } else if(name.endsWith('.csv') || name.endsWith('.tsv') || name.endsWith('.txt')){
           const text = await file.text();
-          parsed = parsePastedText(text);
-        } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+          parsed = parseText(text);
+        } else if(name.endsWith('.xlsx') || name.endsWith('.xls')) {
           const buf = await file.arrayBuffer();
-          const wb = XLSX.read(buf, { type: "array" });
+          const wb = XLSX.read(buf, { type:'array' });
           const ws = wb.Sheets[wb.SheetNames[0]];
-          parsed = XLSX.utils.sheet_to_json(ws, { defval: "" }).map(normalizeObjectKeys);
+          parsed = XLSX.utils.sheet_to_json(ws, { defval:'' }).map(normalizeObjectKeys);
         } else {
-          throw new Error("暫時只支援 .xlsx / .xls / .csv / .tsv / .txt / .json");
+          throw new Error(`不支援檔案格式：${file.name}`);
         }
 
-        if (!parsed.length) {
-          throw new Error("檔案已讀取，但沒有找到有效資料。請確認第一行是表頭。");
+        if(parsed.length){
+          const result = appendParsedRecords(parsed, file.name);
+          if(result.appended > 0){
+            importedFiles.push(file.name);
+            addedFiles += 1;
+          }
+          addedRecords += result.appended;
+          skippedRecords += result.skipped;
         }
-
-        sourceRows = parsed;
-        regenerate();
-      } catch (err) {
-        setError(String(err?.message || err));
       }
+
+      rebuildMaster();
+      renderMessages('good', `已追加 ${addedFiles} 份檔案，共新增 ${addedRecords} 筆來源記錄。${skippedRecords ? `\n跳過重複記錄 ${skippedRecords} 筆。` : ''}\n目前主表共有 ${masterRows.length} 行。`);
     }
 
-    function downloadBlob(filename, blob) {
+    function exportJSON(){
+      const blob = new Blob([JSON.stringify(masterRows, null, 2)], { type:'application/json;charset=utf-8' });
+      downloadBlob('basic-info-master.json', blob);
+    }
+
+    function exportTSV(){
+      const lines = [TARGET_HEADERS.join('\t')].concat(
+        masterRows.map(row => TARGET_HEADERS.map(h => String(row[h] ?? '').replace(/\t/g,' ')).join('\t'))
+      );
+      const blob = new Blob([lines.join('\n')], { type:'text/tab-separated-values;charset=utf-8' });
+      downloadBlob('basic-info-master.tsv', blob);
+    }
+
+    function exportXLSX(){
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(masterRows, { header: TARGET_HEADERS });
+      XLSX.utils.book_append_sheet(wb, ws, 'BASIC_INFO');
+      XLSX.writeFile(wb, 'basic-info-master.xlsx');
+    }
+
+    function downloadBlob(filename, blob){
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    function exportJSON() {
-      const blob = new Blob(
-        [JSON.stringify(outputRows, null, 2)],
-        { type: "application/json;charset=utf-8" }
-      );
-      downloadBlob("target-format.json", blob);
+    function autoSave(){
+      const payload = { rawRecords, importedFiles, defaults: readDefaults() };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     }
 
-    function exportTSV() {
-      const lines = [TARGET_HEADERS.join("\t")].concat(
-        outputRows.map(row =>
-          TARGET_HEADERS.map(h => String(row[h] ?? "").replace(/\t/g, " ")).join("\t")
-        )
-      );
+    function loadSaved(){
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if(!saved) return;
+        rawRecords = Array.isArray(saved.rawRecords) ? saved.rawRecords : [];
+        importedFiles = Array.isArray(saved.importedFiles) ? saved.importedFiles : [];
 
-      const blob = new Blob(
-        [lines.join("\n")],
-        { type: "text/tab-separated-values;charset=utf-8" }
-      );
-      downloadBlob("target-format.tsv", blob);
+        const d = saved.defaults || {};
+        document.getElementById('groupInput').value = d.group || '';
+        document.getElementById('progressInput').value = d.progress || '';
+        document.getElementById('testerInput').value = d.tester || '';
+        document.getElementById('staffInput').value = d.staff || '';
+        document.getElementById('medInput').value = d.med || '';
+        document.getElementById('autoIdInput').value = d.autoId ? 'on' : 'off';
+        document.getElementById('idPrefixInput').value = d.idPrefix || 'T';
+        document.getElementById('idStartInput').value = d.idStart || 1;
+        document.getElementById('idPadInput').value = d.idPad || 3;
+
+        rebuildMaster();
+        if(rawRecords.length) {
+          renderMessages('good', `已從瀏覽器恢復暫存：${rawRecords.length} 筆來源記錄，${masterRows.length} 行主表。`);
+        }
+      } catch(err){
+        console.warn(err);
+      }
     }
 
-    function exportXLSX() {
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(outputRows, { header: TARGET_HEADERS });
-      XLSX.utils.book_append_sheet(wb, ws, "BASIC_INFO");
-      XLSX.writeFile(wb, "target-format.xlsx");
-    }
+    document.getElementById('appendTextBtn').addEventListener('click', () => {
+      try {
+        const text = document.getElementById('rawText').value;
+        const parsed = parseText(text);
+        if(!parsed.length) throw new Error('沒有讀到任何資料。請貼上 TSV/CSV/JSON，或改用上傳檔案。');
 
-    document.getElementById("parseBtn").addEventListener("click", handleParseText);
-
-    document.getElementById("exampleBtn").addEventListener("click", () => {
-      document.getElementById("rawText").value = SAMPLE_TEXT;
+        const result = appendParsedRecords(parsed, 'pasted-text');
+        rebuildMaster();
+        renderMessages('good', `已追加貼上資料，新增 ${result.appended} 筆。${result.skipped ? `\n跳過重複記錄 ${result.skipped} 筆。` : ''}\n現在主表共有 ${masterRows.length} 行。`);
+      } catch(err) {
+        renderMessages('error', String(err?.message || err));
+      }
     });
 
-    document.getElementById("clearBtn").addEventListener("click", () => {
-      document.getElementById("rawText").value = "";
-      sourceRows = [];
-      outputRows = [];
-      setError("");
-      updateStats();
-      updateButtons();
-      renderPreview();
+    document.getElementById('exampleBtn').addEventListener('click', ()=> {
+      document.getElementById('rawText').value = SAMPLE_TEXT;
     });
 
-    document.getElementById("fileInput").addEventListener("change", e => {
-      handleFile(e.target.files?.[0]);
+    document.getElementById('clearTextBtn').addEventListener('click', ()=> {
+      document.getElementById('rawText').value = '';
     });
 
-    document.getElementById("regenBtn").addEventListener("click", regenerate);
-    document.getElementById("exportJsonBtn").addEventListener("click", exportJSON);
-    document.getElementById("exportTsvBtn").addEventListener("click", exportTSV);
-    document.getElementById("exportXlsxBtn").addEventListener("click", exportXLSX);
+    document.getElementById('fileInput').addEventListener('change', async e => {
+      const files = Array.from(e.target.files || []);
+      if(!files.length) return;
+      try {
+        await appendFiles(files);
+      } catch(err){
+        renderMessages('error', String(err?.message || err));
+      }
+      e.target.value = '';
+    });
 
-    updateStats();
-    updateButtons();
-    renderPreview();
+    document.getElementById('rebuildBtn').addEventListener('click', ()=>{
+      rebuildMaster();
+      renderMessages('good', '已按目前規則重建主表。');
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', ()=>{
+      autoSave();
+      renderMessages('good', '已手動保存暫存到瀏覽器。');
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', ()=>{
+      if(!confirm('確定要清空目前所有累積資料嗎？')) return;
+      rawRecords = [];
+      importedFiles = [];
+      masterRows = [];
+      localStorage.removeItem(STORAGE_KEY);
+      renderAll();
+      renderMessages('good', '已清空所有累積資料與本地暫存。');
+    });
+
+    document.getElementById('exportJsonBtn').addEventListener('click', exportJSON);
+    document.getElementById('exportTsvBtn').addEventListener('click', exportTSV);
+    document.getElementById('exportXlsxBtn').addEventListener('click', exportXLSX);
+
+    ['groupInput','progressInput','testerInput','staffInput','medInput','autoIdInput','idPrefixInput','idStartInput','idPadInput'].forEach(id => {
+      document.getElementById(id).addEventListener('change', autoSave);
+    });
+
+    loadSaved();
+    renderAll();
   </script>
 </body>
 </html>
