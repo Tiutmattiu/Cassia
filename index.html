@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A + B → C Excel 合并器</title>
+  <title>Paste A + Upload B → C Excel</title>
 
   <!-- SheetJS -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -11,7 +11,7 @@
   <style>
     body {
       font-family: Arial, "Microsoft JhengHei", "PingFang TC", sans-serif;
-      max-width: 1080px;
+      max-width: 1100px;
       margin: 24px auto;
       padding: 16px;
       background: #f7f8fa;
@@ -32,7 +32,7 @@
 
     .sub {
       color: #555;
-      line-height: 1.7;
+      line-height: 1.8;
       margin-bottom: 20px;
     }
 
@@ -44,6 +44,20 @@
       display: block;
       font-weight: 700;
       margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 240px;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #d7dbe2;
+      border-radius: 10px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: vertical;
+      background: #fff;
     }
 
     input[type="file"] {
@@ -60,7 +74,7 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
     button {
@@ -86,16 +100,33 @@
     }
 
     .status {
-      margin-top: 8px;
+      margin-top: 10px;
       font-weight: 700;
     }
 
-    .ok {
-      color: #065f46;
+    .ok { color: #065f46; }
+    .err { color: #b91c1c; }
+
+    .small {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.7;
     }
 
-    .err {
-      color: #b91c1c;
+    .box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px;
+      line-height: 1.7;
+      font-size: 14px;
+      color: #444;
+    }
+
+    code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 6px;
     }
 
     pre {
@@ -106,77 +137,121 @@
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-word;
-      min-height: 200px;
+      min-height: 220px;
+      line-height: 1.5;
     }
 
-    .small {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.7;
-    }
-
-    .warn {
-      background: #fff7ed;
-      border: 1px solid #fdba74;
-      color: #9a3412;
-      padding: 12px;
+    .hint {
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      color: #1e3a8a;
       border-radius: 10px;
-      margin-top: 14px;
+      padding: 12px;
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 16px;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>A + B → C Excel 合并器</h1>
+    <h1>Paste A + Upload B → C Excel</h1>
+
     <div class="sub">
-      <div>A：上传 <b>1 个</b>（支持 <b>Excel / CSV / JSON</b>）</div>
-      <div>B：上传 <b>1~2 个</b>（支持 <b>TXT / CSV / JSON</b>）</div>
-      <div>规则：默认 A 和 B 是同一个人；B 会按 <code>testType=pre/post</code> 自动分流到 C。</div>
-      <div>如果某一边没有（只有 pre 或只有 post），就自动留空。</div>
+      <div><b>A：</b>不上传，直接粘贴 <b>1–2 行数据</b>（表头固定为你提供的 schema）</div>
+      <div><b>B：</b>上传 <b>1–2 个文件</b>（TXT / JSON / CSV）</div>
+      <div>如果 A 贴 2 行，默认是同一个人的前后两次；程序会优先按 <code>timestamp</code> 早晚排序：早的是 <b>pre</b>，晚的是 <b>post</b>。如果时间不可识别，就按粘贴顺序：第一行 pre、第二行 post。</div>
+    </div>
+
+    <div class="hint">
+      <b>A 粘贴格式说明：</b><br>
+      你可以直接从 Excel 复制两行“数据行”贴进下面文本框。<br>
+      <b>不用贴表头</b>；程序默认表头就是你给的那套。<br>
+      当然，如果你不小心把表头也一起贴了，程序也会自动识别并跳过。
     </div>
 
     <div class="row">
-      <label for="fileA">上传 A 文件（1 个）</label>
-      <input id="fileA" type="file" accept=".xlsx,.xls,.csv,.json" />
+      <label for="pasteA">粘贴 A（1–2 行，tab 分隔）</label>
+      <textarea id="pasteA" placeholder="把 A 的 1–2 行数据直接粘贴到这里（从 Excel 复制即可）"></textarea>
+      <div class="small">
+        默认 A 的表头固定，不需要上传文件。<br>
+        如果粘贴 1 行：默认当作 <b>pre</b>。<br>
+        如果粘贴 2 行：按 timestamp 排序（早=pre，晚=post）；若 timestamp 无法识别，则按粘贴顺序（第一行=pre，第二行=post）。
+      </div>
     </div>
 
     <div class="row">
       <label for="fileB">上传 B 文件（1 或 2 个）</label>
-      <input id="fileB" type="file" accept=".txt,.csv,.json" multiple />
-      <div class="small">建议：如果有 pre 和 post，就两个都传；如果只有一个，也可以正常输出。</div>
+      <input id="fileB" type="file" accept=".txt,.json,.csv" multiple />
+      <div class="small">
+        B 支持 1 或 2 个文件。<br>
+        如果有 pre 和 post，请两个都传；如果只缺其中一个，也可以正常输出。
+      </div>
     </div>
 
     <div class="btns">
       <button id="btnPreview" class="secondary">预览合并结果</button>
       <button id="btnDownload">生成并下载 Excel</button>
+      <button id="btnClear" class="secondary">清空</button>
     </div>
 
     <div id="status" class="status"></div>
-
-    <div class="warn">
-      <b>Par_Q 说明：</b><br/>
-      这一版会优先根据 A 里的共病字段（如 osteoporosis / diabetes / COPD 等）输出标准简写，例如：
-      <code>OP, DM, COPD, HF, MI</code>。<br/>
-      如果 B 的 PAR-Q 有阳性，但 A 里没有对应疾病字段可用，就会补一个 <code>PARQ+</code>，避免丢失信息。<br/>
-      如果你们组有自己固定的缩写表（例如 arthritis 要写 OA 还是 ARTH），你把规则发我，我可以继续帮你改成你们组内标准。
-    </div>
 
     <div class="row" style="margin-top:18px;">
       <label>预览</label>
       <pre id="preview">{}</pre>
     </div>
+
+    <div class="row">
+      <label>A 默认表头（固定）</label>
+      <div class="box" id="schemaBox"></div>
+    </div>
   </div>
 
   <script>
-    // =========================
-    // 基础工具
-    // =========================
+    // =========================================================
+    // A 的固定表头（按你提供的顺序）
+    // =========================================================
+    const A_HEADERS = [
+      "timestamp","id","name","age","diagnosisYear","educationYears","dominantHand",
+      "implants","wheelchair","medFirstTime","medDuration","medFrequency",
+      "training1","training2","training3",
+      "fci1_arthritis","fci2_osteoporosis","fci3_asthma","fci4_copd","fci5_angina",
+      "fci6_heart_failure","fci7_heart_attack","fci8_neuro_disease",
+      "fci10_peripheral_vascular","fci11_diabetes","fci12_gastro","fci16_hearing",
+      "fci17_disc_disease","fci18_height","fci18_weight","fci18_obesity","fciTotal",
+      "hads1","hads2","hads3","hads4","hads5","hads6","hads7","hads8","hads9","hads10",
+      "hads11","hads12","hads13","hads14","hadsAnxiety","hadsDepression",
+      "pdq1","pdq2","pdq3","pdq4","pdq5","pdq6","pdq7","pdq8","pdq9","pdq10","pdq11","pdq12",
+      "pdq13","pdq14","pdq15","pdq16","pdq17","pdq18","pdq19","pdq20","pdq21","pdq22","pdq23",
+      "pdq24","pdq25","pdq26","pdq27","pdq28","pdq29","pdq30","pdq31","pdq32","pdq33","pdq34",
+      "pdq35","pdq36","pdq37","pdq38","pdq39","pdqTotal",
+      "fogq1","fogq2","fogq3","fogq4","fogq5","fogq6","fogqTotal"
+    ];
+
+    // =========================================================
+    // UI
+    // =========================================================
+    document.getElementById("schemaBox").textContent = A_HEADERS.join(" | ");
+
     function setStatus(msg, isError = false) {
       const el = document.getElementById("status");
       el.textContent = msg;
       el.className = "status " + (isError ? "err" : "ok");
     }
 
+    function clearAll() {
+      document.getElementById("pasteA").value = "";
+      document.getElementById("fileB").value = "";
+      document.getElementById("preview").textContent = "{}";
+      setStatus("");
+    }
+
+    document.getElementById("btnClear").addEventListener("click", clearAll);
+
+    // =========================================================
+    // 小工具
+    // =========================================================
     function isBlank(v) {
       return v === undefined || v === null || String(v).trim() === "";
     }
@@ -189,9 +264,22 @@
       return s(v).toLowerCase();
     }
 
+    function yes(v) {
+      const x = lower(v);
+      return ["是","yes","y","true","1","有","同意","positive","+"] .includes(x);
+    }
+
+    function no(v) {
+      const x = lower(v);
+      return ["否","no","n","false","0","無","无","negative","-"].includes(x);
+    }
+
     function toNum(v) {
       if (isBlank(v)) return "";
-      const cleaned = String(v).replace(/,/g, "").trim();
+      const cleaned = String(v)
+        .replace(/[，,]/g, "")
+        .replace(/[；;]/g, "")
+        .trim();
       const n = Number(cleaned);
       return Number.isFinite(n) ? n : "";
     }
@@ -205,26 +293,15 @@
     function maybeCmToMeter(v) {
       const n = toNum(v);
       if (n === "") return "";
-      // >3 基本可认为是厘米
       return n > 3 ? roundTo(n / 100, 2) : roundTo(n, 2);
     }
 
     function pick(obj, keys, defaultValue = "") {
       if (!obj) return defaultValue;
-      for (const key of keys) {
-        if (!isBlank(obj[key])) return obj[key];
+      for (const k of keys) {
+        if (!isBlank(obj[k])) return obj[k];
       }
       return defaultValue;
-    }
-
-    function yes(v) {
-      const x = lower(v);
-      return ["是", "yes", "y", "true", "1", "有", "同意"].includes(x);
-    }
-
-    function no(v) {
-      const x = lower(v);
-      return ["否", "no", "n", "false", "0", "無", "无"].includes(x);
     }
 
     function joinNonEmpty(arr, sep = "; ") {
@@ -235,55 +312,121 @@
       return [...new Set(arr)];
     }
 
-    // =========================
-    // 文件解析
-    // =========================
+    function parseDateSafe(value) {
+      if (isBlank(value)) return null;
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatDateYYYYMMDD(value) {
+      if (isBlank(value)) return "";
+      // 如果本来像 2026-04-16，就直接返回前10位
+      const str = s(value);
+      const m = str.match(/^(\d{4}-\d{2}-\d{2})/);
+      if (m) return m[1];
+      const d = parseDateSafe(value);
+      if (!d) return str;
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // =========================================================
+    // 解析 A：从粘贴文本（无表头 / 可误贴表头）解析成 1~2 行对象
+    // =========================================================
+    function parseAPaste(text) {
+      const raw = String(text || "").trim();
+      if (!raw) throw new Error("请先粘贴 A 数据。");
+
+      const lines = raw
+        .split(/\r?\n/)
+        .map(line => line.replace(/\u00A0/g, " ").trim())
+        .filter(Boolean);
+
+      if (!lines.length) throw new Error("A 粘贴内容为空。");
+
+      const rows = [];
+
+      for (const line of lines) {
+        const cells = line.split("\t");
+
+        // 情况1：用户把表头也贴进来了 -> 跳过
+        if (cells.length >= 5) {
+          const firstFew = A_HEADERS.slice(0, Math.min(A_HEADERS.length, cells.length));
+          let headerLike = true;
+          for (let i = 0; i < Math.min(8, firstFew.length); i++) {
+            if (s(cells[i]) !== firstFew[i]) {
+              headerLike = false;
+              break;
+            }
+          }
+          if (headerLike) continue;
+        }
+
+        // 行长度不足时补空；过长时截断
+        const normalized = cells.slice(0, A_HEADERS.length);
+        while (normalized.length < A_HEADERS.length) normalized.push("");
+
+        const obj = {};
+        A_HEADERS.forEach((h, idx) => {
+          obj[h] = normalized[idx] ?? "";
+        });
+
+        // 至少要有一点有效数据
+        const hasAnyData = Object.values(obj).some(v => !isBlank(v));
+        if (hasAnyData) rows.push(obj);
+      }
+
+      if (!rows.length) {
+        throw new Error("A 粘贴内容无法解析。请确认是从 Excel 复制的 tab 分隔数据。");
+      }
+
+      if (rows.length > 2) {
+        throw new Error("A 目前只接受 1 或 2 行数据。请只粘贴同一个人的 1–2 行。");
+      }
+
+      return rows;
+    }
+
+    // =========================================================
+    // 对 A 的 1~2 行进行 pre/post 归位
+    // 规则：
+    // - 1 行 -> pre
+    // - 2 行 -> 有效 timestamp 则按时间升序；否则按粘贴顺序
+    // =========================================================
+    function assignAPrePost(aRows) {
+      if (aRows.length === 1) {
+        return { preA: aRows[0], postA: null };
+      }
+
+      const r1 = aRows[0];
+      const r2 = aRows[1];
+
+      const t1 = parseDateSafe(r1.timestamp);
+      const t2 = parseDateSafe(r2.timestamp);
+
+      if (t1 && t2) {
+        if (t1.getTime() <= t2.getTime()) {
+          return { preA: r1, postA: r2 };
+        } else {
+          return { preA: r2, postA: r1 };
+        }
+      }
+
+      // timestamp 无法识别，则按粘贴顺序
+      return { preA: r1, postA: r2 };
+    }
+
+    // =========================================================
+    // 解析 B 文件：TXT / JSON / CSV
+    // =========================================================
     function tryParseJSON(text) {
       try {
         return JSON.parse(text);
       } catch {
         return null;
       }
-    }
-
-    function sheetToRowsFromArrayBuffer(buffer) {
-      const wb = XLSX.read(buffer, { type: "array" });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      return XLSX.utils.sheet_to_json(sheet, { defval: "" });
-    }
-
-    function parseCSVText(text) {
-      const wb = XLSX.read(text, { type: "string" });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      return XLSX.utils.sheet_to_json(sheet, { defval: "" });
-    }
-
-    async function readAFile(file) {
-      const ext = file.name.split(".").pop().toLowerCase();
-
-      if (ext === "json") {
-        const text = await file.text();
-        const data = tryParseJSON(text);
-        if (!data) throw new Error("A 的 JSON 无法解析");
-
-        if (Array.isArray(data)) {
-          const row = data.find(x => x && typeof x === "object");
-          if (!row) throw new Error("A 的 JSON 数组里没有有效对象");
-          return row;
-        }
-        if (typeof data === "object") return data;
-
-        throw new Error("A 的 JSON 内容格式不正确");
-      }
-
-      if (["xlsx", "xls", "csv"].includes(ext)) {
-        const buf = await file.arrayBuffer();
-        const rows = sheetToRowsFromArrayBuffer(buf);
-        if (!rows.length) throw new Error("A 文件没有有效数据");
-        return rows[0];
-      }
-
-      throw new Error("A 文件格式不支持");
     }
 
     async function readBFile(file) {
@@ -301,11 +444,11 @@
       if (ext === "txt") {
         const text = await file.text();
 
-        // 优先按 JSON 解析
+        // 1) 先按 JSON
         const json = tryParseJSON(text);
         if (json && typeof json === "object") return json;
 
-        // 再尝试解析 key:value
+        // 2) 再按 key:value / key,value
         const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
         const obj = {};
         for (const line of lines) {
@@ -330,13 +473,16 @@
 
       if (ext === "csv") {
         const text = await file.text();
-        const rows = parseCSVText(text);
+        const wb = XLSX.read(text, { type: "string" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
         if (!rows.length) throw new Error(`${file.name} 的 CSV 没有有效数据`);
 
-        // 情况1：普通表头+一行
+        // 1) 表头 + 一行
         if (rows.length === 1) return rows[0];
 
-        // 情况2：key,value 两列多行
+        // 2) key,value 两列
         const first = rows[0];
         const cols = Object.keys(first);
         const lowerCols = cols.map(c => c.toLowerCase());
@@ -373,56 +519,30 @@
       throw new Error(`${file.name} 格式不支持`);
     }
 
-    // =========================
-    // 业务逻辑：Par_Q
-    // =========================
-    // 这里优先根据 A 里的共病字段给标准简写
-    // 若 B 的 parq1~7 出现阳性，但 A 没可映射疾病，则补 PARQ+
-    function buildParQ(a, bList) {
-      const codes = [];
-
-      const diseaseMap = [
-        { key: "fci1_arthritis", code: "ARTH" },
-        { key: "fci2_osteoporosis", code: "OP" },
-        { key: "fci3_asthma", code: "ASTH" },
-        { key: "fci4_copd", code: "COPD" },
-        { key: "fci5_angina", code: "AP" },
-        { key: "fci6_heart_failure", code: "HF" },
-        { key: "fci7_heart_attack", code: "MI" },
-        { key: "fci8_neuro_disease", code: "NEURO" },
-        { key: "fci10_peripheral_vascular", code: "PVD" },
-        { key: "fci11_diabetes", code: "DM" },
-        { key: "fci12_gastro", code: "GI" },
-        { key: "fci16_hearing", code: "HL" },
-        { key: "fci17_disc_disease", code: "DISC" },
-        { key: "fci18_obesity", code: "OB" }
-      ];
-
-      for (const item of diseaseMap) {
-        if (yes(a[item.key])) codes.push(item.code);
-      }
-
-      // B 里 parq1~7 是否阳性
-      let parqPositive = false;
-      for (const b of bList) {
-        const arr = [b.parq1, b.parq2, b.parq3, b.parq4, b.parq5, b.parq6, b.parq7];
-        if (arr.some(yes)) {
-          parqPositive = true;
-          break;
-        }
-      }
-
-      const uniq = unique(codes);
-
-      if (uniq.length > 0) return uniq.join(", ");
-      if (parqPositive) return "PARQ+";
+    function detectTestType(b) {
+      const t = lower(b.testType);
+      if (["pre","baseline","before"].includes(t)) return "pre";
+      if (["post","after","followup","follow-up"].includes(t)) return "post";
       return "";
     }
 
-    // =========================
-    // 业务逻辑：UPDRS3 计算
-    // =========================
+    function assignBPrePost(bList) {
+      const preB = bList.find(b => detectTestType(b) === "pre") || null;
+      const postB = bList.find(b => detectTestType(b) === "post") || null;
+
+      // 如果只有一个 B，且没有 testType，就默认 pre
+      if (bList.length === 1 && !detectTestType(bList[0])) {
+        return { preB: bList[0], postB: null };
+      }
+
+      return { preB, postB };
+    }
+
+    // =========================================================
+    // 业务计算
+    // =========================================================
     function computeUPDRS3(b) {
+      if (!b) return "";
       const keys = [
         "updrs3_1","updrs3_2",
         "updrs3_3a","updrs3_3b","updrs3_3c","updrs3_3d","updrs3_3e",
@@ -437,143 +557,188 @@
         "updrs3_17a","updrs3_17b","updrs3_17c","updrs3_17d","updrs3_17e",
         "updrs3_18"
       ];
-      return keys.reduce((sum, key) => {
-        const n = toNum(b[key]);
-        return sum + (n === "" ? 0 : n);
-      }, 0);
+
+      let sum = 0;
+      for (const k of keys) {
+        const n = toNum(b[k]);
+        if (n !== "") sum += n;
+      }
+      return sum;
     }
 
-    function detectTestType(b) {
-      const t = lower(b.testType);
-      if (["pre", "baseline", "before"].includes(t)) return "pre";
-      if (["post", "after", "followup", "follow-up"].includes(t)) return "post";
+    function combineSameOrPair(preVal, postVal) {
+      const a = s(preVal);
+      const b = s(postVal);
+      if (a && b) {
+        return a === b ? a : `pre: ${a} | post: ${b}`;
+      }
+      return a || b || "";
+    }
+
+    function buildTrainingStatus(preA, postA) {
+      const vals = [
+        preA?.training1, preA?.training2, preA?.training3,
+        postA?.training1, postA?.training2, postA?.training3
+      ].map(s).filter(Boolean);
+
+      return unique(vals).join("; ");
+    }
+
+    function buildParQ(preA, postA, preB, postB) {
+      const codes = [];
+
+      // 以 A 的共病字段为主；pre/post 合并取 union
+      const diseaseMap = [
+        { keys: ["fci1_arthritis"], code: "ARTH" },
+        { keys: ["fci2_osteoporosis"], code: "OP" },
+        { keys: ["fci3_asthma"], code: "ASTH" },
+        { keys: ["fci4_copd"], code: "COPD" },
+        { keys: ["fci5_angina"], code: "AP" },
+        { keys: ["fci6_heart_failure"], code: "HF" },
+        { keys: ["fci7_heart_attack"], code: "MI" },
+        { keys: ["fci8_neuro_disease"], code: "NEURO" },
+        { keys: ["fci10_peripheral_vascular"], code: "PVD" },
+        { keys: ["fci11_diabetes"], code: "DM" },
+        { keys: ["fci12_gastro"], code: "GI" },
+        { keys: ["fci16_hearing"], code: "HL" },
+        { keys: ["fci17_disc_disease"], code: "DISC" },
+        { keys: ["fci18_obesity"], code: "OB" },
+
+        // 如果你后面真实数据里额外有这些字段，也能识别
+        { keys: ["hbp","HBP","hypertension","HT","ht"], code: "HBP" },
+        { keys: ["hld","HLD","hyperlipidemia","dyslipidemia"], code: "HLD" }
+      ];
+
+      for (const item of diseaseMap) {
+        const preYes = item.keys.some(k => yes(preA?.[k]));
+        const postYes = item.keys.some(k => yes(postA?.[k]));
+        if (preYes || postYes) codes.push(item.code);
+      }
+
+      // 如果 B 的 parq 有阳性，但 A 没法映射出具体病名 -> PARQ+
+      const bList = [preB, postB].filter(Boolean);
+      let parqPositive = false;
+      for (const b of bList) {
+        const arr = [b.parq1, b.parq2, b.parq3, b.parq4, b.parq5, b.parq6, b.parq7];
+        if (arr.some(yes)) {
+          parqPositive = true;
+          break;
+        }
+      }
+
+      const uniqCodes = unique(codes);
+      if (uniqCodes.length) return uniqCodes.join(", ");
+      if (parqPositive) return "PARQ+";
       return "";
     }
 
-    // =========================
-    // 合并：A + B(1~2) -> C
-    // =========================
-    function mergeToC(a, bList) {
-      const preB = bList.find(b => detectTestType(b) === "pre") || null;
-      const postB = bList.find(b => detectTestType(b) === "post") || null;
+    // =========================================================
+    // A + B => C
+    // =========================================================
+    function mergeToC(preA, postA, preB, postB) {
+      const subjectId =
+        pick(preB, ["id"], "") ||
+        pick(postB, ["id"], "") ||
+        pick(preA, ["id"], "") ||
+        pick(postA, ["id"], "");
 
-      // 如果 B 只有一个但 testType 空，默认当 pre
-      const fallbackSingle = bList.length === 1 && !detectTestType(bList[0]) ? bList[0] : null;
+      const name =
+        pick(preB, ["name"], "") ||
+        pick(postB, ["name"], "") ||
+        pick(preA, ["name"], "") ||
+        pick(postA, ["name"], "");
 
-      const pre = preB || fallbackSingle;
-      const post = postB || null;
+      const hy = pick(preB, ["hyStage"], "") || pick(postB, ["hyStage"], "");
 
-      const heightM = maybeCmToMeter(pick(a, ["fci18_height"], ""));
-      const weightKg = pick(a, ["fci18_weight"], "");
-      const legLengthM = maybeCmToMeter(
-        pick(pre || post || {}, ["legLength"], "")
+      const age = pick(preA, ["age"], "") || pick(postA, ["age"], "");
+      const gender = pick(preA, ["gender","sex","Gender","Sex","性别"], "") || pick(postA, ["gender","sex","Gender","Sex","性别"], "");
+      const dominantHand = pick(preA, ["dominantHand"], "") || pick(postA, ["dominantHand"], "");
+      const educationYear = pick(preA, ["educationYears"], "") || pick(postA, ["educationYears"], "");
+      const walkingAid = pick(preA, ["wheelchair"], "") || pick(postA, ["wheelchair"], "");
+
+      const heightM =
+        maybeCmToMeter(pick(preA, ["fci18_height"], "")) ||
+        maybeCmToMeter(pick(postA, ["fci18_height"], ""));
+
+      const weightKg =
+        pick(preA, ["fci18_weight"], "") ||
+        pick(postA, ["fci18_weight"], "");
+
+      const legLengthM =
+        maybeCmToMeter(pick(preB, ["legLength"], "")) ||
+        maybeCmToMeter(pick(postB, ["legLength"], ""));
+
+      const standardStepLength =
+        legLengthM === "" ? "" : roundTo(Number(legLengthM) * 0.8, 2);
+
+      const trainingStatus = buildTrainingStatus(preA, postA);
+
+      const LEDD = combineSameOrPair(
+        pick(preB, ["totalLEDD"], ""),
+        pick(postB, ["totalLEDD"], "")
       );
 
-      const standardStepLength = legLengthM === "" ? "" : roundTo(Number(legLengthM) * 0.8, 2);
-
-      const trainingStatus = joinNonEmpty([a.training1, a.training2, a.training3]);
-
-      const subjectId = pick(pre || post || {}, ["id"], pick(a, ["id"], ""));
-      const name = pick(pre || post || {}, ["name"], pick(a, ["name"], ""));
+      const medRegime = combineSameOrPair(
+        pick(preB, ["medicationDetails"], ""),
+        pick(postB, ["medicationDetails"], "")
+      );
 
       const result = {
         "Group": "",
         "Subject ID": subjectId,
         "Name": name,
-        "PD_duration": pick(a, ["diagnosisYear"], ""),
-        "H&Y": pick(pre || post || {}, ["hyStage"], ""),
-        "FCI": pick(a, ["fciTotal"], ""),
-        "Par_Q": buildParQ(a, bList),
-        "Age": pick(a, ["age"], ""),
-        "Gender": pick(a, ["gender", "sex", "Gender", "Sex", "性别"], ""),
-        "dominant hand": pick(a, ["dominantHand"], ""),
-        "education_Year": pick(a, ["educationYears"], ""),
-        "walking_aid": pick(a, ["wheelchair"], ""),
+        "PD_duration": pick(preA, ["diagnosisYear"], "") || pick(postA, ["diagnosisYear"], ""),
+        "H&Y": hy,
+        "FCI": pick(preA, ["fciTotal"], "") || pick(postA, ["fciTotal"], ""),
+        "Par_Q": buildParQ(preA, postA, preB, postB),
+        "Age": age,
+        "Gender": gender,
+        "dominant hand": dominantHand,
+        "education_Year": educationYear,
+        "walking_aid": walkingAid,
         "height (m)": heightM,
         "weight (kg)": weightKg,
         "leg length (m)": legLengthM,
         "standard_step-length(m)": standardStepLength,
 
-        "Pre_date": "",
+        "Pre_date": preB ? formatDateYYYYMMDD(preB.testDate) : (preA ? formatDateYYYYMMDD(preA.timestamp) : ""),
         "training_status": trainingStatus,
-        "Post_date": "",
+        "Post_date": postB ? formatDateYYYYMMDD(postB.testDate) : (postA ? formatDateYYYYMMDD(postA.timestamp) : ""),
 
-        "pre_steplength(m)": "",
-        "post_steplength(m)": "",
-        "pre_cadence(bpm)": "",
-        "post_cadence(bpm)": "",
-        "Pre_velocity(m/s)": "",
-        "post_velocity(m/s)": "",
-        "Pre_TUG (s)": "",
-        "post_TUG(s)": "",
+        "pre_steplength(m)": pick(preB, ["avgStepLength"], ""),
+        "post_steplength(m)": pick(postB, ["avgStepLength"], ""),
+        "pre_cadence(bpm)": pick(preB, ["avgCadence"], ""),
+        "post_cadence(bpm)": pick(postB, ["avgCadence"], ""),
+        "Pre_velocity(m/s)": pick(preB, ["avgSpeed"], ""),
+        "post_velocity(m/s)": pick(postB, ["avgSpeed"], ""),
+        "Pre_TUG (s)": pick(preB, ["tug_avg"], ""),
+        "post_TUG(s)": pick(postB, ["tug_avg"], ""),
 
-        "Pre_fogQ": "",
-        "post_fogQ": "",
-        "pre_UPDRS3": "",
-        "post_UPDRS3": "",
-        "Pre_PDQ": "",
-        "Post_PDQ": "",
-        "Pre_Moca": "",
-        "Post_Moca": "",
-        "Pre_HADS_D": "",
-        "Post_HADS_D": "",
-        "Pre_HADS_A": "",
-        "Post_HADS_A": "",
+        "Pre_fogQ": pick(preA, ["fogqTotal"], ""),
+        "post_fogQ": pick(postA, ["fogqTotal"], ""),
+        "pre_UPDRS3": computeUPDRS3(preB),
+        "post_UPDRS3": computeUPDRS3(postB),
+        "Pre_PDQ": pick(preA, ["pdqTotal"], ""),
+        "Post_PDQ": pick(postA, ["pdqTotal"], ""),
+        "Pre_Moca": pick(preB, ["moca"], ""),
+        "Post_Moca": pick(postB, ["moca"], ""),
+        "Pre_HADS_D": pick(preA, ["hadsDepression"], ""),
+        "Post_HADS_D": pick(postA, ["hadsDepression"], ""),
+        "Pre_HADS_A": pick(preA, ["hadsAnxiety"], ""),
+        "Post_HADS_A": pick(postA, ["hadsAnxiety"], ""),
 
-        "LEDD": pick(pre || post || {}, ["totalLEDD"], ""),
-        "Med_regime": pick(pre || post || {}, ["medicationDetails"], ""),
+        "LEDD": LEDD,
+        "Med_regime": medRegime,
         "contact": "",
         "remarks": ""
       };
 
-      // ---- PRE ----
-      if (pre) {
-        result["Pre_date"] = pick(pre, ["testDate"], "");
-        result["pre_steplength(m)"] = pick(pre, ["avgStepLength"], "");
-        result["pre_cadence(bpm)"] = pick(pre, ["avgCadence"], "");
-        result["Pre_velocity(m/s)"] = pick(pre, ["avgSpeed"], "");
-        result["Pre_TUG (s)"] = pick(pre, ["tug_avg"], "");
-        result["Pre_fogQ"] = pick(a, ["fogqTotal"], "");
-        result["pre_UPDRS3"] = computeUPDRS3(pre);
-        result["Pre_PDQ"] = pick(a, ["pdqTotal"], "");
-        result["Pre_Moca"] = pick(pre, ["moca"], "");
-        result["Pre_HADS_D"] = pick(a, ["hadsDepression"], "");
-        result["Pre_HADS_A"] = pick(a, ["hadsAnxiety"], "");
-
-        // pre 的 LEDD / Med_regime 优先
-        result["LEDD"] = pick(pre, ["totalLEDD"], result["LEDD"]);
-        result["Med_regime"] = pick(pre, ["medicationDetails"], result["Med_regime"]);
-      }
-
-      // ---- POST ----
-      if (post) {
-        result["Post_date"] = pick(post, ["testDate"], "");
-        result["post_steplength(m)"] = pick(post, ["avgStepLength"], "");
-        result["post_cadence(bpm)"] = pick(post, ["avgCadence"], "");
-        result["post_velocity(m/s)"] = pick(post, ["avgSpeed"], "");
-        result["post_TUG(s)"] = pick(post, ["tug_avg"], "");
-        result["post_fogQ"] = pick(a, ["fogqTotal"], "");
-        result["post_UPDRS3"] = computeUPDRS3(post);
-        result["Post_PDQ"] = pick(a, ["pdqTotal"], "");
-        result["Post_Moca"] = pick(post, ["moca"], "");
-        result["Post_HADS_D"] = pick(a, ["hadsDepression"], "");
-        result["Post_HADS_A"] = pick(a, ["hadsAnxiety"], "");
-
-        // 如果 pre 没有，post 可补 LEDD / Med_regime
-        if (isBlank(result["LEDD"])) {
-          result["LEDD"] = pick(post, ["totalLEDD"], "");
-        }
-        if (isBlank(result["Med_regime"])) {
-          result["Med_regime"] = pick(post, ["medicationDetails"], "");
-        }
-      }
-
       return result;
     }
 
-    // =========================
+    // =========================================================
     // 导出 Excel
-    // =========================
+    // =========================================================
     function downloadExcel(rowObj, filename = "C_merged.xlsx") {
       const ws = XLSX.utils.json_to_sheet([rowObj]);
       const wb = XLSX.utils.book_new();
@@ -581,30 +746,22 @@
       XLSX.writeFile(wb, filename);
     }
 
-    // =========================
-    // UI
-    // =========================
+    // =========================================================
+    // 主流程
+    // =========================================================
     async function run(download = false) {
       try {
         setStatus("");
 
-        const fileA = document.getElementById("fileA").files[0];
+        const pasteText = document.getElementById("pasteA").value;
         const bFiles = Array.from(document.getElementById("fileB").files || []);
 
-        if (!fileA) {
-          setStatus("请先上传 A 文件。", true);
-          return;
-        }
-        if (!bFiles.length) {
-          setStatus("请至少上传 1 个 B 文件。", true);
-          return;
-        }
-        if (bFiles.length > 2) {
-          setStatus("B 文件最多上传 2 个（pre / post）。", true);
-          return;
-        }
+        const aRows = parseAPaste(pasteText);
+        const { preA, postA } = assignAPrePost(aRows);
 
-        const a = await readAFile(fileA);
+        if (bFiles.length > 2) {
+          throw new Error("B 最多只能上传 2 个文件（pre / post）。");
+        }
 
         const bList = [];
         for (const f of bFiles) {
@@ -612,7 +769,9 @@
           bList.push(b);
         }
 
-        const merged = mergeToC(a, bList);
+        const { preB, postB } = assignBPrePost(bList);
+
+        const merged = mergeToC(preA, postA, preB, postB);
 
         document.getElementById("preview").textContent = JSON.stringify(merged, null, 2);
 
@@ -633,4 +792,4 @@
   </script>
 </body>
 </html>
-``
+
