@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Paste A + Review Many B → C Excel</title>
+  <title>Paste A + Review Many B + LEDD + BMI</title>
 
-  <!-- SheetJS：这次 script 标签是正确的 -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
   <style>
     :root{
       --bg:#f6f8fb;
-      --card:#ffffff;
+      --card:#fff;
       --text:#1f2937;
       --muted:#6b7280;
       --line:#e5e7eb;
@@ -26,7 +25,7 @@
       --radius:16px;
     }
 
-    *{box-sizing:border-box}
+    * { box-sizing: border-box; }
     body{
       margin:0;
       padding:24px;
@@ -35,7 +34,7 @@
       font-family:Arial,"Microsoft JhengHei","PingFang TC",sans-serif;
     }
     .container{
-      max-width:1400px;
+      max-width:1500px;
       margin:0 auto;
       display:grid;
       gap:18px;
@@ -47,31 +46,43 @@
       padding:20px;
       border:1px solid #eef2f7;
     }
-    h1,h2,h3{margin:0 0 12px 0}
-    h1{font-size:28px}
-    h2{font-size:20px}
-    h3{font-size:16px}
+    h1,h2,h3{ margin:0 0 12px 0; }
+    h1{ font-size:28px; }
+    h2{ font-size:20px; }
+    h3{ font-size:16px; }
+
     .sub{
       color:var(--muted);
       line-height:1.8;
       font-size:14px;
     }
+
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:18px;
     }
-    @media (max-width: 980px){
-      .grid{grid-template-columns:1fr}
+    .grid3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:18px;
     }
+    @media (max-width: 1200px){
+      .grid3{ grid-template-columns:1fr; }
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns:1fr; }
+    }
+
     label{
       display:block;
       font-weight:700;
       margin-bottom:8px;
     }
+
     textarea{
       width:100%;
-      min-height:240px;
+      min-height:220px;
       resize:vertical;
       border:1px solid var(--line);
       border-radius:12px;
@@ -81,27 +92,23 @@
       line-height:1.55;
       background:#fff;
     }
-    input[type="file"]{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px;
-      background:#fff;
-    }
-    input[type="text"], select{
+
+    input[type="file"], input[type="text"], input[type="number"], select{
       width:100%;
       border:1px solid var(--line);
       border-radius:10px;
       padding:8px 10px;
-      font-size:13px;
       background:#fff;
+      font-size:13px;
     }
+
     .btns{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
       margin-top:14px;
     }
+
     button{
       border:none;
       cursor:pointer;
@@ -112,15 +119,21 @@
       font-size:15px;
       font-weight:700;
     }
-    button:hover{background:var(--blue2)}
-    .secondary{background:#6b7280}
-    .secondary:hover{background:#4b5563}
+    button:hover{ background:var(--blue2); }
+
+    .secondary{ background:#6b7280; }
+    .secondary:hover{ background:#4b5563; }
+
     .ghost{
       background:#fff;
       color:var(--text);
       border:1px solid var(--line);
     }
-    .ghost:hover{background:#f9fafb}
+    .ghost:hover{ background:#f9fafb; }
+
+    .danger{ background:#dc2626; }
+    .danger:hover{ background:#b91c1c; }
+
     .hint{
       background:#eff6ff;
       border:1px solid #93c5fd;
@@ -130,6 +143,7 @@
       line-height:1.75;
       font-size:14px;
     }
+
     .warn{
       background:var(--amber-bg);
       border:1px solid var(--amber-line);
@@ -139,20 +153,23 @@
       line-height:1.75;
       font-size:14px;
     }
+
     .small{
       color:var(--muted);
       font-size:13px;
       line-height:1.7;
       margin-top:8px;
     }
+
     .status{
       font-weight:700;
       margin-top:12px;
       line-height:1.6;
       white-space:pre-wrap;
     }
-    .ok{color:var(--green)}
-    .err{color:var(--red)}
+    .ok{ color:var(--green); }
+    .err{ color:var(--red); }
+
     pre{
       background:#111827;
       color:#e5e7eb;
@@ -165,6 +182,7 @@
       min-height:160px;
       margin:0;
     }
+
     .schema-box{
       background:#f9fafb;
       border:1px solid var(--line);
@@ -177,24 +195,28 @@
       overflow:auto;
       font-family:Consolas,"Courier New",monospace;
     }
+
     .table-wrap{
       overflow:auto;
       border:1px solid var(--line);
       border-radius:12px;
       background:#fff;
     }
+
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1200px;
+      min-width:1300px;
       font-size:13px;
     }
+
     th, td{
       border-bottom:1px solid var(--line);
       padding:10px;
       vertical-align:top;
       text-align:left;
     }
+
     th{
       background:#f9fafb;
       font-weight:700;
@@ -202,6 +224,7 @@
       top:0;
       z-index:1;
     }
+
     .pill{
       display:inline-block;
       padding:4px 8px;
@@ -209,22 +232,25 @@
       font-size:12px;
       font-weight:700;
     }
-    .pill-pre{background:#dcfce7;color:#166534}
-    .pill-post{background:#dbeafe;color:#1d4ed8}
-    .pill-unknown{background:#fef3c7;color:#92400e}
-    .muted{color:var(--muted)}
-    .mono{font-family:Consolas,"Courier New",monospace}
+    .pill-pre{ background:#dcfce7; color:#166534; }
+    .pill-post{ background:#dbeafe; color:#1d4ed8; }
+    .pill-unknown{ background:#fef3c7; color:#92400e; }
+
+    .muted{ color:var(--muted); }
+    .mono{ font-family:Consolas,"Courier New",monospace; }
+
     .kpis{
       display:grid;
-      grid-template-columns:repeat(6,1fr);
+      grid-template-columns:repeat(8,1fr);
       gap:12px;
     }
-    @media (max-width: 1200px){
-      .kpis{grid-template-columns:repeat(3,1fr)}
+    @media (max-width: 1300px){
+      .kpis{ grid-template-columns:repeat(4,1fr); }
     }
     @media (max-width: 700px){
-      .kpis{grid-template-columns:repeat(2,1fr)}
+      .kpis{ grid-template-columns:repeat(2,1fr); }
     }
+
     .kpi{
       border:1px solid var(--line);
       border-radius:14px;
@@ -240,6 +266,7 @@
       font-size:24px;
       font-weight:800;
     }
+
     details{
       border:1px solid var(--line);
       border-radius:12px;
@@ -250,11 +277,13 @@
       cursor:pointer;
       font-weight:700;
     }
+
     .row-note{
       font-size:12px;
       color:#6b7280;
       line-height:1.5;
     }
+
     .error-list{
       background:#fef2f2;
       border:1px solid #fecaca;
@@ -264,48 +293,82 @@
       white-space:pre-wrap;
       line-height:1.65;
     }
+
+    .inline{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .ledd-row{
+      display:grid;
+      grid-template-columns:2fr 1fr 1fr auto;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    @media (max-width: 900px){
+      .ledd-row{
+        grid-template-columns:1fr;
+      }
+    }
+
+    .ledd-total{
+      font-size:20px;
+      font-weight:800;
+      color:#111827;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
-      <h1>Paste A + Review Many B → C Excel</h1>
+      <h1>Paste A + Review Many B + LEDD + BMI</h1>
       <div class="sub">
         <div><b>A：</b>直接粘贴 1–2 行（固定表头，不上传）</div>
-        <div><b>B：</b>可以一次上传很多个；默认都是同一个人，但你可以在审核表里手动决定哪些文件要合并、哪些不要</div>
-        <div><b>重点：</b>系统不会再因为 `張學強 / 张学强` 这种差异直接中止，而是让你在审核表里把它们改成同一个 canonical subject。</div>
+        <div><b>B：</b>可一次上传很多个；先进入审核表，再决定 Include / Phase / Canonical Subject</div>
+        <div><b>新增：</b>内嵌本地 LEDD 计算器、强制 F/M、BMI 自动计算与分类、FCI/Par_Q 输出问题缩写、同时保留原始与手动 LEDD</div>
       </div>
     </div>
 
-    <div class="grid">
+    <div class="grid3">
       <div class="card">
-        <h2>Step 1. 粘贴 A</h2>
-        <div class="hint">
-          <b>使用方式：</b><br>
-          直接从 Excel 复制 <b>1–2 行数据</b> 贴到下面。<br>
-          <b>不用贴表头</b>；如果你把表头一起贴了，程序会尝试自动跳过。<br><br>
-          <b>规则：</b><br>
-          - 贴 1 行 → 当作 <b>pre</b><br>
-          - 贴 2 行 → 优先按 <code>timestamp</code> 排序：早 = pre，晚 = post；若无法识别时间，则按粘贴顺序
+        <h2>Step 0. 必填：Gender（生成前必须选）</h2>
+        <div class="warn">
+          生成结果前必须手动选择 <b>F / M</b>。<br>
+          没选就不给预览，也不给下载。
         </div>
-        <label for="pasteA" style="margin-top:14px;">A 粘贴区</label>
-        <textarea id="pasteA" placeholder="把 A 的 1–2 行数据直接粘贴到这里（从 Excel 复制即可）"></textarea>
+        <label for="manualSex" style="margin-top:12px;">Gender</label>
+        <select id="manualSex">
+          <option value="">-- 请先选择 --</option>
+          <option value="F">F</option>
+          <option value="M">M</option>
+        </select>
         <div class="small">
-          A 只接受同一个人的 1–2 行，不会批量处理多人。
+          这里是最终 Gender 的唯一来源，不自动猜。
         </div>
       </div>
 
       <div class="card">
-        <h2>Step 2. 上传 B 并设置别名规则（可选）</h2>
-        <div class="warn">
-          <b>这版不会立刻因为名字不一致报错。</b><br>
-          你可以先全部上传，再在下面的 <b>B 审核表</b> 里决定：<br>
-          1. 哪些文件参与计算（Include）<br>
-          2. 哪些是 pre / post / unknown（Phase）<br>
-          3. 哪些名字其实是同一个人（Canonical Subject）
+        <h2>Step 1. 粘贴 A</h2>
+        <div class="hint">
+          直接从 Excel 复制 <b>1–2 行数据</b> 粘贴到下面。<br>
+          <b>不用贴表头</b>；若误贴表头，程序会自动尝试跳过。<br><br>
+          规则：<br>
+          - 1 行 → 默认当 <b>pre</b><br>
+          - 2 行 → 优先按 <code>timestamp</code> 排序：早 = pre，晚 = post；若无法识别，则按粘贴顺序
         </div>
+        <label for="pasteA" style="margin-top:12px;">A 粘贴区</label>
+        <textarea id="pasteA" placeholder="把 A 的 1–2 行数据直接粘贴到这里（从 Excel 复制即可）"></textarea>
+      </div>
 
-        <label for="fileB" style="margin-top:14px;">B 文件（可多选、可很多个）</label>
+      <div class="card">
+        <h2>Step 2. 上传 B + alias 规则</h2>
+        <label for="fileB">B 文件（可多选）</label>
         <input id="fileB" type="file" accept=".txt,.json,.csv" multiple />
 
         <label for="aliasRules" style="margin-top:16px;">Name alias 规则（可选）</label>
@@ -316,19 +379,56 @@
 李美玲=李美玲, 李美鈴"></textarea>
 
         <div class="small">
-          这些规则只是帮你在初始审核表里自动填 canonical subject。<br>
-          <b>最终还是以审核表里每一行的 Canonical Subject 为准。</b>
+          alias 只影响审核表初始值；最终以你在审核表里手动修改后的 Canonical Subject 为准。
         </div>
-
-        <div class="btns">
-          <button id="btnAnalyze" class="secondary">1) 读取并生成审核表</button>
-          <button id="btnExport">2) 按审核表导出 Excel</button>
-          <button id="btnDebug" class="ghost">下载 Debug JSON</button>
-          <button id="btnClear" class="ghost">清空</button>
-        </div>
-
-        <div id="status" class="status"></div>
       </div>
+    </div>
+
+    <div class="card">
+      <h2>Step 2.5 内嵌 LEDD 快速计算器（可选）</h2>
+      <div class="hint">
+        这是本地版 LEDD 快速计算器。你可以把常见 PD 药物逐行输入，系统会实时计算 total LEDD。<br>
+        最终结果里会同时保留：<br>
+        - B 文件原始的 <code>totalLEDD</code><br>
+        - 你手动算出来的 <code>manual LEDD</code>
+      </div>
+
+      <div class="small" style="margin-bottom:10px;">
+        公式：<b>Dose (mg each time) × Times/day × Conversion factor</b><br>
+        对于组合制剂（如 Stalevo / Sinemet / Madopar / Levodopa with Entacapone / Tolcapone / Duodopa / Rytary），请只输入对应的 <b>levodopa dose</b>。
+      </div>
+
+      <div id="leddRows"></div>
+
+      <div class="btns" style="margin-top:8px;">
+        <button type="button" id="btnAddLeddRow" class="ghost">+ 新增一行药物</button>
+        <button type="button" id="btnClearLedd" class="ghost">清空 LEDD 计算器</button>
+      </div>
+
+      <div style="margin-top:12px;" class="inline">
+        <div id="leddTotalBox" class="ledd-total">Manual LEDD Total = 0</div>
+      </div>
+
+      <div class="small">
+        这版不再做“覆盖或不覆盖”的二选一；会把 <b>原始 LEDD</b> 和 <b>手动 LEDD</b> 一起保留下来。
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Step 3. 先读取并生成审核表</h2>
+      <div class="warn">
+        这一步不会直接导出结果，而是先把所有 B 文件读出来，给你做人工审核：<br>
+        - <b>Include</b>：这个文件要不要用<br>
+        - <b>Phase</b>：pre / post / unknown<br>
+        - <b>Canonical Subject</b>：哪些名字算同一个人（例如 張學強 / 张学强）
+      </div>
+      <div class="btns">
+        <button id="btnAnalyze" class="secondary">1) 读取并生成审核表</button>
+        <button id="btnExport">2) 生成结果并下载 Excel</button>
+        <button id="btnDebug" class="ghost">下载 Debug JSON</button>
+        <button id="btnClear" class="ghost">清空全部</button>
+      </div>
+      <div id="status" class="status"></div>
     </div>
 
     <div class="card">
@@ -340,21 +440,18 @@
         <div class="kpi"><div class="label">Pre 文件数</div><div id="kpiPre" class="value">0</div></div>
         <div class="kpi"><div class="label">Post 文件数</div><div id="kpiPost" class="value">0</div></div>
         <div class="kpi"><div class="label">Conflicts</div><div id="kpiConflict" class="value">0</div></div>
+        <div class="kpi"><div class="label">BMI</div><div id="kpiBMI" class="value">-</div></div>
+        <div class="kpi"><div class="label">BMI 类别</div><div id="kpiBMICat" class="value">-</div></div>
       </div>
     </div>
 
     <div class="card">
-      <h2>Step 3. B 文件审核表（关键）</h2>
+      <h2>Step 4. B 文件审核表</h2>
       <div class="hint">
-        <b>你现在要做的事：</b><br>
-        1. 看每一行是不是你要的文件<br>
-        2. 不要的文件取消勾选 <b>Include</b><br>
-        3. 如果 auto phase 不对，就改 <b>Phase</b><br>
-        4. 如果不同写法其实是同一个人，就把 <b>Canonical Subject</b> 改成一样<br><br>
-        <b>例如：</b><br>
-        - `張學強` → 改成 `张学强`<br>
-        - `张学强` → 保持 `张学强`<br>
-        这样它们就会被视为同一个人
+        你现在要做的事情：<br>
+        1. 不要的文件取消勾选 <b>Include</b><br>
+        2. auto phase 不对，就改 <b>Phase</b><br>
+        3. 不同写法其实是同一个人，就把 <b>Canonical Subject</b> 改成一样
       </div>
 
       <div id="reviewContainer" class="table-wrap" style="margin-top:14px;">
@@ -404,7 +501,7 @@
         <pre id="debugB">尚未运行。</pre>
       </details>
       <details open style="margin-top:10px;">
-        <summary>字段冲突与自动选值</summary>
+        <summary>字段冲突、LEDD 与 BMI 详情</summary>
         <pre id="debugConflict">尚未运行。</pre>
       </details>
       <details style="margin-top:10px;">
@@ -416,7 +513,7 @@
 
   <script>
     // =========================================================
-    // A 固定表头
+    // 固定 A 表头
     // =========================================================
     const A_HEADERS = [
       "timestamp","id","name","age","diagnosisYear","educationYears","dominantHand",
@@ -437,13 +534,47 @@
     document.getElementById("schemaBox").textContent = A_HEADERS.join(" | ");
 
     // =========================================================
+    // LEDD conversion factors
+    // =========================================================
+    const LEDD_FACTORS = {
+      "Levodopa": { factor: 1, note: "Input levodopa dose only" },
+      "Sinemet": { factor: 1, note: "levodopa/carbidopa; input levodopa dose only" },
+      "Madopar": { factor: 1, note: "levodopa/benserazide; input levodopa dose only" },
+      "Duodopa": { factor: 1.11, note: "Input levodopa dose only" },
+      "LevodopaCR": { factor: 0.75, note: "Controlled release" },
+      "SinemetCR": { factor: 0.75, note: "CR levodopa/carbidopa; input levodopa dose only" },
+      "Levodopa_with_Entacapone": { factor: 1.33, note: "Input levodopa dose only" },
+      "Stalevo": { factor: 1.33, note: "Input levodopa dose only" },
+      "Levodopa_with_Tolcapone": { factor: 1.5, note: "Input levodopa dose only" },
+      "Rytary": { factor: 0.6, note: "Input levodopa dose only" },
+
+      "Amantadine": { factor: 1, note: "" },
+      "Apomorphine": { factor: 10, note: "" },
+      "Azilect": { factor: 100, note: "rasagiline brand" },
+      "Bromocriptine": { factor: 10, note: "" },
+      "Cabergoline": { factor: 80, note: "" },
+      "Lisuride": { factor: 100, note: "" },
+      "Mirapex": { factor: 100, note: "pramipexole brand" },
+      "Perglide": { factor: 100, note: "" },
+      "Pramipexole": { factor: 100, note: "" },
+      "Rasagiline": { factor: 100, note: "" },
+      "Requip": { factor: 20, note: "ropinirole brand" },
+      "RequipXL": { factor: 20, note: "ropinirole CR brand" },
+      "Ropinirole": { factor: 20, note: "" },
+      "RopiniroleCR": { factor: 20, note: "" },
+      "Rotigotine": { factor: 30, note: "" },
+      "SelegilineOral": { factor: 10, note: "" },
+      "SelegilineSublingual": { factor: 80, note: "" }
+    };
+
+    // =========================================================
     // 全局缓存
     // =========================================================
     window.__RAW_B_ENTRIES__ = [];
     window.__PARSE_ERRORS__ = [];
+    window.__LAST_A__ = null;
     window.__LAST_RESULT__ = null;
     window.__LAST_DEBUG__ = null;
-    window.__LAST_A__ = null;
 
     // =========================================================
     // UI helpers
@@ -453,39 +584,22 @@
       el.textContent = msg;
       el.className = "status " + (isError ? "err" : "ok");
     }
+
     function setText(id, text) {
       document.getElementById(id).textContent = text;
     }
+
     function setKPI(id, value) {
       document.getElementById(id).textContent = String(value);
     }
-    function clearAll() {
-      document.getElementById("pasteA").value = "";
-      document.getElementById("fileB").value = "";
-      document.getElementById("aliasRules").value = "";
-      setStatus("");
-      setText("preview", "{}");
-      setText("debugSummary", "尚未运行。");
-      setText("debugA", "尚未运行。");
-      setText("debugB", "尚未运行。");
-      setText("debugConflict", "尚未运行。");
-      setKPI("kpiA", 0);
-      setKPI("kpiBTotal", 0);
-      setKPI("kpiIncluded", 0);
-      setKPI("kpiPre", 0);
-      setKPI("kpiPost", 0);
-      setKPI("kpiConflict", 0);
-      document.getElementById("reviewTableBody").innerHTML = '<tr><td colspan="10" class="muted">还没有读取 B 文件。请先点击「读取并生成审核表」。</td></tr>';
-      const box = document.getElementById("parseErrorBox");
-      box.style.display = "none";
-      box.innerHTML = "";
-      window.__RAW_B_ENTRIES__ = [];
-      window.__PARSE_ERRORS__ = [];
-      window.__LAST_RESULT__ = null;
-      window.__LAST_DEBUG__ = null;
-      window.__LAST_A__ = null;
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
-    document.getElementById("btnClear").addEventListener("click", clearAll);
 
     // =========================================================
     // utils
@@ -493,16 +607,19 @@
     function isBlank(v) {
       return v === undefined || v === null || String(v).trim() === "";
     }
+
     function s(v) {
       return v === undefined || v === null ? "" : String(v).trim();
     }
+
     function lower(v) {
       return s(v).toLowerCase();
     }
+
     function yes(v) {
-      const x = lower(v);
-      return ["是","yes","y","true","1","有","同意","positive","+"].includes(x);
+      return ["是","yes","y","true","1","有","positive","+","同意"].includes(lower(v));
     }
+
     function toNum(v) {
       if (isBlank(v)) return "";
       const cleaned = String(v)
@@ -512,19 +629,19 @@
       const n = Number(cleaned);
       return Number.isFinite(n) ? n : "";
     }
+
     function roundTo(v, d = 2) {
       const n = Number(v);
       if (!Number.isFinite(n)) return "";
       return Number(n.toFixed(d));
     }
+
     function maybeCmToMeter(v) {
       const n = toNum(v);
       if (n === "") return "";
       return n > 3 ? roundTo(n / 100, 2) : roundTo(n, 2);
     }
-    function unique(arr) {
-      return [...new Set(arr)];
-    }
+
     function pick(obj, keys, defaultValue = "") {
       if (!obj) return defaultValue;
       for (const k of keys) {
@@ -532,14 +649,21 @@
       }
       return defaultValue;
     }
+
+    function unique(arr) {
+      return [...new Set(arr)];
+    }
+
     function normalizeForCompare(v) {
       return String(v ?? "").trim();
     }
+
     function parseDateSafe(v) {
       if (isBlank(v)) return null;
       const d = new Date(v);
       return isNaN(d.getTime()) ? null : d;
     }
+
     function formatDateYYYYMMDD(value) {
       if (isBlank(value)) return "";
       const str = s(value);
@@ -552,6 +676,7 @@
       const dd = String(d.getDate()).padStart(2, "0");
       return `${yyyy}-${mm}-${dd}`;
     }
+
     function dateRank(meta) {
       const t1 = parseDateSafe(meta.localSaveTime);
       if (t1) return t1.getTime();
@@ -559,12 +684,44 @@
       if (t2) return t2.getTime();
       return meta.uploadIndex || 0;
     }
+
     function completenessScore(data) {
       return Object.values(data || {}).filter(v => !isBlank(v)).length;
     }
 
+    function combineSameOrPair(preVal, postVal) {
+      const a = s(preVal);
+      const b = s(postVal);
+      if (a && b) return a === b ? a : `pre: ${a} | post: ${b}`;
+      return a || b || "";
+    }
+
+    function appendRemark(parts, text) {
+      const t = s(text);
+      if (t) parts.push(t);
+    }
+
     // =========================================================
-    // Name alias
+    // BMI
+    // =========================================================
+    function computeBMI(heightM, weightKg) {
+      const h = Number(heightM);
+      const w = Number(weightKg);
+      if (!Number.isFinite(h) || !Number.isFinite(w) || h <= 0 || w <= 0) return "";
+      return roundTo(w / (h * h), 1);
+    }
+
+    function bmiCategory(bmi) {
+      const n = Number(bmi);
+      if (!Number.isFinite(n)) return "";
+      if (n < 18.5) return "Underweight (<18.5)";
+      if (n < 25) return "Healthy (18.5–24.9)";
+      if (n < 30) return "Overweight (25.0–29.9)";
+      return "Obesity (≥30)";
+    }
+
+    // =========================================================
+    // alias
     // =========================================================
     function normalizeNameBasic(name) {
       return s(name)
@@ -596,7 +753,6 @@
           continue;
         }
 
-        // canonical 自己也映射到自己
         aliasMap[normalizeNameBasic(canonical)] = canonical;
         variants.forEach(v => {
           aliasMap[normalizeNameBasic(v)] = canonical;
@@ -616,7 +772,7 @@
     }
 
     // =========================================================
-    // Parse A pasted text
+    // Parse A
     // =========================================================
     function parseAPaste(text) {
       const raw = String(text || "").trim();
@@ -630,10 +786,6 @@
         .split(/\r?\n/)
         .map(line => line.replace(/\u00A0/g, " ").trim())
         .filter(Boolean);
-
-      if (!lines.length) {
-        throw new Error("A 粘贴内容为空白行，无法解析。");
-      }
 
       const rows = [];
       const debug = [];
@@ -652,6 +804,7 @@
             }
           }
         }
+
         if (headerLike) {
           debug.push(`第 ${lineIdx + 1} 行看起来像表头，已自动跳过。`);
           continue;
@@ -725,7 +878,7 @@
     }
 
     // =========================================================
-    // Parse B files
+    // Parse B
     // =========================================================
     function tryParseJSON(text) {
       try { return JSON.parse(text); } catch { return null; }
@@ -861,7 +1014,7 @@
     }
 
     // =========================================================
-    // Review table
+    // 审核表
     // =========================================================
     function phasePill(phase) {
       if (phase === "pre") return '<span class="pill pill-pre">pre</span>';
@@ -882,9 +1035,7 @@
 
           return `
             <tr data-index="${idx}">
-              <td>
-                <input type="checkbox" class="review-include" checked />
-              </td>
+              <td><input type="checkbox" class="review-include" checked /></td>
               <td>
                 <select class="review-phase">
                   <option value="pre" ${phase === "pre" ? "selected" : ""}>pre</option>
@@ -946,21 +1097,10 @@
       if (!included.length) {
         return {
           ok: false,
-          message: "你当前没有勾选任何 B 文件。\n\n请至少保留 1 个 Include = 勾选 的 B 文件，或者只靠 A 导出（若你希望这样，我也可以再帮你改成允许完全没有 B）。"
+          message: "你当前没有勾选任何 B 文件。\n\n请至少保留 1 个 Include = 勾选 的 B 文件。"
         };
       }
 
-      const signatures = unique(
-        included.map(x => {
-          const id = s(x.meta.id);
-          const canon = s(x.canonicalSubject);
-          const rawName = s(x.meta.name);
-          if (id) return `id:${id}`;
-          return `name:${canon || rawName || "(empty)"}`;
-        })
-      );
-
-      // 若多个不同 id，一定不行
       const idSet = unique(included.map(x => s(x.meta.id)).filter(Boolean));
       if (idSet.length > 1) {
         return {
@@ -972,7 +1112,6 @@
         };
       }
 
-      // 如果没有 id，则看 canonical subject
       if (!idSet.length) {
         const canonSet = unique(included.map(x => s(x.canonicalSubject) || s(x.meta.name)).filter(Boolean));
         if (canonSet.length > 1) {
@@ -989,13 +1128,12 @@
       return {
         ok: true,
         included,
-        signatures,
         idSet
       };
     }
 
     // =========================================================
-    // Aggregation
+    // Phase aggregation
     // =========================================================
     function sortEntriesForPriority(entries) {
       return [...entries].sort((a, b) => {
@@ -1043,7 +1181,6 @@
         if (ta !== tb) return ta - tb;
         return a.uploadIndex - b.uploadIndex;
       });
-
       const chosen = ranked[ranked.length - 1];
 
       debug.conflicts.push({
@@ -1052,7 +1189,6 @@
         chosenFrom: chosen.fileName,
         values: candidates
       });
-
       debug.selection.push(`${label}: 存在冲突，已自动选 "${chosen.value}"（来自 ${chosen.fileName}）`);
       return chosen.value;
     }
@@ -1089,7 +1225,7 @@
       const sorted = sortEntriesForPriority(entries);
       const debug = { phase: phaseLabel, selection: [], conflicts: [], files: sorted.map(x => x.meta.fileName) };
 
-      const agg = {
+      return {
         testDate: resolveFieldFromEntries(sorted, d => d.testDate, debug, `${phaseLabel}.testDate`),
         legLength: resolveFieldFromEntries(sorted, d => d.legLength, debug, `${phaseLabel}.legLength`),
         moca: resolveFieldFromEntries(sorted, d => d.moca, debug, `${phaseLabel}.moca`),
@@ -1107,100 +1243,202 @@
         }),
         debug
       };
-
-      return agg;
     }
 
     // =========================================================
-    // Derived fields
+    // FCI / PARQ codes
     // =========================================================
-    function buildTrainingStatus(preA, postA) {
-      const vals = [
-        preA?.training1, preA?.training2, preA?.training3,
-        postA?.training1, postA?.training2, postA?.training3
-      ].map(s).filter(Boolean);
-      return unique(vals).join("; ");
+    const COMORBIDITY_MAP = [
+      { key: "fci1_arthritis", code: "ARTH", label: "arthritis" },
+      { key: "fci2_osteoporosis", code: "OP", label: "osteoporosis" },
+      { key: "fci3_asthma", code: "ASTH", label: "asthma" },
+      { key: "fci4_copd", code: "COPD", label: "COPD" },
+      { key: "fci5_angina", code: "AP", label: "angina" },
+      { key: "fci6_heart_failure", code: "HF", label: "heart failure" },
+      { key: "fci7_heart_attack", code: "MI", label: "myocardial infarction" },
+      { key: "fci8_neuro_disease", code: "NEURO", label: "neurological disease" },
+      { key: "fci10_peripheral_vascular", code: "PVD", label: "peripheral vascular disease" },
+      { key: "fci11_diabetes", code: "DM", label: "diabetes mellitus" },
+      { key: "fci12_gastro", code: "GI", label: "gastrointestinal disease" },
+      { key: "fci16_hearing", code: "HL", label: "hearing loss" },
+      { key: "fci17_disc_disease", code: "DISC", label: "disc disease" },
+      { key: "fci18_obesity", code: "OB", label: "obesity" }
+    ];
+
+    function getComorbidityCodes(preA, postA) {
+      const codes = [];
+      for (const item of COMORBIDITY_MAP) {
+        if (yes(preA?.[item.key]) || yes(postA?.[item.key])) {
+          codes.push(item.code);
+        }
+      }
+      return unique(codes);
     }
 
-    function combineSameOrPair(preVal, postVal) {
-      const a = s(preVal);
-      const b = s(postVal);
-      if (a && b) return a === b ? a : `pre: ${a} | post: ${b}`;
-      return a || b || "";
+    function buildFCIField(preA, postA) {
+      const score = pick(preA, ["fciTotal"], "") || pick(postA, ["fciTotal"], "");
+      const codes = getComorbidityCodes(preA, postA);
+      if (!isBlank(score) && codes.length) return `${score} [${codes.join(", ")}]`;
+      if (!isBlank(score)) return String(score);
+      if (codes.length) return codes.join(", ");
+      return "";
     }
 
     function buildParQ(preA, postA, preAgg, postAgg) {
-      const codes = [];
-      const diseaseMap = [
-        { keys: ["fci1_arthritis"], code: "ARTH" },
-        { keys: ["fci2_osteoporosis"], code: "OP" },
-        { keys: ["fci3_asthma"], code: "ASTH" },
-        { keys: ["fci4_copd"], code: "COPD" },
-        { keys: ["fci5_angina"], code: "AP" },
-        { keys: ["fci6_heart_failure"], code: "HF" },
-        { keys: ["fci7_heart_attack"], code: "MI" },
-        { keys: ["fci8_neuro_disease"], code: "NEURO" },
-        { keys: ["fci10_peripheral_vascular"], code: "PVD" },
-        { keys: ["fci11_diabetes"], code: "DM" },
-        { keys: ["fci12_gastro"], code: "GI" },
-        { keys: ["fci16_hearing"], code: "HL" },
-        { keys: ["fci17_disc_disease"], code: "DISC" },
-        { keys: ["fci18_obesity"], code: "OB" },
-        { keys: ["hbp","HBP","hypertension","ht"], code: "HBP" },
-        { keys: ["hld","HLD","hyperlipidemia","dyslipidemia"], code: "HLD" }
-      ];
-
-      for (const item of diseaseMap) {
-        const hit =
-          item.keys.some(k => yes(preA?.[k])) ||
-          item.keys.some(k => yes(postA?.[k]));
-        if (hit) codes.push(item.code);
-      }
-
-      const uniqCodes = unique(codes);
-      if (uniqCodes.length) return uniqCodes.join(", ");
+      const codes = getComorbidityCodes(preA, postA);
+      if (codes.length) return codes.join(", ");
       if (preAgg.parqAnyPositive || postAgg.parqAnyPositive) return "PARQ+";
       return "";
     }
 
     // =========================================================
-    // Merge final C
+    // LEDD calculator
+    // =========================================================
+    function createLeddRow(initial = {}) {
+      const row = document.createElement("div");
+      row.className = "ledd-row";
+      row.innerHTML = `
+        <select class="ledd-drug"></select>
+        <input type="number" class="ledd-dose" placeholder="Dose (mg each time)" min="0" step="0.01" value="${initial.dose ?? ""}">
+        <input type="number" class="ledd-freq" placeholder="Times/day" min="0" step="1" value="${initial.freq ?? ""}">
+        <button type="button" class="danger ledd-remove">删除</button>
+      `;
+
+      const drugSelect = row.querySelector(".ledd-drug");
+      drugSelect.innerHTML = `
+        <option value="">-- 请选择药物 --</option>
+        ${Object.keys(LEDD_FACTORS).map(key => `<option value="${key}" ${initial.drug === key ? "selected" : ""}>${key} (×${LEDD_FACTORS[key].factor})</option>`).join("")}
+      `;
+
+      row.addEventListener("input", recalcManualLedd);
+      row.querySelector(".ledd-remove").addEventListener("click", () => {
+        row.remove();
+        recalcManualLedd();
+      });
+
+      return row;
+    }
+
+    function addLeddRow(initial = {}) {
+      document.getElementById("leddRows").appendChild(createLeddRow(initial));
+      recalcManualLedd();
+    }
+
+    function getManualLeddRows() {
+      return Array.from(document.querySelectorAll("#leddRows .ledd-row")).map(row => {
+        const drug = row.querySelector(".ledd-drug").value;
+        const dose = toNum(row.querySelector(".ledd-dose").value);
+        const freq = toNum(row.querySelector(".ledd-freq").value);
+        return { drug, dose, freq };
+      }).filter(x => x.drug && x.dose !== "" && x.freq !== "");
+    }
+
+    function recalcManualLedd() {
+      const rows = getManualLeddRows();
+      let total = 0;
+      for (const row of rows) {
+        const factor = LEDD_FACTORS[row.drug]?.factor ?? 0;
+        total += Number(row.dose) * Number(row.freq) * Number(factor);
+      }
+      const totalRounded = roundTo(total, 1) || 0;
+      document.getElementById("leddTotalBox").textContent = `Manual LEDD Total = ${totalRounded}`;
+      return totalRounded;
+    }
+
+    function manualLeddSummary() {
+      const rows = getManualLeddRows();
+      if (!rows.length) return "";
+      return rows.map(r => {
+        const factor = LEDD_FACTORS[r.drug]?.factor ?? 0;
+        const led = roundTo(Number(r.dose) * Number(r.freq) * Number(factor), 1) || 0;
+        return `${r.drug}: ${r.dose} mg × ${r.freq}/day × ${factor} = ${led}`;
+      }).join("; ");
+    }
+
+    document.getElementById("btnAddLeddRow").addEventListener("click", () => addLeddRow({}));
+    document.getElementById("btnClearLedd").addEventListener("click", () => {
+      document.getElementById("leddRows").innerHTML = "";
+      addLeddRow({});
+    });
+
+    // 默认先给一行
+    addLeddRow({});
+
+    // =========================================================
+    // Merge to final C
     // =========================================================
     function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
+      const manualSex = document.getElementById("manualSex").value;
+      if (!manualSex) {
+        throw new Error("你还没有填写 Gender（F/M）。\n\n请先在页面顶部的 Step 0 选择 F 或 M，然后再生成结果。");
+      }
+
       const subjectId =
         subjectInfo.id ||
         pick(preA, ["id"], "") ||
         pick(postA, ["id"], "");
+
       const name =
         subjectInfo.name ||
         pick(preA, ["name"], "") ||
         pick(postA, ["name"], "");
 
-      const hy = preAgg.hyStage || postAgg.hyStage || "";
-      const age = pick(preA, ["age"], "") || pick(postA, ["age"], "");
-      const gender = pick(preA, ["gender","sex","Gender","Sex","性别"], "") || pick(postA, ["gender","sex","Gender","Sex","性别"], "");
-      const dominantHand = pick(preA, ["dominantHand"], "") || pick(postA, ["dominantHand"], "");
-      const educationYear = pick(preA, ["educationYears"], "") || pick(postA, ["educationYears"], "");
-      const walkingAid = pick(preA, ["wheelchair"], "") || pick(postA, ["wheelchair"], "");
-      const heightM = maybeCmToMeter(pick(preA, ["fci18_height"], "")) || maybeCmToMeter(pick(postA, ["fci18_height"], ""));
-      const weightKg = pick(preA, ["fci18_weight"], "") || pick(postA, ["fci18_weight"], "");
+      const heightM =
+        maybeCmToMeter(pick(preA, ["fci18_height"], "")) ||
+        maybeCmToMeter(pick(postA, ["fci18_height"], ""));
+
+      const weightKg =
+        pick(preA, ["fci18_weight"], "") ||
+        pick(postA, ["fci18_weight"], "");
+
+      const bmi = computeBMI(heightM, weightKg);
+      const bmiCat = bmiCategory(bmi);
+
       const legLengthM = maybeCmToMeter(preAgg.legLength || postAgg.legLength || "");
       const standardStepLength = legLengthM === "" ? "" : roundTo(Number(legLengthM) * 0.8, 2);
-      const trainingStatus = buildTrainingStatus(preA, postA);
+
+      const trainingVals = [
+        preA?.training1, preA?.training2, preA?.training3,
+        postA?.training1, postA?.training2, postA?.training3
+      ].map(s).filter(Boolean);
+      const trainingStatus = unique(trainingVals).join("; ");
+
+      const originalLEDD = combineSameOrPair(preAgg.totalLEDD, postAgg.totalLEDD);
+      const manualLEDD = getManualLeddRows().length ? String(recalcManualLedd()) : "";
+      const manualLeddText = manualLeddSummary();
+
+      // LEDD 字段尽量保持“原始优先、手动兜底”
+      const finalLEDD = originalLEDD || manualLEDD || "";
+
+      const originalMedRegime = combineSameOrPair(preAgg.medicationDetails, postAgg.medicationDetails);
+      let finalMedRegime = originalMedRegime;
+      if (manualLeddText) {
+        finalMedRegime = finalMedRegime
+          ? `${finalMedRegime} | manualLEDD: ${manualLeddText}`
+          : `manualLEDD: ${manualLeddText}`;
+      }
+
+      const remarksParts = [];
+      appendRemark(remarksParts, bmi ? `BMI=${bmi}` : "");
+      appendRemark(remarksParts, bmiCat ? `BMI_category=${bmiCat}` : "");
+      appendRemark(remarksParts, originalLEDD ? `LEDD_original=${originalLEDD}` : "");
+      appendRemark(remarksParts, manualLEDD ? `LEDD_manual=${manualLEDD}` : "");
+      appendRemark(remarksParts, (!originalLEDD && !manualLEDD) ? "LEDD_missing" : "");
+      const remarks = remarksParts.join("; ");
 
       return {
         "Group": "",
         "Subject ID": subjectId,
         "Name": name,
         "PD_duration": pick(preA, ["diagnosisYear"], "") || pick(postA, ["diagnosisYear"], ""),
-        "H&Y": hy,
-        "FCI": pick(preA, ["fciTotal"], "") || pick(postA, ["fciTotal"], ""),
+        "H&Y": preAgg.hyStage || postAgg.hyStage || "",
+        "FCI": buildFCIField(preA, postA),
         "Par_Q": buildParQ(preA, postA, preAgg, postAgg),
-        "Age": age,
-        "Gender": gender,
-        "dominant hand": dominantHand,
-        "education_Year": educationYear,
-        "walking_aid": walkingAid,
+        "Age": pick(preA, ["age"], "") || pick(postA, ["age"], ""),
+        "Gender": manualSex,
+        "dominant hand": pick(preA, ["dominantHand"], "") || pick(postA, ["dominantHand"], ""),
+        "education_Year": pick(preA, ["educationYears"], "") || pick(postA, ["educationYears"], ""),
+        "walking_aid": pick(preA, ["wheelchair"], "") || pick(postA, ["wheelchair"], ""),
         "height (m)": heightM,
         "weight (kg)": weightKg,
         "leg length (m)": legLengthM,
@@ -1232,10 +1470,10 @@
         "Pre_HADS_A": pick(preA, ["hadsAnxiety"], ""),
         "Post_HADS_A": pick(postA, ["hadsAnxiety"], ""),
 
-        "LEDD": combineSameOrPair(preAgg.totalLEDD, postAgg.totalLEDD),
-        "Med_regime": combineSameOrPair(preAgg.medicationDetails, postAgg.medicationDetails),
+        "LEDD": finalLEDD,
+        "Med_regime": finalMedRegime,
         "contact": "",
-        "remarks": ""
+        "remarks": remarks
       };
     }
 
@@ -1260,13 +1498,10 @@
     function formatReviewedBForDebug(reviewed, aliasDebug, parseErrors) {
       const lines = [];
       lines.push("Alias rules:");
-      if (aliasDebug.length) {
-        aliasDebug.forEach(x => lines.push("- " + x));
-      } else {
-        lines.push("- （无）");
-      }
-      lines.push("");
+      if (aliasDebug.length) aliasDebug.forEach(x => lines.push("- " + x));
+      else lines.push("- （无）");
 
+      lines.push("");
       lines.push("审核后 B 文件：");
       if (!reviewed.length) {
         lines.push("- 无");
@@ -1287,17 +1522,14 @@
       return lines.join("\n");
     }
 
-    function formatConflictDebug(preAgg, postAgg) {
+    function formatConflictDebug(preAgg, postAgg, result) {
       const lines = [];
 
       function dump(title, agg) {
         lines.push(`=== ${title} ===`);
         lines.push("字段选择日志：");
-        if (agg.debug.selection.length) {
-          agg.debug.selection.forEach(x => lines.push("- " + x));
-        } else {
-          lines.push("- 无");
-        }
+        if (agg.debug.selection.length) agg.debug.selection.forEach(x => lines.push("- " + x));
+        else lines.push("- 无");
         lines.push("");
         lines.push("冲突详情：");
         if (!agg.debug.conflicts.length) {
@@ -1316,11 +1548,25 @@
 
       dump("PRE", preAgg);
       dump("POST", postAgg);
+
+      lines.push("=== BMI / LEDD / 合并字段 ===");
+      lines.push(`Gender = ${result["Gender"] || "(空)"}`);
+      lines.push(`height (m) = ${result["height (m)"] || "(空)"}`);
+      lines.push(`weight (kg) = ${result["weight (kg)"] || "(空)"}`);
+      lines.push(`FCI = ${result["FCI"] || "(空)"}`);
+      lines.push(`Par_Q = ${result["Par_Q"] || "(空)"}`);
+      lines.push(`LEDD = ${result["LEDD"] || "(空)"}`);
+      lines.push(`Med_regime = ${result["Med_regime"] || "(空)"}`);
+      lines.push(`remarks = ${result["remarks"] || "(空)"}`);
+      lines.push(`manualLeddRows = ${getManualLeddRows().length}`);
+      lines.push(`manualLeddTotal = ${getManualLeddRows().length ? recalcManualLedd() : "(空)"}`);
+      lines.push(`manualLeddSummary = ${manualLeddSummary() || "(空)"}`);
+
       return lines.join("\n");
     }
 
     // =========================================================
-    // Export
+    // Export helpers
     // =========================================================
     function downloadExcel(rowObj, filename = "C_merged.xlsx") {
       const ws = XLSX.utils.json_to_sheet([rowObj]);
@@ -1341,16 +1587,50 @@
       URL.revokeObjectURL(url);
     }
 
-    function escapeHtml(str) {
-      return String(str ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+    // =========================================================
+    // 清空
+    // =========================================================
+    function clearAll() {
+      document.getElementById("manualSex").value = "";
+      document.getElementById("pasteA").value = "";
+      document.getElementById("fileB").value = "";
+      document.getElementById("aliasRules").value = "";
+      document.getElementById("leddRows").innerHTML = "";
+      addLeddRow({});
+
+      setStatus("");
+      setText("preview", "{}");
+      setText("debugSummary", "尚未运行。");
+      setText("debugA", "尚未运行。");
+      setText("debugB", "尚未运行。");
+      setText("debugConflict", "尚未运行。");
+
+      setKPI("kpiA", 0);
+      setKPI("kpiBTotal", 0);
+      setKPI("kpiIncluded", 0);
+      setKPI("kpiPre", 0);
+      setKPI("kpiPost", 0);
+      setKPI("kpiConflict", 0);
+      setKPI("kpiBMI", "-");
+      setKPI("kpiBMICat", "-");
+
+      document.getElementById("reviewTableBody").innerHTML =
+        '<tr><td colspan="10" class="muted">还没有读取 B 文件。请先点击「读取并生成审核表」。</td></tr>';
+
+      const box = document.getElementById("parseErrorBox");
+      box.style.display = "none";
+      box.innerHTML = "";
+
+      window.__RAW_B_ENTRIES__ = [];
+      window.__PARSE_ERRORS__ = [];
+      window.__LAST_A__ = null;
+      window.__LAST_RESULT__ = null;
+      window.__LAST_DEBUG__ = null;
     }
+    document.getElementById("btnClear").addEventListener("click", clearAll);
 
     // =========================================================
-    // Step 1: Analyze and create review table
+    // Step 1: 读取并生成审核表
     // =========================================================
     async function analyzeAndBuildReview() {
       try {
@@ -1360,14 +1640,10 @@
         const files = Array.from(document.getElementById("fileB").files || []);
         const aliasText = document.getElementById("aliasRules").value;
 
-        // Parse A
         const { rows: aRows, debug: aDebug } = parseAPaste(pasteText);
         const aAssign = assignAPrePost(aRows);
-
-        // Parse alias rules
         const { aliasMap, debug: aliasDebug } = parseAliasRules(aliasText);
 
-        // Parse B
         const rawEntries = [];
         const parseErrors = [];
 
@@ -1388,9 +1664,7 @@
 
         window.__RAW_B_ENTRIES__ = rawEntries;
         window.__PARSE_ERRORS__ = parseErrors;
-        window.__LAST_A__ = {
-          aRows, aDebug, aAssign
-        };
+        window.__LAST_A__ = { aRows, aDebug, aAssign, aliasDebug };
 
         renderReviewTable(rawEntries, parseErrors, aliasMap);
 
@@ -1400,6 +1674,8 @@
         setKPI("kpiPre", rawEntries.filter(x => x.autoPhase === "pre").length);
         setKPI("kpiPost", rawEntries.filter(x => x.autoPhase === "post").length);
         setKPI("kpiConflict", 0);
+        setKPI("kpiBMI", "-");
+        setKPI("kpiBMICat", "-");
 
         setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
         setText("debugB", formatReviewedBForDebug(
@@ -1412,7 +1688,7 @@
           aliasDebug,
           parseErrors
         ));
-        setText("debugConflict", "还没有执行最终导出，所以暂时没有 conflict 计算结果。");
+        setText("debugConflict", "还没有执行最终导出，所以暂时没有 conflict / BMI / LEDD 计算结果。");
         setText("debugSummary",
           [
             "已生成审核表。",
@@ -1420,7 +1696,7 @@
             `B 成功解析：${rawEntries.length}`,
             `B 解析失败：${parseErrors.length}`,
             "",
-            "下一步：请到「B 文件审核表」里检查 Include / Phase / Canonical Subject，确认后再点击「按审核表导出 Excel」。"
+            "下一步：请在审核表里检查 Include / Phase / Canonical Subject，确认后再点击「生成结果并下载 Excel」。"
           ].join("\n")
         );
         setText("preview", "{}");
@@ -1436,7 +1712,7 @@
     }
 
     // =========================================================
-    // Step 2: Export using reviewed table
+    // Step 2: 按审核表生成并导出
     // =========================================================
     async function exportUsingReviewedTable(download = true) {
       try {
@@ -1444,13 +1720,16 @@
           throw new Error("还没有生成审核表。\n\n请先点击「1) 读取并生成审核表」。");
         }
 
+        const manualSex = document.getElementById("manualSex").value;
+        if (!manualSex) {
+          throw new Error("你还没有填写 Gender（F/M）。\n\n请先在页面顶部的 Step 0 选择 F 或 M。");
+        }
+
         setStatus("正在根据审核表整合数据…");
 
         const reviewed = getReviewedEntries();
         const validation = validateReviewedEntries(reviewed);
-        if (!validation.ok) {
-          throw new Error(validation.message);
-        }
+        if (!validation.ok) throw new Error(validation.message);
 
         const included = validation.included;
         const preEntries = included.filter(x => x.phase === "pre");
@@ -1460,11 +1739,10 @@
         const preAgg = aggregatePhase(preEntries, "pre");
         const postAgg = aggregatePhase(postEntries, "post");
 
-        const { aRows, aDebug, aAssign } = window.__LAST_A__;
+        const { aRows, aDebug, aAssign, aliasDebug } = window.__LAST_A__;
         const preA = aAssign.preA;
         const postA = aAssign.postA;
 
-        // subject info
         const subjectId = unique(included.map(x => s(x.meta.id)).filter(Boolean))[0] || "";
         const canonicalNames = unique(included.map(x => s(x.canonicalSubject)).filter(Boolean));
         const subjectName =
@@ -1477,17 +1755,24 @@
           name: subjectName
         });
 
+        const heightM = result["height (m)"];
+        const weightKg = result["weight (kg)"];
+        const bmi = computeBMI(heightM, weightKg);
+        const bmiCat = bmiCategory(bmi);
+
         const conflictCount = preAgg.debug.conflicts.length + postAgg.debug.conflicts.length;
 
         setKPI("kpiIncluded", included.length);
         setKPI("kpiPre", preEntries.length);
         setKPI("kpiPost", postEntries.length);
         setKPI("kpiConflict", conflictCount);
+        setKPI("kpiBMI", bmi || "-");
+        setKPI("kpiBMICat", bmiCat || "-");
 
         setText("preview", JSON.stringify(result, null, 2));
         setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
-        setText("debugB", formatReviewedBForDebug(reviewed, [], window.__PARSE_ERRORS__));
-        setText("debugConflict", formatConflictDebug(preAgg, postAgg));
+        setText("debugB", formatReviewedBForDebug(reviewed, aliasDebug || [], window.__PARSE_ERRORS__));
+        setText("debugConflict", formatConflictDebug(preAgg, postAgg, result));
 
         const summaryLines = [];
         summaryLines.push("导出前检查完成。");
@@ -1497,8 +1782,13 @@
         summaryLines.push(`Unknown（Included 但未参与计算）：${unknownIncluded.length}`);
         summaryLines.push(`Conflicts：${conflictCount}`);
         summaryLines.push("");
+        summaryLines.push(`Gender：${manualSex}`);
         summaryLines.push(`最终 Subject ID：${subjectId || "(空)"}`);
         summaryLines.push(`最终 Subject Name：${subjectName || "(空)"}`);
+        summaryLines.push(`BMI：${bmi || "(空)"} | ${bmiCat || "(空)"}`);
+        summaryLines.push(`FCI：${result["FCI"] || "(空)"}`);
+        summaryLines.push(`Par_Q：${result["Par_Q"] || "(空)"}`);
+        summaryLines.push(`LEDD：${result["LEDD"] || "(空)"}`);
 
         if (unknownIncluded.length) {
           summaryLines.push("");
@@ -1517,6 +1807,10 @@
           unknownIncludedCount: unknownIncluded.length,
           conflictCount,
           parseErrors: window.__PARSE_ERRORS__,
+          manualSex,
+          manualLeddRows: getManualLeddRows(),
+          manualLeddTotal: getManualLeddRows().length ? recalcManualLedd() : "",
+          manualLeddSummary: manualLeddSummary(),
           preAgg,
           postAgg,
           result
@@ -1544,7 +1838,7 @@
     document.getElementById("btnExport").addEventListener("click", () => exportUsingReviewedTable(true));
     document.getElementById("btnDebug").addEventListener("click", () => {
       if (!window.__LAST_DEBUG__) {
-        setStatus("还没有可下载的 Debug 报告。\n\n请先读取审核表并至少导出/预览一次。", true);
+        setStatus("还没有可下载的 Debug 报告。\n\n请先读取审核表并至少导出一次。", true);
         return;
       }
       downloadJSON(window.__LAST_DEBUG__, "debug_report.json");
