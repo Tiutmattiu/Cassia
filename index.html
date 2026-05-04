@@ -3,214 +3,345 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Paste A + Upload B → C Excel</title>
+  <title>Paste A + Many B → C Excel (Single Subject)</title>
 
   <!-- SheetJS -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
   <style>
-    body {
-      font-family: Arial, "Microsoft JhengHei", "PingFang TC", sans-serif;
-      max-width: 1100px;
-      margin: 24px auto;
-      padding: 16px;
-      background: #f7f8fa;
-      color: #222;
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --blue:#2563eb;
+      --blue2:#1d4ed8;
+      --green:#065f46;
+      --red:#b91c1c;
+      --amber:#92400e;
+      --amber-bg:#fff7ed;
+      --amber-line:#fdba74;
+      --shadow:0 10px 24px rgba(0,0,0,.08);
+      --radius:16px;
     }
 
-    .card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 22px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:24px;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial,"Microsoft JhengHei","PingFang TC",sans-serif;
     }
-
-    h1 {
-      margin-top: 0;
-      margin-bottom: 10px;
+    .container{
+      max-width:1280px;
+      margin:0 auto;
+      display:grid;
+      gap:18px;
     }
-
-    .sub {
-      color: #555;
-      line-height: 1.8;
-      margin-bottom: 20px;
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:20px;
+      border:1px solid #eef2f7;
     }
-
-    .row {
-      margin-bottom: 18px;
+    h1,h2,h3{margin:0 0 12px 0}
+    h1{font-size:28px}
+    h2{font-size:20px}
+    h3{font-size:16px}
+    .sub{
+      color:var(--muted);
+      line-height:1.8;
+      font-size:14px;
     }
-
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 8px;
+    .grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
     }
-
-    textarea {
-      width: 100%;
-      min-height: 240px;
-      box-sizing: border-box;
-      padding: 12px;
-      border: 1px solid #d7dbe2;
-      border-radius: 10px;
-      font-family: Consolas, "Courier New", monospace;
-      font-size: 13px;
-      line-height: 1.5;
-      resize: vertical;
-      background: #fff;
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
     }
-
-    input[type="file"] {
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px;
-      border: 1px solid #d7dbe2;
-      border-radius: 10px;
-      background: #fff;
+    label{
+      display:block;
+      font-weight:700;
+      margin-bottom:8px;
     }
-
-    .btns {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 8px;
+    textarea{
+      width:100%;
+      min-height:260px;
+      resize:vertical;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      font-family:Consolas,"Courier New",monospace;
+      font-size:13px;
+      line-height:1.55;
+      background:#fff;
     }
-
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 12px 18px;
-      font-size: 15px;
-      cursor: pointer;
-      color: white;
-      background: #2563eb;
+    input[type="file"]{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
     }
-
-    button:hover {
-      background: #1d4ed8;
+    .btns{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
     }
-
-    button.secondary {
-      background: #6b7280;
+    button{
+      border:none;
+      cursor:pointer;
+      padding:12px 18px;
+      border-radius:12px;
+      color:#fff;
+      background:var(--blue);
+      font-size:15px;
+      font-weight:700;
     }
-
-    button.secondary:hover {
-      background: #4b5563;
+    button:hover{background:var(--blue2)}
+    .secondary{background:#6b7280}
+    .secondary:hover{background:#4b5563}
+    .ghost{
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--line);
     }
-
-    .status {
-      margin-top: 10px;
-      font-weight: 700;
+    .ghost:hover{background:#f9fafb}
+    .hint{
+      background:#eff6ff;
+      border:1px solid #93c5fd;
+      color:#1e3a8a;
+      border-radius:12px;
+      padding:14px;
+      line-height:1.75;
+      font-size:14px;
     }
-
-    .ok { color: #065f46; }
-    .err { color: #b91c1c; }
-
-    .small {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.7;
+    .warn{
+      background:var(--amber-bg);
+      border:1px solid var(--amber-line);
+      color:var(--amber);
+      border-radius:12px;
+      padding:14px;
+      line-height:1.75;
+      font-size:14px;
     }
-
-    .box {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 12px;
-      line-height: 1.7;
-      font-size: 14px;
-      color: #444;
+    .small{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+      margin-top:8px;
     }
-
-    code {
-      background: #f3f4f6;
-      padding: 2px 6px;
-      border-radius: 6px;
+    .status{
+      font-weight:700;
+      margin-top:12px;
+      line-height:1.6;
+      white-space:pre-wrap;
     }
-
-    pre {
-      background: #111827;
-      color: #e5e7eb;
-      padding: 14px;
-      border-radius: 10px;
-      overflow: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-      min-height: 220px;
-      line-height: 1.5;
+    .ok{color:var(--green)}
+    .err{color:var(--red)}
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:12px;
     }
-
-    .hint {
-      background: #eff6ff;
-      border: 1px solid #93c5fd;
-      color: #1e3a8a;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 14px;
-      line-height: 1.7;
-      margin-bottom: 16px;
+    @media (max-width: 1100px){
+      .kpi-grid{grid-template-columns:repeat(3,1fr)}
+    }
+    @media (max-width: 650px){
+      .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    .kpi{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      background:#fafcff;
+    }
+    .kpi .label{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:6px;
+    }
+    .kpi .value{
+      font-size:24px;
+      font-weight:800;
+    }
+    pre{
+      background:#111827;
+      color:#e5e7eb;
+      padding:14px;
+      border-radius:12px;
+      overflow:auto;
+      white-space:pre-wrap;
+      word-break:break-word;
+      line-height:1.5;
+      min-height:160px;
+      margin:0;
+    }
+    .schema-box{
+      background:#f9fafb;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      font-size:12px;
+      line-height:1.8;
+      color:#374151;
+      max-height:180px;
+      overflow:auto;
+      font-family:Consolas,"Courier New",monospace;
+    }
+    details{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px 14px;
+      background:#fff;
+    }
+    details + details{margin-top:10px}
+    summary{
+      cursor:pointer;
+      font-weight:700;
+    }
+    .pill{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      margin-right:6px;
+    }
+    .pill-pre{background:#dcfce7;color:#166534}
+    .pill-post{background:#dbeafe;color:#1d4ed8}
+    .pill-unknown{background:#fef3c7;color:#92400e}
+    .muted{color:var(--muted)}
+    .mono{font-family:Consolas,"Courier New",monospace}
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+    @media (max-width: 900px){
+      .two-col{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Paste A + Upload B → C Excel</h1>
-
-    <div class="sub">
-      <div><b>A：</b>不上传，直接粘贴 <b>1–2 行数据</b>（表头固定为你提供的 schema）</div>
-      <div><b>B：</b>上传 <b>1–2 个文件</b>（TXT / JSON / CSV）</div>
-      <div>如果 A 贴 2 行，默认是同一个人的前后两次；程序会优先按 <code>timestamp</code> 早晚排序：早的是 <b>pre</b>，晚的是 <b>post</b>。如果时间不可识别，就按粘贴顺序：第一行 pre、第二行 post。</div>
-    </div>
-
-    <div class="hint">
-      <b>A 粘贴格式说明：</b><br>
-      你可以直接从 Excel 复制两行“数据行”贴进下面文本框。<br>
-      <b>不用贴表头</b>；程序默认表头就是你给的那套。<br>
-      当然，如果你不小心把表头也一起贴了，程序也会自动识别并跳过。
-    </div>
-
-    <div class="row">
-      <label for="pasteA">粘贴 A（1–2 行，tab 分隔）</label>
-      <textarea id="pasteA" placeholder="把 A 的 1–2 行数据直接粘贴到这里（从 Excel 复制即可）"></textarea>
-      <div class="small">
-        默认 A 的表头固定，不需要上传文件。<br>
-        如果粘贴 1 行：默认当作 <b>pre</b>。<br>
-        如果粘贴 2 行：按 timestamp 排序（早=pre，晚=post）；若 timestamp 无法识别，则按粘贴顺序（第一行=pre，第二行=post）。
+  <div class="container">
+    <div class="card">
+      <h1>Paste A + Many B → C Excel（单一受试者版）</h1>
+      <div class="sub">
+        <div><b>A：</b>直接复制粘贴 1–2 行（固定表头，不上传文件）</div>
+        <div><b>B：</b>一次可上传 <b>无数个</b> TXT / JSON / CSV 文件；默认都是 <b>同一个人</b></div>
+        <div>系统会自动把 B 分成 <b>pre / post / unknown</b>，并分别从所有 pre / 所有 post 文件中整合字段；如果同一字段不同文件给出不同值，会记录为 <b>conflict</b>，并在 debug 面板里详细列出。</div>
       </div>
     </div>
 
-    <div class="row">
-      <label for="fileB">上传 B 文件（1 或 2 个）</label>
-      <input id="fileB" type="file" accept=".txt,.json,.csv" multiple />
-      <div class="small">
-        B 支持 1 或 2 个文件。<br>
-        如果有 pre 和 post，请两个都传；如果只缺其中一个，也可以正常输出。
+    <div class="grid">
+      <div class="card">
+        <h2>Step 1. 粘贴 A</h2>
+        <div class="hint">
+          <b>怎么贴：</b><br>
+          直接从 Excel 复制 <b>1–2 行数据</b> 粘贴到下面。<br>
+          <b>不用贴表头</b>；如果你不小心把表头也一起贴进来，程序会自动尝试跳过。<br><br>
+          <b>规则：</b><br>
+          - 贴 1 行 → 视为 <b>pre</b><br>
+          - 贴 2 行 → 视为同一个人的 pre / post，优先按 <code>timestamp</code> 早晚排序；若无法识别时间，则按粘贴顺序（第一行=pre，第二行=post）
+        </div>
+        <label for="pasteA" style="margin-top:14px;">A 粘贴区（tab 分隔）</label>
+        <textarea id="pasteA" placeholder="把 A 的 1–2 行数据直接粘贴到这里（从 Excel 复制即可）"></textarea>
+        <div class="small">
+          A 表头是固定的；这版不会让你上传 A 文件，也不会处理多个人。
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Step 2. 上传 B（可无限多个）</h2>
+        <div class="warn">
+          <b>这版的设计就是为了解决你“B 存了很多版本、不知道哪个最新”的问题：</b><br>
+          你可以把同一个人的所有 B 全部上传。<br>
+          系统会：<br>
+          1. 自动归类为 pre / post / unknown<br>
+          2. 按字段整合，不是只取一个文件<br>
+          3. 如果同一字段有冲突，会详细写出来，不会静默覆盖
+        </div>
+
+        <label for="fileB" style="margin-top:14px;">B 文件（可多选、可无限多个）</label>
+        <input id="fileB" type="file" accept=".txt,.json,.csv" multiple />
+        <div class="small">
+          允许一次上传很多个 B，但默认必须是 <b>同一个人</b>。<br>
+          如果检测到 B 文件里出现多个不同的 <code>id</code> 或多个不同的 <code>name</code>，程序会报错并停止，防止混入别人数据。<br>
+          <br>
+          <b>testType 识别顺序：</b><br>
+          1. 文件内容中的 <code>testType</code><br>
+          2. 文件名中是否含 <code>pre</code> / <code>post</code><br>
+          3. 都识别不到 → 归为 <b>unknown</b>（不会参与计算，但会出现在 debug）
+        </div>
+
+        <div class="btns">
+          <button id="btnAnalyze" class="secondary">先分析 / 预览</button>
+          <button id="btnDownload">生成并下载 Excel</button>
+          <button id="btnDebug" class="ghost">下载 Debug 报告（JSON）</button>
+          <button id="btnClear" class="ghost">清空</button>
+        </div>
+        <div id="status" class="status"></div>
       </div>
     </div>
 
-    <div class="btns">
-      <button id="btnPreview" class="secondary">预览合并结果</button>
-      <button id="btnDownload">生成并下载 Excel</button>
-      <button id="btnClear" class="secondary">清空</button>
+    <div class="card">
+      <h2>Step 3. 运行结果概览</h2>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="label">A 数据行数</div><div id="kpiA" class="value">0</div></div>
+        <div class="kpi"><div class="label">B 总文件数</div><div id="kpiBTotal" class="value">0</div></div>
+        <div class="kpi"><div class="label">Pre B 数量</div><div id="kpiBPre" class="value">0</div></div>
+        <div class="kpi"><div class="label">Post B 数量</div><div id="kpiBPost" class="value">0</div></div>
+        <div class="kpi"><div class="label">Unknown B 数量</div><div id="kpiBUnknown" class="value">0</div></div>
+        <div class="kpi"><div class="label">Conflicts</div><div id="kpiConflict" class="value">0</div></div>
+      </div>
     </div>
 
-    <div id="status" class="status"></div>
-
-    <div class="row" style="margin-top:18px;">
-      <label>预览</label>
-      <pre id="preview">{}</pre>
+    <div class="two-col">
+      <div class="card">
+        <h2>C 预览</h2>
+        <pre id="preview">{}</pre>
+      </div>
+      <div class="card">
+        <h2>Debug 摘要</h2>
+        <pre id="debugSummary">尚未运行。</pre>
+      </div>
     </div>
 
-    <div class="row">
-      <label>A 默认表头（固定）</label>
-      <div class="box" id="schemaBox"></div>
+    <div class="card">
+      <h2>详细 Debug 面板</h2>
+
+      <details open>
+        <summary>A 解析详情</summary>
+        <pre id="debugA">尚未运行。</pre>
+      </details>
+
+      <details open>
+        <summary>B 文件归类详情（pre / post / unknown）</summary>
+        <pre id="debugB">尚未运行。</pre>
+      </details>
+
+      <details open>
+        <summary>字段冲突与自动选择详情</summary>
+        <pre id="debugConflict">尚未运行。</pre>
+      </details>
+
+      <details>
+        <summary>A 固定表头 schema</summary>
+        <div id="schemaBox" class="schema-box"></div>
+      </details>
     </div>
   </div>
 
   <script>
     // =========================================================
-    // A 的固定表头（按你提供的顺序）
+    // A 固定表头（按你提供的顺序）
     // =========================================================
     const A_HEADERS = [
       "timestamp","id","name","age","diagnosisYear","educationYears","dominantHand",
@@ -228,52 +359,62 @@
       "pdq35","pdq36","pdq37","pdq38","pdq39","pdqTotal",
       "fogq1","fogq2","fogq3","fogq4","fogq5","fogq6","fogqTotal"
     ];
-
-    // =========================================================
-    // UI
-    // =========================================================
     document.getElementById("schemaBox").textContent = A_HEADERS.join(" | ");
 
+    // =========================================================
+    // UI helpers
+    // =========================================================
     function setStatus(msg, isError = false) {
       const el = document.getElementById("status");
       el.textContent = msg;
       el.className = "status " + (isError ? "err" : "ok");
     }
-
+    function setKPI(id, value) {
+      document.getElementById(id).textContent = String(value);
+    }
+    function setText(id, text) {
+      document.getElementById(id).textContent = text;
+    }
     function clearAll() {
       document.getElementById("pasteA").value = "";
       document.getElementById("fileB").value = "";
-      document.getElementById("preview").textContent = "{}";
       setStatus("");
+      setKPI("kpiA", 0);
+      setKPI("kpiBTotal", 0);
+      setKPI("kpiBPre", 0);
+      setKPI("kpiBPost", 0);
+      setKPI("kpiBUnknown", 0);
+      setKPI("kpiConflict", 0);
+      setText("preview", "{}");
+      setText("debugSummary", "尚未运行。");
+      setText("debugA", "尚未运行。");
+      setText("debugB", "尚未运行。");
+      setText("debugConflict", "尚未运行。");
+      window.__LAST_DEBUG__ = null;
+      window.__LAST_RESULT__ = null;
     }
-
     document.getElementById("btnClear").addEventListener("click", clearAll);
 
     // =========================================================
-    // 小工具
+    // General utils
     // =========================================================
     function isBlank(v) {
       return v === undefined || v === null || String(v).trim() === "";
     }
-
     function s(v) {
       return v === undefined || v === null ? "" : String(v).trim();
     }
-
     function lower(v) {
       return s(v).toLowerCase();
     }
-
     function yes(v) {
       const x = lower(v);
-      return ["是","yes","y","true","1","有","同意","positive","+"] .includes(x);
+      return ["是","yes","y","true","1","有","positive","+","同意"].includes(x);
     }
-
     function no(v) {
       const x = lower(v);
-      return ["否","no","n","false","0","無","无","negative","-"].includes(x);
+      return ["否","no","n","false","0","无","無","negative","-"].includes(x);
     }
-
     function toNum(v) {
       if (isBlank(v)) return "";
       const cleaned = String(v)
@@ -283,19 +424,16 @@
       const n = Number(cleaned);
       return Number.isFinite(n) ? n : "";
     }
-
     function roundTo(v, d = 2) {
       const n = Number(v);
       if (!Number.isFinite(n)) return "";
       return Number(n.toFixed(d));
     }
-
     function maybeCmToMeter(v) {
       const n = toNum(v);
       if (n === "") return "";
       return n > 3 ? roundTo(n / 100, 2) : roundTo(n, 2);
     }
-
     function pick(obj, keys, defaultValue = "") {
       if (!obj) return defaultValue;
       for (const k of keys) {
@@ -303,24 +441,31 @@
       }
       return defaultValue;
     }
-
-    function joinNonEmpty(arr, sep = "; ") {
-      return arr.map(s).filter(Boolean).join(sep);
-    }
-
     function unique(arr) {
       return [...new Set(arr)];
     }
-
-    function parseDateSafe(value) {
-      if (isBlank(value)) return null;
-      const d = new Date(value);
+    function joinNonEmpty(arr, sep = "; ") {
+      return arr.map(s).filter(Boolean).join(sep);
+    }
+    function normalizeForCompare(v) {
+      return String(v ?? "").trim();
+    }
+    function parseDateSafe(v) {
+      if (isBlank(v)) return null;
+      const d = new Date(v);
       return isNaN(d.getTime()) ? null : d;
     }
-
+    function dateRank(meta) {
+      // 排序依据：localSaveTime > testDate > uploadIndex
+      const t1 = parseDateSafe(meta.localSaveTime);
+      if (t1) return t1.getTime();
+      const t2 = parseDateSafe(meta.testDate);
+      if (t2) return t2.getTime();
+      // fallback：用上传顺序
+      return meta.uploadIndex || 0;
+    }
     function formatDateYYYYMMDD(value) {
       if (isBlank(value)) return "";
-      // 如果本来像 2026-04-16，就直接返回前10位
       const str = s(value);
       const m = str.match(/^(\d{4}-\d{2}-\d{2})/);
       if (m) return m[1];
@@ -333,38 +478,48 @@
     }
 
     // =========================================================
-    // 解析 A：从粘贴文本（无表头 / 可误贴表头）解析成 1~2 行对象
+    // Parse A from pasted text
     // =========================================================
     function parseAPaste(text) {
       const raw = String(text || "").trim();
-      if (!raw) throw new Error("请先粘贴 A 数据。");
+      if (!raw) {
+        throw new Error(
+          "A 为空。\n\n请把 A 的 1–2 行数据直接粘贴到文本框中。\n建议从 Excel 直接复制整行数据（tab 分隔）。"
+        );
+      }
 
       const lines = raw
         .split(/\r?\n/)
         .map(line => line.replace(/\u00A0/g, " ").trim())
         .filter(Boolean);
 
-      if (!lines.length) throw new Error("A 粘贴内容为空。");
+      if (!lines.length) {
+        throw new Error("A 粘贴内容为空白行，无法解析。");
+      }
 
       const rows = [];
+      const debug = [];
 
-      for (const line of lines) {
+      for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+        const line = lines[lineIdx];
         const cells = line.split("\t");
 
-        // 情况1：用户把表头也贴进来了 -> 跳过
+        // 若误贴 header，则跳过
+        let headerLike = false;
         if (cells.length >= 5) {
-          const firstFew = A_HEADERS.slice(0, Math.min(A_HEADERS.length, cells.length));
-          let headerLike = true;
-          for (let i = 0; i < Math.min(8, firstFew.length); i++) {
-            if (s(cells[i]) !== firstFew[i]) {
+          headerLike = true;
+          for (let i = 0; i < Math.min(8, A_HEADERS.length, cells.length); i++) {
+            if (s(cells[i]) !== A_HEADERS[i]) {
               headerLike = false;
               break;
             }
           }
-          if (headerLike) continue;
+        }
+        if (headerLike) {
+          debug.push(`第 ${lineIdx + 1} 行看起来像表头，已自动跳过。`);
+          continue;
         }
 
-        // 行长度不足时补空；过长时截断
         const normalized = cells.slice(0, A_HEADERS.length);
         while (normalized.length < A_HEADERS.length) normalized.push("");
 
@@ -373,176 +528,328 @@
           obj[h] = normalized[idx] ?? "";
         });
 
-        // 至少要有一点有效数据
-        const hasAnyData = Object.values(obj).some(v => !isBlank(v));
-        if (hasAnyData) rows.push(obj);
+        const nonEmptyCount = Object.values(obj).filter(v => !isBlank(v)).length;
+        if (nonEmptyCount > 0) {
+          rows.push(obj);
+          debug.push(`第 ${lineIdx + 1} 行解析成功：${nonEmptyCount} 个非空字段。`);
+        }
       }
 
       if (!rows.length) {
-        throw new Error("A 粘贴内容无法解析。请确认是从 Excel 复制的 tab 分隔数据。");
+        throw new Error(
+          "A 无法解析。\n\n可能原因：\n1. 你贴进去的是空内容\n2. 不是 tab 分隔（不是从 Excel 直接复制）\n3. 只贴了表头，没有贴数据行"
+        );
       }
 
       if (rows.length > 2) {
-        throw new Error("A 目前只接受 1 或 2 行数据。请只粘贴同一个人的 1–2 行。");
+        throw new Error(
+          `A 检测到 ${rows.length} 行有效数据。\n\n这版只允许同一个人的 1–2 行。\n请只保留同一个人的 pre/post 两行（或单行）。`
+        );
       }
 
-      return rows;
+      return { rows, debug };
     }
 
-    // =========================================================
-    // 对 A 的 1~2 行进行 pre/post 归位
-    // 规则：
-    // - 1 行 -> pre
-    // - 2 行 -> 有效 timestamp 则按时间升序；否则按粘贴顺序
-    // =========================================================
     function assignAPrePost(aRows) {
       if (aRows.length === 1) {
-        return { preA: aRows[0], postA: null };
+        return {
+          preA: aRows[0],
+          postA: null,
+          message: "A 只有 1 行：默认视为 pre。"
+        };
       }
 
       const r1 = aRows[0];
       const r2 = aRows[1];
-
       const t1 = parseDateSafe(r1.timestamp);
       const t2 = parseDateSafe(r2.timestamp);
 
       if (t1 && t2) {
         if (t1.getTime() <= t2.getTime()) {
-          return { preA: r1, postA: r2 };
+          return {
+            preA: r1,
+            postA: r2,
+            message: `A 有 2 行：按 timestamp 排序。\npre = ${s(r1.timestamp)}\npost = ${s(r2.timestamp)}`
+          };
         } else {
-          return { preA: r2, postA: r1 };
+          return {
+            preA: r2,
+            postA: r1,
+            message: `A 有 2 行：按 timestamp 排序（已交换顺序）。\npre = ${s(r2.timestamp)}\npost = ${s(r1.timestamp)}`
+          };
         }
       }
 
-      // timestamp 无法识别，则按粘贴顺序
-      return { preA: r1, postA: r2 };
+      return {
+        preA: r1,
+        postA: r2,
+        message: "A 有 2 行，但 timestamp 不能可靠识别：已按粘贴顺序处理（第 1 行=pre，第 2 行=post）。"
+      };
     }
 
     // =========================================================
-    // 解析 B 文件：TXT / JSON / CSV
+    // Parse B files
     // =========================================================
     function tryParseJSON(text) {
-      try {
-        return JSON.parse(text);
-      } catch {
-        return null;
-      }
+      try { return JSON.parse(text); } catch { return null; }
     }
 
-    async function readBFile(file) {
+    async function readBFile(file, uploadIndex) {
       const ext = file.name.split(".").pop().toLowerCase();
+      let data = null;
+      let parseMethod = "";
 
       if (ext === "json") {
         const text = await file.text();
-        const data = tryParseJSON(text);
-        if (!data || typeof data !== "object") {
-          throw new Error(`${file.name} 不是有效 JSON`);
+        const json = tryParseJSON(text);
+        if (!json || typeof json !== "object") {
+          throw new Error(`文件 ${file.name} 不是有效 JSON。`);
         }
-        return data;
-      }
-
-      if (ext === "txt") {
+        data = json;
+        parseMethod = "json";
+      } else if (ext === "txt") {
         const text = await file.text();
 
-        // 1) 先按 JSON
+        // 1) JSON
         const json = tryParseJSON(text);
-        if (json && typeof json === "object") return json;
-
-        // 2) 再按 key:value / key,value
-        const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
-        const obj = {};
-        for (const line of lines) {
-          if (line.includes(":")) {
-            const idx = line.indexOf(":");
-            const key = line.slice(0, idx).trim().replace(/^"|"$/g, "");
-            const value = line.slice(idx + 1).trim().replace(/^"|"$/g, "").replace(/,$/, "");
-            if (key) obj[key] = value;
-          } else if (line.includes(",")) {
-            const parts = line.split(",");
-            if (parts.length >= 2) {
-              const key = parts[0].trim();
-              const value = parts.slice(1).join(",").trim();
+        if (json && typeof json === "object") {
+          data = json;
+          parseMethod = "txt-json";
+        } else {
+          // 2) key:value / key,value
+          const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+          const obj = {};
+          for (const line of lines) {
+            if (line.includes(":")) {
+              const idx = line.indexOf(":");
+              const key = line.slice(0, idx).trim().replace(/^"|"$/g, "");
+              const value = line.slice(idx + 1).trim().replace(/^"|"$/g, "").replace(/,$/, "");
               if (key) obj[key] = value;
+            } else if (line.includes(",")) {
+              const parts = line.split(",");
+              if (parts.length >= 2) {
+                const key = parts[0].trim();
+                const value = parts.slice(1).join(",").trim();
+                if (key) obj[key] = value;
+              }
             }
           }
+          if (!Object.keys(obj).length) {
+            throw new Error(`文件 ${file.name} 的 TXT 无法识别为 JSON 或 key-value。`);
+          }
+          data = obj;
+          parseMethod = "txt-keyvalue";
         }
-
-        if (Object.keys(obj).length) return obj;
-        throw new Error(`${file.name} 的 TXT 无法识别为 JSON 或 key-value`);
-      }
-
-      if (ext === "csv") {
+      } else if (ext === "csv") {
         const text = await file.text();
         const wb = XLSX.read(text, { type: "string" });
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-        if (!rows.length) throw new Error(`${file.name} 的 CSV 没有有效数据`);
-
-        // 1) 表头 + 一行
-        if (rows.length === 1) return rows[0];
-
-        // 2) key,value 两列
-        const first = rows[0];
-        const cols = Object.keys(first);
-        const lowerCols = cols.map(c => c.toLowerCase());
-
-        if (lowerCols.includes("key") && lowerCols.includes("value")) {
-          const keyCol = cols.find(c => c.toLowerCase() === "key");
-          const valCol = cols.find(c => c.toLowerCase() === "value");
-          const obj = {};
-          for (const row of rows) {
-            const key = s(row[keyCol]);
-            if (key) obj[key] = row[valCol];
-          }
-          return obj;
+        if (!rows.length) {
+          throw new Error(`文件 ${file.name} 的 CSV 没有有效数据。`);
         }
 
-        if (cols.length === 2) {
-          const c1 = cols[0];
-          const c2 = cols[1];
-          const obj = {};
-          let count = 0;
-          for (const row of rows) {
-            const key = s(row[c1]);
-            if (key) {
-              obj[key] = row[c2];
-              count++;
+        // 普通表头 + 一行
+        if (rows.length === 1) {
+          data = rows[0];
+          parseMethod = "csv-row";
+        } else {
+          // key/value 两列
+          const first = rows[0];
+          const cols = Object.keys(first);
+          const lowerCols = cols.map(c => c.toLowerCase());
+
+          if (lowerCols.includes("key") && lowerCols.includes("value")) {
+            const keyCol = cols.find(c => c.toLowerCase() === "key");
+            const valCol = cols.find(c => c.toLowerCase() === "value");
+            const obj = {};
+            for (const row of rows) {
+              const key = s(row[keyCol]);
+              if (key) obj[key] = row[valCol];
             }
+            data = obj;
+            parseMethod = "csv-keyvalue-header";
+          } else if (cols.length === 2) {
+            const c1 = cols[0], c2 = cols[1];
+            const obj = {};
+            let count = 0;
+            for (const row of rows) {
+              const key = s(row[c1]);
+              if (key) {
+                obj[key] = row[c2];
+                count++;
+              }
+            }
+            if (count >= 3) {
+              data = obj;
+              parseMethod = "csv-keyvalue-2col";
+            } else {
+              data = rows[0];
+              parseMethod = "csv-fallback-row";
+            }
+          } else {
+            data = rows[0];
+            parseMethod = "csv-fallback-row";
           }
-          if (count >= 3) return obj;
         }
-
-        return rows[0];
+      } else {
+        throw new Error(`文件 ${file.name} 格式不支持。只支持 .txt / .json / .csv`);
       }
 
-      throw new Error(`${file.name} 格式不支持`);
+      const meta = {
+        fileName: file.name,
+        fileSize: file.size,
+        uploadIndex,
+        parseMethod,
+        id: pick(data, ["id"], ""),
+        name: pick(data, ["name"], ""),
+        testTypeRaw: pick(data, ["testType"], ""),
+        testDate: pick(data, ["testDate"], ""),
+        localSaveTime: pick(data, ["localSaveTime"], "")
+      };
+
+      return { data, meta };
     }
 
-    function detectTestType(b) {
-      const t = lower(b.testType);
-      if (["pre","baseline","before"].includes(t)) return "pre";
-      if (["post","after","followup","follow-up"].includes(t)) return "post";
-      return "";
-    }
+    function detectTestTypeFromDataOrName(data, fileName) {
+      const raw = lower(data.testType);
+      if (["pre","baseline","before"].includes(raw)) return { phase: "pre", reason: "由内容中的 testType 判断" };
+      if (["post","after","followup","follow-up"].includes(raw)) return { phase: "post", reason: "由内容中的 testType 判断" };
 
-    function assignBPrePost(bList) {
-      const preB = bList.find(b => detectTestType(b) === "pre") || null;
-      const postB = bList.find(b => detectTestType(b) === "post") || null;
-
-      // 如果只有一个 B，且没有 testType，就默认 pre
-      if (bList.length === 1 && !detectTestType(bList[0])) {
-        return { preB: bList[0], postB: null };
+      const fname = lower(fileName);
+      if (/\bpre\b/.test(fname) || fname.includes("_pre") || fname.includes("-pre") || fname.includes(" pre ")) {
+        return { phase: "pre", reason: "由文件名包含 pre 判断" };
+      }
+      if (/\bpost\b/.test(fname) || fname.includes("_post") || fname.includes("-post") || fname.includes(" post ")) {
+        return { phase: "post", reason: "由文件名包含 post 判断" };
       }
 
-      return { preB, postB };
+      return { phase: "unknown", reason: "内容和文件名都无法判断 pre/post" };
     }
 
     // =========================================================
-    // 业务计算
+    // Validation: ensure B files are one person
     // =========================================================
-    function computeUPDRS3(b) {
-      if (!b) return "";
+    function validateSingleSubject(bEntries) {
+      const idSet = unique(
+        bEntries.map(x => s(x.meta.id)).filter(Boolean)
+      );
+      const nameSet = unique(
+        bEntries.map(x => s(x.meta.name)).filter(Boolean)
+      );
+
+      const errors = [];
+      const warnings = [];
+
+      if (idSet.length > 1) {
+        errors.push(
+          "B 文件里检测到多个不同的 id，疑似混入了多个人的数据：\n- " + idSet.join("\n- ")
+        );
+      }
+      if (nameSet.length > 1) {
+        errors.push(
+          "B 文件里检测到多个不同的 name，疑似混入了多个人的数据：\n- " + nameSet.join("\n- ")
+        );
+      }
+
+      if (!idSet.length) {
+        warnings.push("所有 B 文件都没有 id。程序仍会继续，但无法用 B 的 id 做单一受试者检查。");
+      }
+      if (!nameSet.length) {
+        warnings.push("所有 B 文件都没有 name。程序仍会继续，但无法用 B 的 name 做单一受试者检查。");
+      }
+
+      return { errors, warnings, idSet, nameSet };
+    }
+
+    // =========================================================
+    // Phase aggregators
+    // =========================================================
+    function completenessScore(data) {
+      return Object.values(data || {}).filter(v => !isBlank(v)).length;
+    }
+
+    function sortEntriesForPriority(entries) {
+      // 按“较旧 -> 较新”排序，后面优先
+      return [...entries].sort((a, b) => {
+        const ra = dateRank(a.meta);
+        const rb = dateRank(b.meta);
+        if (ra !== rb) return ra - rb;
+        const ca = completenessScore(a.data);
+        const cb = completenessScore(b.data);
+        if (ca !== cb) return ca - cb;
+        return a.meta.uploadIndex - b.meta.uploadIndex;
+      });
+    }
+
+    function resolveFieldFromEntries(entries, fieldKey, extractor, debug, options = {}) {
+      const label = options.label || fieldKey;
+      const normalizedCandidates = [];
+      const rawCandidates = [];
+
+      for (const entry of entries) {
+        let value = extractor(entry.data, entry.meta);
+        if (typeof options.transform === "function") {
+          value = options.transform(value, entry);
+        }
+        if (!isBlank(value)) {
+          const norm = normalizeForCompare(value);
+          normalizedCandidates.push({
+            norm,
+            raw: value,
+            fileName: entry.meta.fileName,
+            localSaveTime: entry.meta.localSaveTime,
+            testDate: entry.meta.testDate,
+            uploadIndex: entry.meta.uploadIndex
+          });
+          rawCandidates.push(value);
+        }
+      }
+
+      if (!normalizedCandidates.length) {
+        debug.selection.push(`${label}: 无非空值 → 留空`);
+        return "";
+      }
+
+      const uniqueNorms = unique(normalizedCandidates.map(x => x.norm));
+
+      if (uniqueNorms.length === 1) {
+        const chosen = normalizedCandidates[normalizedCandidates.length - 1];
+        debug.selection.push(`${label}: 一致值 "${chosen.raw}"（来自 ${chosen.fileName}）`);
+        return chosen.raw;
+      }
+
+      // 有冲突：选排序后最后一个（较新/较完整/较后上传）
+      const ranked = [...normalizedCandidates].sort((a, b) => {
+        const ta = dateRank(a);
+        const tb = dateRank(b);
+        if (ta !== tb) return ta - tb;
+        return a.uploadIndex - b.uploadIndex;
+      });
+      const chosen = ranked[ranked.length - 1];
+
+      debug.conflicts.push({
+        field: label,
+        chosen: chosen.raw,
+        chosenFrom: chosen.fileName,
+        values: normalizedCandidates.map(x => ({
+          value: x.raw,
+          fileName: x.fileName,
+          localSaveTime: x.localSaveTime || "",
+          testDate: x.testDate || "",
+          uploadIndex: x.uploadIndex
+        }))
+      });
+
+      debug.selection.push(
+        `${label}: 检测到冲突，已自动选 "${chosen.raw}"（来自 ${chosen.fileName}）`
+      );
+
+      return chosen.raw;
+    }
+
+    function computeUPDRS3(data) {
+      if (!data) return "";
       const keys = [
         "updrs3_1","updrs3_2",
         "updrs3_3a","updrs3_3b","updrs3_3c","updrs3_3d","updrs3_3e",
@@ -557,37 +864,76 @@
         "updrs3_17a","updrs3_17b","updrs3_17c","updrs3_17d","updrs3_17e",
         "updrs3_18"
       ];
-
       let sum = 0;
+      let any = false;
       for (const k of keys) {
-        const n = toNum(b[k]);
-        if (n !== "") sum += n;
+        const n = toNum(data[k]);
+        if (n !== "") {
+          sum += n;
+          any = true;
+        }
       }
-      return sum;
+      return any ? sum : "";
     }
 
-    function combineSameOrPair(preVal, postVal) {
-      const a = s(preVal);
-      const b = s(postVal);
-      if (a && b) {
-        return a === b ? a : `pre: ${a} | post: ${b}`;
-      }
-      return a || b || "";
+    function aggregatePhase(entries, phaseLabel) {
+      const debug = {
+        phase: phaseLabel,
+        fileOrder: [],
+        selection: [],
+        conflicts: []
+      };
+
+      const sorted = sortEntriesForPriority(entries);
+      debug.fileOrder = sorted.map(e => ({
+        fileName: e.meta.fileName,
+        localSaveTime: e.meta.localSaveTime || "",
+        testDate: e.meta.testDate || "",
+        uploadIndex: e.meta.uploadIndex,
+        completeness: completenessScore(e.data)
+      }));
+
+      return {
+        testDate: resolveFieldFromEntries(sorted, "testDate", d => d.testDate, debug, { label: `${phaseLabel}.testDate` }),
+        legLength: resolveFieldFromEntries(sorted, "legLength", d => d.legLength, debug, { label: `${phaseLabel}.legLength` }),
+        moca: resolveFieldFromEntries(sorted, "moca", d => d.moca, debug, { label: `${phaseLabel}.moca` }),
+        totalLEDD: resolveFieldFromEntries(sorted, "totalLEDD", d => d.totalLEDD, debug, { label: `${phaseLabel}.totalLEDD` }),
+        medicationDetails: resolveFieldFromEntries(sorted, "medicationDetails", d => d.medicationDetails, debug, { label: `${phaseLabel}.medicationDetails` }),
+        hyStage: resolveFieldFromEntries(sorted, "hyStage", d => d.hyStage, debug, { label: `${phaseLabel}.hyStage` }),
+        tug_avg: resolveFieldFromEntries(sorted, "tug_avg", d => d.tug_avg, debug, { label: `${phaseLabel}.tug_avg` }),
+        avgSpeed: resolveFieldFromEntries(sorted, "avgSpeed", d => d.avgSpeed, debug, { label: `${phaseLabel}.avgSpeed` }),
+        avgStepLength: resolveFieldFromEntries(sorted, "avgStepLength", d => d.avgStepLength, debug, { label: `${phaseLabel}.avgStepLength` }),
+        avgCadence: resolveFieldFromEntries(sorted, "avgCadence", d => d.avgCadence, debug, { label: `${phaseLabel}.avgCadence` }),
+        updrs3Total: resolveFieldFromEntries(sorted, "updrs3Total", d => computeUPDRS3(d), debug, { label: `${phaseLabel}.updrs3Total` }),
+        parqAnyPositive: sorted.some(e => {
+          const d = e.data || {};
+          return [d.parq1,d.parq2,d.parq3,d.parq4,d.parq5,d.parq6,d.parq7].some(yes);
+        }),
+        files: sorted,
+        debug
+      };
     }
 
+    // =========================================================
+    // Derived fields
+    // =========================================================
     function buildTrainingStatus(preA, postA) {
       const vals = [
         preA?.training1, preA?.training2, preA?.training3,
         postA?.training1, postA?.training2, postA?.training3
       ].map(s).filter(Boolean);
-
       return unique(vals).join("; ");
     }
 
-    function buildParQ(preA, postA, preB, postB) {
-      const codes = [];
+    function combineSameOrPair(preVal, postVal) {
+      const a = s(preVal);
+      const b = s(postVal);
+      if (a && b) return a === b ? a : `pre: ${a} | post: ${b}`;
+      return a || b || "";
+    }
 
-      // 以 A 的共病字段为主；pre/post 合并取 union
+    function buildParQ(preA, postA, preAgg, postAgg) {
+      const codes = [];
       const diseaseMap = [
         { keys: ["fci1_arthritis"], code: "ARTH" },
         { keys: ["fci2_osteoporosis"], code: "OP" },
@@ -603,94 +949,57 @@
         { keys: ["fci16_hearing"], code: "HL" },
         { keys: ["fci17_disc_disease"], code: "DISC" },
         { keys: ["fci18_obesity"], code: "OB" },
-
-        // 如果你后面真实数据里额外有这些字段，也能识别
-        { keys: ["hbp","HBP","hypertension","HT","ht"], code: "HBP" },
+        { keys: ["hbp","HBP","hypertension","ht"], code: "HBP" },
         { keys: ["hld","HLD","hyperlipidemia","dyslipidemia"], code: "HLD" }
       ];
 
       for (const item of diseaseMap) {
-        const preYes = item.keys.some(k => yes(preA?.[k]));
-        const postYes = item.keys.some(k => yes(postA?.[k]));
-        if (preYes || postYes) codes.push(item.code);
-      }
-
-      // 如果 B 的 parq 有阳性，但 A 没法映射出具体病名 -> PARQ+
-      const bList = [preB, postB].filter(Boolean);
-      let parqPositive = false;
-      for (const b of bList) {
-        const arr = [b.parq1, b.parq2, b.parq3, b.parq4, b.parq5, b.parq6, b.parq7];
-        if (arr.some(yes)) {
-          parqPositive = true;
-          break;
-        }
+        const hit =
+          item.keys.some(k => yes(preA?.[k])) ||
+          item.keys.some(k => yes(postA?.[k]));
+        if (hit) codes.push(item.code);
       }
 
       const uniqCodes = unique(codes);
       if (uniqCodes.length) return uniqCodes.join(", ");
-      if (parqPositive) return "PARQ+";
+
+      if (preAgg.parqAnyPositive || postAgg.parqAnyPositive) return "PARQ+";
       return "";
     }
 
     // =========================================================
-    // A + B => C
+    // Merge to final C
     // =========================================================
-    function mergeToC(preA, postA, preB, postB) {
+    function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
       const subjectId =
-        pick(preB, ["id"], "") ||
-        pick(postB, ["id"], "") ||
+        subjectInfo.id ||
         pick(preA, ["id"], "") ||
         pick(postA, ["id"], "");
-
       const name =
-        pick(preB, ["name"], "") ||
-        pick(postB, ["name"], "") ||
+        subjectInfo.name ||
         pick(preA, ["name"], "") ||
         pick(postA, ["name"], "");
 
-      const hy = pick(preB, ["hyStage"], "") || pick(postB, ["hyStage"], "");
-
+      const hy = preAgg.hyStage || postAgg.hyStage || "";
       const age = pick(preA, ["age"], "") || pick(postA, ["age"], "");
       const gender = pick(preA, ["gender","sex","Gender","Sex","性别"], "") || pick(postA, ["gender","sex","Gender","Sex","性别"], "");
       const dominantHand = pick(preA, ["dominantHand"], "") || pick(postA, ["dominantHand"], "");
       const educationYear = pick(preA, ["educationYears"], "") || pick(postA, ["educationYears"], "");
       const walkingAid = pick(preA, ["wheelchair"], "") || pick(postA, ["wheelchair"], "");
-
-      const heightM =
-        maybeCmToMeter(pick(preA, ["fci18_height"], "")) ||
-        maybeCmToMeter(pick(postA, ["fci18_height"], ""));
-
-      const weightKg =
-        pick(preA, ["fci18_weight"], "") ||
-        pick(postA, ["fci18_weight"], "");
-
-      const legLengthM =
-        maybeCmToMeter(pick(preB, ["legLength"], "")) ||
-        maybeCmToMeter(pick(postB, ["legLength"], ""));
-
-      const standardStepLength =
-        legLengthM === "" ? "" : roundTo(Number(legLengthM) * 0.8, 2);
-
+      const heightM = maybeCmToMeter(pick(preA, ["fci18_height"], "")) || maybeCmToMeter(pick(postA, ["fci18_height"], ""));
+      const weightKg = pick(preA, ["fci18_weight"], "") || pick(postA, ["fci18_weight"], "");
+      const legLengthM = maybeCmToMeter(preAgg.legLength || postAgg.legLength || "");
+      const standardStepLength = legLengthM === "" ? "" : roundTo(Number(legLengthM) * 0.8, 2);
       const trainingStatus = buildTrainingStatus(preA, postA);
 
-      const LEDD = combineSameOrPair(
-        pick(preB, ["totalLEDD"], ""),
-        pick(postB, ["totalLEDD"], "")
-      );
-
-      const medRegime = combineSameOrPair(
-        pick(preB, ["medicationDetails"], ""),
-        pick(postB, ["medicationDetails"], "")
-      );
-
-      const result = {
+      return {
         "Group": "",
         "Subject ID": subjectId,
         "Name": name,
         "PD_duration": pick(preA, ["diagnosisYear"], "") || pick(postA, ["diagnosisYear"], ""),
         "H&Y": hy,
         "FCI": pick(preA, ["fciTotal"], "") || pick(postA, ["fciTotal"], ""),
-        "Par_Q": buildParQ(preA, postA, preB, postB),
+        "Par_Q": buildParQ(preA, postA, preAgg, postAgg),
         "Age": age,
         "Gender": gender,
         "dominant hand": dominantHand,
@@ -701,43 +1010,160 @@
         "leg length (m)": legLengthM,
         "standard_step-length(m)": standardStepLength,
 
-        "Pre_date": preB ? formatDateYYYYMMDD(preB.testDate) : (preA ? formatDateYYYYMMDD(preA.timestamp) : ""),
+        "Pre_date": preAgg.testDate ? formatDateYYYYMMDD(preAgg.testDate) : (preA ? formatDateYYYYMMDD(preA.timestamp) : ""),
         "training_status": trainingStatus,
-        "Post_date": postB ? formatDateYYYYMMDD(postB.testDate) : (postA ? formatDateYYYYMMDD(postA.timestamp) : ""),
+        "Post_date": postAgg.testDate ? formatDateYYYYMMDD(postAgg.testDate) : (postA ? formatDateYYYYMMDD(postA.timestamp) : ""),
 
-        "pre_steplength(m)": pick(preB, ["avgStepLength"], ""),
-        "post_steplength(m)": pick(postB, ["avgStepLength"], ""),
-        "pre_cadence(bpm)": pick(preB, ["avgCadence"], ""),
-        "post_cadence(bpm)": pick(postB, ["avgCadence"], ""),
-        "Pre_velocity(m/s)": pick(preB, ["avgSpeed"], ""),
-        "post_velocity(m/s)": pick(postB, ["avgSpeed"], ""),
-        "Pre_TUG (s)": pick(preB, ["tug_avg"], ""),
-        "post_TUG(s)": pick(postB, ["tug_avg"], ""),
+        "pre_steplength(m)": preAgg.avgStepLength || "",
+        "post_steplength(m)": postAgg.avgStepLength || "",
+        "pre_cadence(bpm)": preAgg.avgCadence || "",
+        "post_cadence(bpm)": postAgg.avgCadence || "",
+        "Pre_velocity(m/s)": preAgg.avgSpeed || "",
+        "post_velocity(m/s)": postAgg.avgSpeed || "",
+        "Pre_TUG (s)": preAgg.tug_avg || "",
+        "post_TUG(s)": postAgg.tug_avg || "",
 
         "Pre_fogQ": pick(preA, ["fogqTotal"], ""),
         "post_fogQ": pick(postA, ["fogqTotal"], ""),
-        "pre_UPDRS3": computeUPDRS3(preB),
-        "post_UPDRS3": computeUPDRS3(postB),
+        "pre_UPDRS3": preAgg.updrs3Total || "",
+        "post_UPDRS3": postAgg.updrs3Total || "",
         "Pre_PDQ": pick(preA, ["pdqTotal"], ""),
         "Post_PDQ": pick(postA, ["pdqTotal"], ""),
-        "Pre_Moca": pick(preB, ["moca"], ""),
-        "Post_Moca": pick(postB, ["moca"], ""),
+        "Pre_Moca": preAgg.moca || "",
+        "Post_Moca": postAgg.moca || "",
         "Pre_HADS_D": pick(preA, ["hadsDepression"], ""),
         "Post_HADS_D": pick(postA, ["hadsDepression"], ""),
         "Pre_HADS_A": pick(preA, ["hadsAnxiety"], ""),
         "Post_HADS_A": pick(postA, ["hadsAnxiety"], ""),
 
-        "LEDD": LEDD,
-        "Med_regime": medRegime,
+        "LEDD": combineSameOrPair(preAgg.totalLEDD, postAgg.totalLEDD),
+        "Med_regime": combineSameOrPair(preAgg.medicationDetails, postAgg.medicationDetails),
         "contact": "",
         "remarks": ""
       };
-
-      return result;
     }
 
     // =========================================================
-    // 导出 Excel
+    // Debug rendering
+    // =========================================================
+    function formatAForDebug(aRows, aDebug, aAssign) {
+      const lines = [];
+      lines.push("A 解析日志：");
+      aDebug.forEach(x => lines.push("- " + x));
+      lines.push("");
+      lines.push("A pre/post 归位：");
+      lines.push(aAssign.message);
+      lines.push("");
+      lines.push("A 原始行摘要：");
+      aRows.forEach((row, idx) => {
+        lines.push(`Row ${idx + 1}: timestamp=${s(row.timestamp)} | id=${s(row.id)} | name=${s(row.name)} | pdqTotal=${s(row.pdqTotal)} | fogqTotal=${s(row.fogqTotal)} | hadsA=${s(row.hadsAnxiety)} | hadsD=${s(row.hadsDepression)}`);
+      });
+      return lines.join("\n");
+    }
+
+    function formatBForDebug(classified, validationWarnings) {
+      const lines = [];
+      if (validationWarnings.length) {
+        lines.push("Validation warnings:");
+        validationWarnings.forEach(w => lines.push("- " + w));
+        lines.push("");
+      }
+
+      lines.push(`B 总文件数：${classified.all.length}`);
+      lines.push(`Pre：${classified.pre.length} | Post：${classified.post.length} | Unknown：${classified.unknown.length}`);
+      lines.push("");
+
+      function dumpGroup(title, entries, pill) {
+        lines.push(`${title} (${entries.length})`);
+        if (!entries.length) {
+          lines.push("  - 无");
+          lines.push("");
+          return;
+        }
+        entries.forEach((entry, i) => {
+          const m = entry.meta;
+          lines.push(
+            `  ${i + 1}. ${m.fileName}\n` +
+            `     id=${s(m.id) || "(空)"} | name=${s(m.name) || "(空)"} | testType=${s(m.testTypeRaw) || "(空)"} | testDate=${s(m.testDate) || "(空)"} | localSaveTime=${s(m.localSaveTime) || "(空)"} | parse=${m.parseMethod}\n` +
+            `     phase=${entry.phase} | reason=${entry.phaseReason}`
+          );
+        });
+        lines.push("");
+      }
+
+      dumpGroup("PRE 文件", classified.pre);
+      dumpGroup("POST 文件", classified.post);
+      dumpGroup("UNKNOWN 文件（不参与计算）", classified.unknown);
+
+      return lines.join("\n");
+    }
+
+    function formatConflictDebug(preAgg, postAgg) {
+      const lines = [];
+
+      function dumpPhase(title, agg) {
+        lines.push(`=== ${title} ===`);
+        lines.push("文件优先级顺序（较旧 -> 较新 / 较后优先）：");
+        if (!agg.debug.fileOrder.length) {
+          lines.push("- 无文件");
+        } else {
+          agg.debug.fileOrder.forEach((x, idx) => {
+            lines.push(
+              `${idx + 1}. ${x.fileName} | localSaveTime=${x.localSaveTime || "(空)"} | testDate=${x.testDate || "(空)"} | uploadIndex=${x.uploadIndex} | completeness=${x.completeness}`
+            );
+          });
+        }
+        lines.push("");
+        lines.push("字段选择日志：");
+        if (!agg.debug.selection.length) {
+          lines.push("- 无");
+        } else {
+          agg.debug.selection.forEach(x => lines.push("- " + x));
+        }
+        lines.push("");
+        lines.push("冲突详情：");
+        if (!agg.debug.conflicts.length) {
+          lines.push("- 无冲突");
+        } else {
+          agg.debug.conflicts.forEach(conf => {
+            lines.push(`- 字段：${conf.field}`);
+            lines.push(`  自动选中：${conf.chosen} （来自 ${conf.chosenFrom}）`);
+            conf.values.forEach(v => {
+              lines.push(`  · 候选值：${v.value} | 文件：${v.fileName} | localSaveTime=${v.localSaveTime || "(空)"} | testDate=${v.testDate || "(空)"} | uploadIndex=${v.uploadIndex}`);
+            });
+          });
+        }
+        lines.push("");
+      }
+
+      dumpPhase("PRE 聚合", preAgg);
+      dumpPhase("POST 聚合", postAgg);
+
+      return lines.join("\n");
+    }
+
+    function buildSummary(result, classified, conflictCount, warningsCount) {
+      const lines = [];
+      lines.push("运行摘要");
+      lines.push("--------");
+      lines.push(`B 总文件数：${classified.all.length}`);
+      lines.push(`Pre：${classified.pre.length}`);
+      lines.push(`Post：${classified.post.length}`);
+      lines.push(`Unknown（未参与计算）：${classified.unknown.length}`);
+      lines.push(`Conflicts：${conflictCount}`);
+      lines.push(`Warnings：${warningsCount}`);
+      lines.push("");
+      lines.push(`最终 Subject ID：${s(result["Subject ID"]) || "(空)"}`);
+      lines.push(`最终 Name：${s(result["Name"]) || "(空)"}`);
+      lines.push(`最终 Pre_date：${s(result["Pre_date"]) || "(空)"}`);
+      lines.push(`最终 Post_date：${s(result["Post_date"]) || "(空)"}`);
+      lines.push(`最终 LEDD：${s(result["LEDD"]) || "(空)"}`);
+      lines.push(`最终 Med_regime：${s(result["Med_regime"]) || "(空)"}`);
+      return lines.join("\n");
+    }
+
+    // =========================================================
+    // Export helpers
     // =========================================================
     function downloadExcel(rowObj, filename = "C_merged.xlsx") {
       const ws = XLSX.utils.json_to_sheet([rowObj]);
@@ -746,49 +1172,176 @@
       XLSX.writeFile(wb, filename);
     }
 
+    function downloadJSON(obj, filename = "debug_report.json") {
+      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
     // =========================================================
-    // 主流程
+    // Main pipeline
     // =========================================================
     async function run(download = false) {
       try {
-        setStatus("");
-
+        setStatus("正在分析，请稍候…");
         const pasteText = document.getElementById("pasteA").value;
-        const bFiles = Array.from(document.getElementById("fileB").files || []);
+        const files = Array.from(document.getElementById("fileB").files || []);
 
-        const aRows = parseAPaste(pasteText);
-        const { preA, postA } = assignAPrePost(aRows);
+        // 1) Parse A
+        const { rows: aRows, debug: aDebug } = parseAPaste(pasteText);
+        const aAssign = assignAPrePost(aRows);
+        const preA = aAssign.preA;
+        const postA = aAssign.postA;
 
-        if (bFiles.length > 2) {
-          throw new Error("B 最多只能上传 2 个文件（pre / post）。");
+        // 2) Parse B files
+        const bEntries = [];
+        const parseErrors = [];
+
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          try {
+            const entry = await readBFile(f, i + 1);
+            const phaseInfo = detectTestTypeFromDataOrName(entry.data, entry.meta.fileName);
+            bEntries.push({
+              ...entry,
+              phase: phaseInfo.phase,
+              phaseReason: phaseInfo.reason
+            });
+          } catch (err) {
+            parseErrors.push(`- ${f.name}: ${err.message}`);
+          }
         }
 
-        const bList = [];
-        for (const f of bFiles) {
-          const b = await readBFile(f);
-          bList.push(b);
+        // 如果全部 B 都失败，也允许继续，只是 B 为空
+        if (files.length && parseErrors.length === files.length) {
+          throw new Error(
+            "所有 B 文件都解析失败，无法继续。\n\n" + parseErrors.join("\n")
+          );
         }
 
-        const { preB, postB } = assignBPrePost(bList);
+        // 3) Validate single subject among B
+        const validation = validateSingleSubject(bEntries);
+        if (validation.errors.length) {
+          throw new Error(
+            "B 文件单一受试者检查失败：\n\n" + validation.errors.join("\n\n")
+          );
+        }
 
-        const merged = mergeToC(preA, postA, preB, postB);
+        // 4) Classify B
+        const classified = {
+          all: bEntries,
+          pre: bEntries.filter(x => x.phase === "pre"),
+          post: bEntries.filter(x => x.phase === "post"),
+          unknown: bEntries.filter(x => x.phase === "unknown")
+        };
 
-        document.getElementById("preview").textContent = JSON.stringify(merged, null, 2);
+        // 5) Aggregate by phase
+        const preAgg = aggregatePhase(classified.pre, "pre");
+        const postAgg = aggregatePhase(classified.post, "post");
+
+        // 6) Subject info from B (single subject assumption)
+        const subjectInfo = {
+          id: validation.idSet[0] || "",
+          name: validation.nameSet[0] || ""
+        };
+
+        // 7) Merge final C
+        const result = mergeToC(preA, postA, preAgg, postAgg, subjectInfo);
+
+        // 8) Prepare debug
+        const warningList = [];
+        if (parseErrors.length) {
+          warningList.push(`有 ${parseErrors.length} 个 B 文件解析失败。`);
+        }
+        warningList.push(...validation.warnings);
+        if (!classified.pre.length) warningList.push("没有任何可用的 pre B 文件。所有 pre 来自 A（若 A 有）。");
+        if (!classified.post.length) warningList.push("没有任何可用的 post B 文件。所有 post 来自 A（若 A 有）。");
+        if (classified.unknown.length) warningList.push(`有 ${classified.unknown.length} 个 B 文件无法判断 pre/post，已归为 unknown，未参与计算。`);
+
+        const conflictCount = preAgg.debug.conflicts.length + postAgg.debug.conflicts.length;
+
+        const debugPayload = {
+          timestamp: new Date().toISOString(),
+          summary: {
+            aRows: aRows.length,
+            bTotal: classified.all.length,
+            bPre: classified.pre.length,
+            bPost: classified.post.length,
+            bUnknown: classified.unknown.length,
+            conflictCount,
+            warningCount: warningList.length,
+            parseErrorCount: parseErrors.length
+          },
+          parseErrors,
+          warnings: warningList,
+          validation,
+          aDebug,
+          aAssign,
+          classified,
+          preAgg,
+          postAgg,
+          result
+        };
+
+        // 9) Render UI
+        setKPI("kpiA", aRows.length);
+        setKPI("kpiBTotal", classified.all.length);
+        setKPI("kpiBPre", classified.pre.length);
+        setKPI("kpiBPost", classified.post.length);
+        setKPI("kpiBUnknown", classified.unknown.length);
+        setKPI("kpiConflict", conflictCount);
+
+        setText("preview", JSON.stringify(result, null, 2));
+        setText("debugSummary", buildSummary(result, classified, conflictCount, warningList.length));
+        setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
+        setText("debugB", formatBForDebug(classified, validation.warnings.concat(parseErrors.length ? [`解析失败文件数：${parseErrors.length}`] : [])));
+        setText("debugConflict", formatConflictDebug(preAgg, postAgg));
+
+        window.__LAST_DEBUG__ = debugPayload;
+        window.__LAST_RESULT__ = result;
+
+        const statusLines = [];
+        statusLines.push("分析完成。");
+        if (warningList.length) {
+          statusLines.push(`Warnings：${warningList.length} 个`);
+        }
+        if (parseErrors.length) {
+          statusLines.push(`B 解析失败：${parseErrors.length} 个文件（详情请看 Debug）`);
+        }
+        if (classified.unknown.length) {
+          statusLines.push(`Unknown B：${classified.unknown.length} 个（未参与计算）`);
+        }
+        if (conflictCount) {
+          statusLines.push(`Conflicts：${conflictCount} 个字段存在冲突，系统已自动选值（详情请看 Debug）`);
+        }
+        setStatus(statusLines.join("\n"), false);
 
         if (download) {
-          downloadExcel(merged, "C_merged.xlsx");
-          setStatus("已成功生成并下载：C_merged.xlsx");
-        } else {
-          setStatus("预览成功。");
+          downloadExcel(result, "C_merged.xlsx");
+          setStatus(statusLines.join("\n") + "\n\n已下载：C_merged.xlsx", false);
         }
       } catch (err) {
         console.error(err);
-        setStatus("处理失败：" + err.message, true);
+        setStatus("处理失败：\n\n" + err.message, true);
       }
     }
 
-    document.getElementById("btnPreview").addEventListener("click", () => run(false));
+    document.getElementById("btnAnalyze").addEventListener("click", () => run(false));
     document.getElementById("btnDownload").addEventListener("click", () => run(true));
+    document.getElementById("btnDebug").addEventListener("click", () => {
+      if (!window.__LAST_DEBUG__) {
+        setStatus("还没有可下载的 Debug 报告。请先点击“先分析 / 预览”或“生成并下载 Excel”。", true);
+        return;
+      }
+      downloadJSON(window.__LAST_DEBUG__, "debug_report.json");
+      setStatus("已下载：debug_report.json");
+    });
   </script>
 </body>
 </html>
