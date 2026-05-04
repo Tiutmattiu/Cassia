@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Paste A + Many B → C Excel (Single Subject)</title>
+  <title>Paste A + Review Many B → C Excel</title>
 
-  <!-- SheetJS -->
+  <!-- SheetJS：这次 script 标签是正确的 -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
   <style>
     :root{
-      --bg:#f5f7fb;
+      --bg:#f6f8fb;
       --card:#ffffff;
       --text:#1f2937;
       --muted:#6b7280;
@@ -35,7 +35,7 @@
       font-family:Arial,"Microsoft JhengHei","PingFang TC",sans-serif;
     }
     .container{
-      max-width:1280px;
+      max-width:1400px;
       margin:0 auto;
       display:grid;
       gap:18px;
@@ -58,7 +58,7 @@
     }
     .grid{
       display:grid;
-      grid-template-columns:1.2fr .8fr;
+      grid-template-columns:1fr 1fr;
       gap:18px;
     }
     @media (max-width: 980px){
@@ -71,7 +71,7 @@
     }
     textarea{
       width:100%;
-      min-height:260px;
+      min-height:240px;
       resize:vertical;
       border:1px solid var(--line);
       border-radius:12px;
@@ -86,6 +86,14 @@
       border:1px solid var(--line);
       border-radius:12px;
       padding:10px;
+      background:#fff;
+    }
+    input[type="text"], select{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:13px;
       background:#fff;
     }
     .btns{
@@ -145,32 +153,6 @@
     }
     .ok{color:var(--green)}
     .err{color:var(--red)}
-    .kpi-grid{
-      display:grid;
-      grid-template-columns:repeat(6,1fr);
-      gap:12px;
-    }
-    @media (max-width: 1100px){
-      .kpi-grid{grid-template-columns:repeat(3,1fr)}
-    }
-    @media (max-width: 650px){
-      .kpi-grid{grid-template-columns:repeat(2,1fr)}
-    }
-    .kpi{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px;
-      background:#fafcff;
-    }
-    .kpi .label{
-      color:var(--muted);
-      font-size:12px;
-      margin-bottom:6px;
-    }
-    .kpi .value{
-      font-size:24px;
-      font-weight:800;
-    }
     pre{
       background:#111827;
       color:#e5e7eb;
@@ -195,16 +177,30 @@
       overflow:auto;
       font-family:Consolas,"Courier New",monospace;
     }
-    details{
+    .table-wrap{
+      overflow:auto;
       border:1px solid var(--line);
       border-radius:12px;
-      padding:12px 14px;
       background:#fff;
     }
-    details + details{margin-top:10px}
-    summary{
-      cursor:pointer;
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1200px;
+      font-size:13px;
+    }
+    th, td{
+      border-bottom:1px solid var(--line);
+      padding:10px;
+      vertical-align:top;
+      text-align:left;
+    }
+    th{
+      background:#f9fafb;
       font-weight:700;
+      position:sticky;
+      top:0;
+      z-index:1;
     }
     .pill{
       display:inline-block;
@@ -212,31 +208,72 @@
       border-radius:999px;
       font-size:12px;
       font-weight:700;
-      margin-right:6px;
     }
     .pill-pre{background:#dcfce7;color:#166534}
     .pill-post{background:#dbeafe;color:#1d4ed8}
     .pill-unknown{background:#fef3c7;color:#92400e}
     .muted{color:var(--muted)}
     .mono{font-family:Consolas,"Courier New",monospace}
-    .two-col{
+    .kpis{
       display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:18px;
+      grid-template-columns:repeat(6,1fr);
+      gap:12px;
     }
-    @media (max-width: 900px){
-      .two-col{grid-template-columns:1fr}
+    @media (max-width: 1200px){
+      .kpis{grid-template-columns:repeat(3,1fr)}
+    }
+    @media (max-width: 700px){
+      .kpis{grid-template-columns:repeat(2,1fr)}
+    }
+    .kpi{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      background:#fafcff;
+    }
+    .kpi .label{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:6px;
+    }
+    .kpi .value{
+      font-size:24px;
+      font-weight:800;
+    }
+    details{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px 14px;
+      background:#fff;
+    }
+    summary{
+      cursor:pointer;
+      font-weight:700;
+    }
+    .row-note{
+      font-size:12px;
+      color:#6b7280;
+      line-height:1.5;
+    }
+    .error-list{
+      background:#fef2f2;
+      border:1px solid #fecaca;
+      color:#991b1b;
+      border-radius:12px;
+      padding:12px;
+      white-space:pre-wrap;
+      line-height:1.65;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
-      <h1>Paste A + Many B → C Excel（单一受试者版）</h1>
+      <h1>Paste A + Review Many B → C Excel</h1>
       <div class="sub">
-        <div><b>A：</b>直接复制粘贴 1–2 行（固定表头，不上传文件）</div>
-        <div><b>B：</b>一次可上传 <b>无数个</b> TXT / JSON / CSV 文件；默认都是 <b>同一个人</b></div>
-        <div>系统会自动把 B 分成 <b>pre / post / unknown</b>，并分别从所有 pre / 所有 post 文件中整合字段；如果同一字段不同文件给出不同值，会记录为 <b>conflict</b>，并在 debug 面板里详细列出。</div>
+        <div><b>A：</b>直接粘贴 1–2 行（固定表头，不上传）</div>
+        <div><b>B：</b>可以一次上传很多个；默认都是同一个人，但你可以在审核表里手动决定哪些文件要合并、哪些不要</div>
+        <div><b>重点：</b>系统不会再因为 `張學強 / 张学强` 这种差异直接中止，而是让你在审核表里把它们改成同一个 canonical subject。</div>
       </div>
     </div>
 
@@ -244,66 +281,108 @@
       <div class="card">
         <h2>Step 1. 粘贴 A</h2>
         <div class="hint">
-          <b>怎么贴：</b><br>
-          直接从 Excel 复制 <b>1–2 行数据</b> 粘贴到下面。<br>
-          <b>不用贴表头</b>；如果你不小心把表头也一起贴进来，程序会自动尝试跳过。<br><br>
+          <b>使用方式：</b><br>
+          直接从 Excel 复制 <b>1–2 行数据</b> 贴到下面。<br>
+          <b>不用贴表头</b>；如果你把表头一起贴了，程序会尝试自动跳过。<br><br>
           <b>规则：</b><br>
-          - 贴 1 行 → 视为 <b>pre</b><br>
-          - 贴 2 行 → 视为同一个人的 pre / post，优先按 <code>timestamp</code> 早晚排序；若无法识别时间，则按粘贴顺序（第一行=pre，第二行=post）
+          - 贴 1 行 → 当作 <b>pre</b><br>
+          - 贴 2 行 → 优先按 <code>timestamp</code> 排序：早 = pre，晚 = post；若无法识别时间，则按粘贴顺序
         </div>
-        <label for="pasteA" style="margin-top:14px;">A 粘贴区（tab 分隔）</label>
+        <label for="pasteA" style="margin-top:14px;">A 粘贴区</label>
         <textarea id="pasteA" placeholder="把 A 的 1–2 行数据直接粘贴到这里（从 Excel 复制即可）"></textarea>
         <div class="small">
-          A 表头是固定的；这版不会让你上传 A 文件，也不会处理多个人。
+          A 只接受同一个人的 1–2 行，不会批量处理多人。
         </div>
       </div>
 
       <div class="card">
-        <h2>Step 2. 上传 B（可无限多个）</h2>
+        <h2>Step 2. 上传 B 并设置别名规则（可选）</h2>
         <div class="warn">
-          <b>这版的设计就是为了解决你“B 存了很多版本、不知道哪个最新”的问题：</b><br>
-          你可以把同一个人的所有 B 全部上传。<br>
-          系统会：<br>
-          1. 自动归类为 pre / post / unknown<br>
-          2. 按字段整合，不是只取一个文件<br>
-          3. 如果同一字段有冲突，会详细写出来，不会静默覆盖
+          <b>这版不会立刻因为名字不一致报错。</b><br>
+          你可以先全部上传，再在下面的 <b>B 审核表</b> 里决定：<br>
+          1. 哪些文件参与计算（Include）<br>
+          2. 哪些是 pre / post / unknown（Phase）<br>
+          3. 哪些名字其实是同一个人（Canonical Subject）
         </div>
 
-        <label for="fileB" style="margin-top:14px;">B 文件（可多选、可无限多个）</label>
+        <label for="fileB" style="margin-top:14px;">B 文件（可多选、可很多个）</label>
         <input id="fileB" type="file" accept=".txt,.json,.csv" multiple />
+
+        <label for="aliasRules" style="margin-top:16px;">Name alias 规则（可选）</label>
+        <textarea id="aliasRules" style="min-height:120px;" placeholder="每行一条：Canonical=Variant1,Variant2
+
+例如：
+张学强=張學強, 张学强
+李美玲=李美玲, 李美鈴"></textarea>
+
         <div class="small">
-          允许一次上传很多个 B，但默认必须是 <b>同一个人</b>。<br>
-          如果检测到 B 文件里出现多个不同的 <code>id</code> 或多个不同的 <code>name</code>，程序会报错并停止，防止混入别人数据。<br>
-          <br>
-          <b>testType 识别顺序：</b><br>
-          1. 文件内容中的 <code>testType</code><br>
-          2. 文件名中是否含 <code>pre</code> / <code>post</code><br>
-          3. 都识别不到 → 归为 <b>unknown</b>（不会参与计算，但会出现在 debug）
+          这些规则只是帮你在初始审核表里自动填 canonical subject。<br>
+          <b>最终还是以审核表里每一行的 Canonical Subject 为准。</b>
         </div>
 
         <div class="btns">
-          <button id="btnAnalyze" class="secondary">先分析 / 预览</button>
-          <button id="btnDownload">生成并下载 Excel</button>
-          <button id="btnDebug" class="ghost">下载 Debug 报告（JSON）</button>
+          <button id="btnAnalyze" class="secondary">1) 读取并生成审核表</button>
+          <button id="btnExport">2) 按审核表导出 Excel</button>
+          <button id="btnDebug" class="ghost">下载 Debug JSON</button>
           <button id="btnClear" class="ghost">清空</button>
         </div>
+
         <div id="status" class="status"></div>
       </div>
     </div>
 
     <div class="card">
-      <h2>Step 3. 运行结果概览</h2>
-      <div class="kpi-grid">
-        <div class="kpi"><div class="label">A 数据行数</div><div id="kpiA" class="value">0</div></div>
+      <h2>运行概览</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="label">A 行数</div><div id="kpiA" class="value">0</div></div>
         <div class="kpi"><div class="label">B 总文件数</div><div id="kpiBTotal" class="value">0</div></div>
-        <div class="kpi"><div class="label">Pre B 数量</div><div id="kpiBPre" class="value">0</div></div>
-        <div class="kpi"><div class="label">Post B 数量</div><div id="kpiBPost" class="value">0</div></div>
-        <div class="kpi"><div class="label">Unknown B 数量</div><div id="kpiBUnknown" class="value">0</div></div>
+        <div class="kpi"><div class="label">审核后 Included</div><div id="kpiIncluded" class="value">0</div></div>
+        <div class="kpi"><div class="label">Pre 文件数</div><div id="kpiPre" class="value">0</div></div>
+        <div class="kpi"><div class="label">Post 文件数</div><div id="kpiPost" class="value">0</div></div>
         <div class="kpi"><div class="label">Conflicts</div><div id="kpiConflict" class="value">0</div></div>
       </div>
     </div>
 
-    <div class="two-col">
+    <div class="card">
+      <h2>Step 3. B 文件审核表（关键）</h2>
+      <div class="hint">
+        <b>你现在要做的事：</b><br>
+        1. 看每一行是不是你要的文件<br>
+        2. 不要的文件取消勾选 <b>Include</b><br>
+        3. 如果 auto phase 不对，就改 <b>Phase</b><br>
+        4. 如果不同写法其实是同一个人，就把 <b>Canonical Subject</b> 改成一样<br><br>
+        <b>例如：</b><br>
+        - `張學強` → 改成 `张学强`<br>
+        - `张学强` → 保持 `张学强`<br>
+        这样它们就会被视为同一个人
+      </div>
+
+      <div id="reviewContainer" class="table-wrap" style="margin-top:14px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px;">Include</th>
+              <th style="width:120px;">Phase</th>
+              <th style="width:220px;">Canonical Subject</th>
+              <th style="width:220px;">Raw Name</th>
+              <th style="width:120px;">ID</th>
+              <th>File</th>
+              <th style="width:120px;">testType</th>
+              <th style="width:130px;">testDate</th>
+              <th style="width:180px;">localSaveTime</th>
+              <th>Auto Reason</th>
+            </tr>
+          </thead>
+          <tbody id="reviewTableBody">
+            <tr><td colspan="10" class="muted">还没有读取 B 文件。请先点击「读取并生成审核表」。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="parseErrorBox" style="margin-top:14px; display:none;"></div>
+    </div>
+
+    <div class="grid">
       <div class="card">
         <h2>C 预览</h2>
         <pre id="preview">{}</pre>
@@ -315,24 +394,20 @@
     </div>
 
     <div class="card">
-      <h2>详细 Debug 面板</h2>
-
+      <h2>详细 Debug</h2>
       <details open>
         <summary>A 解析详情</summary>
         <pre id="debugA">尚未运行。</pre>
       </details>
-
-      <details open>
-        <summary>B 文件归类详情（pre / post / unknown）</summary>
+      <details open style="margin-top:10px;">
+        <summary>B 文件详情与审核结果</summary>
         <pre id="debugB">尚未运行。</pre>
       </details>
-
-      <details open>
-        <summary>字段冲突与自动选择详情</summary>
+      <details open style="margin-top:10px;">
+        <summary>字段冲突与自动选值</summary>
         <pre id="debugConflict">尚未运行。</pre>
       </details>
-
-      <details>
+      <details style="margin-top:10px;">
         <summary>A 固定表头 schema</summary>
         <div id="schemaBox" class="schema-box"></div>
       </details>
@@ -341,7 +416,7 @@
 
   <script>
     // =========================================================
-    // A 固定表头（按你提供的顺序）
+    // A 固定表头
     // =========================================================
     const A_HEADERS = [
       "timestamp","id","name","age","diagnosisYear","educationYears","dominantHand",
@@ -362,6 +437,15 @@
     document.getElementById("schemaBox").textContent = A_HEADERS.join(" | ");
 
     // =========================================================
+    // 全局缓存
+    // =========================================================
+    window.__RAW_B_ENTRIES__ = [];
+    window.__PARSE_ERRORS__ = [];
+    window.__LAST_RESULT__ = null;
+    window.__LAST_DEBUG__ = null;
+    window.__LAST_A__ = null;
+
+    // =========================================================
     // UI helpers
     // =========================================================
     function setStatus(msg, isError = false) {
@@ -369,34 +453,42 @@
       el.textContent = msg;
       el.className = "status " + (isError ? "err" : "ok");
     }
-    function setKPI(id, value) {
-      document.getElementById(id).textContent = String(value);
-    }
     function setText(id, text) {
       document.getElementById(id).textContent = text;
+    }
+    function setKPI(id, value) {
+      document.getElementById(id).textContent = String(value);
     }
     function clearAll() {
       document.getElementById("pasteA").value = "";
       document.getElementById("fileB").value = "";
+      document.getElementById("aliasRules").value = "";
       setStatus("");
-      setKPI("kpiA", 0);
-      setKPI("kpiBTotal", 0);
-      setKPI("kpiBPre", 0);
-      setKPI("kpiBPost", 0);
-      setKPI("kpiBUnknown", 0);
-      setKPI("kpiConflict", 0);
       setText("preview", "{}");
       setText("debugSummary", "尚未运行。");
       setText("debugA", "尚未运行。");
       setText("debugB", "尚未运行。");
       setText("debugConflict", "尚未运行。");
-      window.__LAST_DEBUG__ = null;
+      setKPI("kpiA", 0);
+      setKPI("kpiBTotal", 0);
+      setKPI("kpiIncluded", 0);
+      setKPI("kpiPre", 0);
+      setKPI("kpiPost", 0);
+      setKPI("kpiConflict", 0);
+      document.getElementById("reviewTableBody").innerHTML = '<tr><td colspan="10" class="muted">还没有读取 B 文件。请先点击「读取并生成审核表」。</td></tr>';
+      const box = document.getElementById("parseErrorBox");
+      box.style.display = "none";
+      box.innerHTML = "";
+      window.__RAW_B_ENTRIES__ = [];
+      window.__PARSE_ERRORS__ = [];
       window.__LAST_RESULT__ = null;
+      window.__LAST_DEBUG__ = null;
+      window.__LAST_A__ = null;
     }
     document.getElementById("btnClear").addEventListener("click", clearAll);
 
     // =========================================================
-    // General utils
+    // utils
     // =========================================================
     function isBlank(v) {
       return v === undefined || v === null || String(v).trim() === "";
@@ -409,11 +501,7 @@
     }
     function yes(v) {
       const x = lower(v);
-      return ["是","yes","y","true","1","有","positive","+","同意"].includes(x);
-    }
-    function no(v) {
-      const x = lower(v);
-      return ["否","no","n","false","0","无","無","negative","-"].includes(x);
+      return ["是","yes","y","true","1","有","同意","positive","+"].includes(x);
     }
     function toNum(v) {
       if (isBlank(v)) return "";
@@ -434,18 +522,15 @@
       if (n === "") return "";
       return n > 3 ? roundTo(n / 100, 2) : roundTo(n, 2);
     }
+    function unique(arr) {
+      return [...new Set(arr)];
+    }
     function pick(obj, keys, defaultValue = "") {
       if (!obj) return defaultValue;
       for (const k of keys) {
         if (!isBlank(obj[k])) return obj[k];
       }
       return defaultValue;
-    }
-    function unique(arr) {
-      return [...new Set(arr)];
-    }
-    function joinNonEmpty(arr, sep = "; ") {
-      return arr.map(s).filter(Boolean).join(sep);
     }
     function normalizeForCompare(v) {
       return String(v ?? "").trim();
@@ -454,15 +539,6 @@
       if (isBlank(v)) return null;
       const d = new Date(v);
       return isNaN(d.getTime()) ? null : d;
-    }
-    function dateRank(meta) {
-      // 排序依据：localSaveTime > testDate > uploadIndex
-      const t1 = parseDateSafe(meta.localSaveTime);
-      if (t1) return t1.getTime();
-      const t2 = parseDateSafe(meta.testDate);
-      if (t2) return t2.getTime();
-      // fallback：用上传顺序
-      return meta.uploadIndex || 0;
     }
     function formatDateYYYYMMDD(value) {
       if (isBlank(value)) return "";
@@ -476,9 +552,71 @@
       const dd = String(d.getDate()).padStart(2, "0");
       return `${yyyy}-${mm}-${dd}`;
     }
+    function dateRank(meta) {
+      const t1 = parseDateSafe(meta.localSaveTime);
+      if (t1) return t1.getTime();
+      const t2 = parseDateSafe(meta.testDate);
+      if (t2) return t2.getTime();
+      return meta.uploadIndex || 0;
+    }
+    function completenessScore(data) {
+      return Object.values(data || {}).filter(v => !isBlank(v)).length;
+    }
 
     // =========================================================
-    // Parse A from pasted text
+    // Name alias
+    // =========================================================
+    function normalizeNameBasic(name) {
+      return s(name)
+        .toLowerCase()
+        .replace(/[·•．.\-_/\\()（）\[\]【】,，、\s]/g, "");
+    }
+
+    function parseAliasRules(text) {
+      const lines = String(text || "")
+        .split(/\r?\n/)
+        .map(x => x.trim())
+        .filter(Boolean);
+
+      const aliasMap = {};
+      const debug = [];
+
+      for (const line of lines) {
+        const eqIdx = line.indexOf("=");
+        if (eqIdx === -1) {
+          debug.push(`忽略非法 alias 规则（缺少 =）：${line}`);
+          continue;
+        }
+        const canonical = line.slice(0, eqIdx).trim();
+        const right = line.slice(eqIdx + 1).trim();
+        const variants = right.split(",").map(x => x.trim()).filter(Boolean);
+
+        if (!canonical) {
+          debug.push(`忽略非法 alias 规则（canonical 为空）：${line}`);
+          continue;
+        }
+
+        // canonical 自己也映射到自己
+        aliasMap[normalizeNameBasic(canonical)] = canonical;
+        variants.forEach(v => {
+          aliasMap[normalizeNameBasic(v)] = canonical;
+        });
+
+        debug.push(`Alias rule: ${canonical} <= [${variants.join(", ")}]`);
+      }
+
+      return { aliasMap, debug };
+    }
+
+    function canonicalizeName(rawName, aliasMap) {
+      const raw = s(rawName);
+      if (!raw) return "";
+      const norm = normalizeNameBasic(raw);
+      return aliasMap[norm] || raw;
+    }
+
+    // =========================================================
+    // Parse A pasted text
     // =========================================================
     function parseAPaste(text) {
       const raw = String(text || "").trim();
@@ -504,7 +642,6 @@
         const line = lines[lineIdx];
         const cells = line.split("\t");
 
-        // 若误贴 header，则跳过
         let headerLike = false;
         if (cells.length >= 5) {
           headerLike = true;
@@ -610,13 +747,11 @@
       } else if (ext === "txt") {
         const text = await file.text();
 
-        // 1) JSON
         const json = tryParseJSON(text);
         if (json && typeof json === "object") {
           data = json;
           parseMethod = "txt-json";
         } else {
-          // 2) key:value / key,value
           const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
           const obj = {};
           for (const line of lines) {
@@ -645,16 +780,15 @@
         const wb = XLSX.read(text, { type: "string" });
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
         if (!rows.length) {
           throw new Error(`文件 ${file.name} 的 CSV 没有有效数据。`);
         }
 
-        // 普通表头 + 一行
         if (rows.length === 1) {
           data = rows[0];
           parseMethod = "csv-row";
         } else {
-          // key/value 两列
           const first = rows[0];
           const cols = Object.keys(first);
           const lowerCols = cols.map(c => c.toLowerCase());
@@ -723,54 +857,147 @@
       if (/\bpost\b/.test(fname) || fname.includes("_post") || fname.includes("-post") || fname.includes(" post ")) {
         return { phase: "post", reason: "由文件名包含 post 判断" };
       }
-
       return { phase: "unknown", reason: "内容和文件名都无法判断 pre/post" };
     }
 
     // =========================================================
-    // Validation: ensure B files are one person
+    // Review table
     // =========================================================
-    function validateSingleSubject(bEntries) {
-      const idSet = unique(
-        bEntries.map(x => s(x.meta.id)).filter(Boolean)
-      );
-      const nameSet = unique(
-        bEntries.map(x => s(x.meta.name)).filter(Boolean)
+    function phasePill(phase) {
+      if (phase === "pre") return '<span class="pill pill-pre">pre</span>';
+      if (phase === "post") return '<span class="pill pill-post">post</span>';
+      return '<span class="pill pill-unknown">unknown</span>';
+    }
+
+    function renderReviewTable(entries, parseErrors, aliasMap) {
+      const tbody = document.getElementById("reviewTableBody");
+
+      if (!entries.length) {
+        tbody.innerHTML = '<tr><td colspan="10" class="muted">没有成功解析的 B 文件。</td></tr>';
+      } else {
+        tbody.innerHTML = entries.map((entry, idx) => {
+          const rawName = s(entry.meta.name);
+          const canonical = canonicalizeName(rawName, aliasMap) || rawName || "";
+          const phase = entry.autoPhase || "unknown";
+
+          return `
+            <tr data-index="${idx}">
+              <td>
+                <input type="checkbox" class="review-include" checked />
+              </td>
+              <td>
+                <select class="review-phase">
+                  <option value="pre" ${phase === "pre" ? "selected" : ""}>pre</option>
+                  <option value="post" ${phase === "post" ? "selected" : ""}>post</option>
+                  <option value="unknown" ${phase === "unknown" ? "selected" : ""}>unknown</option>
+                </select>
+                <div class="row-note" style="margin-top:6px;">auto: ${phasePill(phase)}</div>
+              </td>
+              <td>
+                <input type="text" class="review-canonical" value="${escapeHtml(canonical)}" placeholder="例如：张学强" />
+                <div class="row-note" style="margin-top:6px;">不同写法想合并，就改成同一个 canonical</div>
+              </td>
+              <td class="mono">${escapeHtml(rawName || "(空)")}</td>
+              <td class="mono">${escapeHtml(s(entry.meta.id) || "(空)")}</td>
+              <td>
+                <div class="mono">${escapeHtml(entry.meta.fileName)}</div>
+                <div class="row-note">parse: ${escapeHtml(entry.meta.parseMethod)}</div>
+              </td>
+              <td class="mono">${escapeHtml(s(entry.meta.testTypeRaw) || "(空)")}</td>
+              <td class="mono">${escapeHtml(s(entry.meta.testDate) || "(空)")}</td>
+              <td class="mono">${escapeHtml(s(entry.meta.localSaveTime) || "(空)")}</td>
+              <td>${escapeHtml(entry.autoReason)}</td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      const box = document.getElementById("parseErrorBox");
+      if (parseErrors.length) {
+        box.style.display = "block";
+        box.innerHTML = `<div class="error-list"><b>以下 B 文件解析失败（不会进入审核表）：</b>\n\n${parseErrors.join("\n")}</div>`;
+      } else {
+        box.style.display = "none";
+        box.innerHTML = "";
+      }
+    }
+
+    function getReviewedEntries() {
+      const rows = Array.from(document.querySelectorAll("#reviewTableBody tr[data-index]"));
+      return rows.map(row => {
+        const idx = Number(row.getAttribute("data-index"));
+        const raw = window.__RAW_B_ENTRIES__[idx];
+        const include = row.querySelector(".review-include").checked;
+        const phase = row.querySelector(".review-phase").value;
+        const canonicalSubject = s(row.querySelector(".review-canonical").value);
+
+        return {
+          ...raw,
+          include,
+          phase,
+          canonicalSubject
+        };
+      });
+    }
+
+    function validateReviewedEntries(reviewed) {
+      const included = reviewed.filter(x => x.include);
+
+      if (!included.length) {
+        return {
+          ok: false,
+          message: "你当前没有勾选任何 B 文件。\n\n请至少保留 1 个 Include = 勾选 的 B 文件，或者只靠 A 导出（若你希望这样，我也可以再帮你改成允许完全没有 B）。"
+        };
+      }
+
+      const signatures = unique(
+        included.map(x => {
+          const id = s(x.meta.id);
+          const canon = s(x.canonicalSubject);
+          const rawName = s(x.meta.name);
+          if (id) return `id:${id}`;
+          return `name:${canon || rawName || "(empty)"}`;
+        })
       );
 
-      const errors = [];
-      const warnings = [];
-
+      // 若多个不同 id，一定不行
+      const idSet = unique(included.map(x => s(x.meta.id)).filter(Boolean));
       if (idSet.length > 1) {
-        errors.push(
-          "B 文件里检测到多个不同的 id，疑似混入了多个人的数据：\n- " + idSet.join("\n- ")
-        );
-      }
-      if (nameSet.length > 1) {
-        errors.push(
-          "B 文件里检测到多个不同的 name，疑似混入了多个人的数据：\n- " + nameSet.join("\n- ")
-        );
+        return {
+          ok: false,
+          message:
+            "审核后的 Included 文件中仍然存在多个不同的 ID，不能当作同一个人处理：\n- " +
+            idSet.join("\n- ") +
+            "\n\n请取消不需要的文件，或确认是否真的混入了其他人的数据。"
+        };
       }
 
+      // 如果没有 id，则看 canonical subject
       if (!idSet.length) {
-        warnings.push("所有 B 文件都没有 id。程序仍会继续，但无法用 B 的 id 做单一受试者检查。");
-      }
-      if (!nameSet.length) {
-        warnings.push("所有 B 文件都没有 name。程序仍会继续，但无法用 B 的 name 做单一受试者检查。");
+        const canonSet = unique(included.map(x => s(x.canonicalSubject) || s(x.meta.name)).filter(Boolean));
+        if (canonSet.length > 1) {
+          return {
+            ok: false,
+            message:
+              "审核后的 Included 文件没有可用 ID，而且 Canonical Subject 仍有多个不同值：\n- " +
+              canonSet.join("\n- ") +
+              "\n\n如果这些其实是同一个人，请把它们改成同一个 Canonical Subject；如果不是同一个人，请取消不需要的文件。"
+          };
+        }
       }
 
-      return { errors, warnings, idSet, nameSet };
+      return {
+        ok: true,
+        included,
+        signatures,
+        idSet
+      };
     }
 
     // =========================================================
-    // Phase aggregators
+    // Aggregation
     // =========================================================
-    function completenessScore(data) {
-      return Object.values(data || {}).filter(v => !isBlank(v)).length;
-    }
-
     function sortEntriesForPriority(entries) {
-      // 按“较旧 -> 较新”排序，后面优先
       return [...entries].sort((a, b) => {
         const ra = dateRank(a.meta);
         const rb = dateRank(b.meta);
@@ -782,70 +1009,52 @@
       });
     }
 
-    function resolveFieldFromEntries(entries, fieldKey, extractor, debug, options = {}) {
-      const label = options.label || fieldKey;
-      const normalizedCandidates = [];
-      const rawCandidates = [];
-
+    function resolveFieldFromEntries(entries, extractor, debug, label) {
+      const candidates = [];
       for (const entry of entries) {
-        let value = extractor(entry.data, entry.meta);
-        if (typeof options.transform === "function") {
-          value = options.transform(value, entry);
-        }
+        const value = extractor(entry.data, entry.meta);
         if (!isBlank(value)) {
-          const norm = normalizeForCompare(value);
-          normalizedCandidates.push({
-            norm,
-            raw: value,
+          candidates.push({
+            value,
+            norm: normalizeForCompare(value),
             fileName: entry.meta.fileName,
-            localSaveTime: entry.meta.localSaveTime,
-            testDate: entry.meta.testDate,
+            testDate: entry.meta.testDate || "",
+            localSaveTime: entry.meta.localSaveTime || "",
             uploadIndex: entry.meta.uploadIndex
           });
-          rawCandidates.push(value);
         }
       }
 
-      if (!normalizedCandidates.length) {
+      if (!candidates.length) {
         debug.selection.push(`${label}: 无非空值 → 留空`);
         return "";
       }
 
-      const uniqueNorms = unique(normalizedCandidates.map(x => x.norm));
-
-      if (uniqueNorms.length === 1) {
-        const chosen = normalizedCandidates[normalizedCandidates.length - 1];
-        debug.selection.push(`${label}: 一致值 "${chosen.raw}"（来自 ${chosen.fileName}）`);
-        return chosen.raw;
+      const uniq = unique(candidates.map(x => x.norm));
+      if (uniq.length === 1) {
+        const chosen = candidates[candidates.length - 1];
+        debug.selection.push(`${label}: 一致值 "${chosen.value}"（来自 ${chosen.fileName}）`);
+        return chosen.value;
       }
 
-      // 有冲突：选排序后最后一个（较新/较完整/较后上传）
-      const ranked = [...normalizedCandidates].sort((a, b) => {
+      const ranked = [...candidates].sort((a, b) => {
         const ta = dateRank(a);
         const tb = dateRank(b);
         if (ta !== tb) return ta - tb;
         return a.uploadIndex - b.uploadIndex;
       });
+
       const chosen = ranked[ranked.length - 1];
 
       debug.conflicts.push({
         field: label,
-        chosen: chosen.raw,
+        chosen: chosen.value,
         chosenFrom: chosen.fileName,
-        values: normalizedCandidates.map(x => ({
-          value: x.raw,
-          fileName: x.fileName,
-          localSaveTime: x.localSaveTime || "",
-          testDate: x.testDate || "",
-          uploadIndex: x.uploadIndex
-        }))
+        values: candidates
       });
 
-      debug.selection.push(
-        `${label}: 检测到冲突，已自动选 "${chosen.raw}"（来自 ${chosen.fileName}）`
-      );
-
-      return chosen.raw;
+      debug.selection.push(`${label}: 存在冲突，已自动选 "${chosen.value}"（来自 ${chosen.fileName}）`);
+      return chosen.value;
     }
 
     function computeUPDRS3(data) {
@@ -877,41 +1086,29 @@
     }
 
     function aggregatePhase(entries, phaseLabel) {
-      const debug = {
-        phase: phaseLabel,
-        fileOrder: [],
-        selection: [],
-        conflicts: []
-      };
-
       const sorted = sortEntriesForPriority(entries);
-      debug.fileOrder = sorted.map(e => ({
-        fileName: e.meta.fileName,
-        localSaveTime: e.meta.localSaveTime || "",
-        testDate: e.meta.testDate || "",
-        uploadIndex: e.meta.uploadIndex,
-        completeness: completenessScore(e.data)
-      }));
+      const debug = { phase: phaseLabel, selection: [], conflicts: [], files: sorted.map(x => x.meta.fileName) };
 
-      return {
-        testDate: resolveFieldFromEntries(sorted, "testDate", d => d.testDate, debug, { label: `${phaseLabel}.testDate` }),
-        legLength: resolveFieldFromEntries(sorted, "legLength", d => d.legLength, debug, { label: `${phaseLabel}.legLength` }),
-        moca: resolveFieldFromEntries(sorted, "moca", d => d.moca, debug, { label: `${phaseLabel}.moca` }),
-        totalLEDD: resolveFieldFromEntries(sorted, "totalLEDD", d => d.totalLEDD, debug, { label: `${phaseLabel}.totalLEDD` }),
-        medicationDetails: resolveFieldFromEntries(sorted, "medicationDetails", d => d.medicationDetails, debug, { label: `${phaseLabel}.medicationDetails` }),
-        hyStage: resolveFieldFromEntries(sorted, "hyStage", d => d.hyStage, debug, { label: `${phaseLabel}.hyStage` }),
-        tug_avg: resolveFieldFromEntries(sorted, "tug_avg", d => d.tug_avg, debug, { label: `${phaseLabel}.tug_avg` }),
-        avgSpeed: resolveFieldFromEntries(sorted, "avgSpeed", d => d.avgSpeed, debug, { label: `${phaseLabel}.avgSpeed` }),
-        avgStepLength: resolveFieldFromEntries(sorted, "avgStepLength", d => d.avgStepLength, debug, { label: `${phaseLabel}.avgStepLength` }),
-        avgCadence: resolveFieldFromEntries(sorted, "avgCadence", d => d.avgCadence, debug, { label: `${phaseLabel}.avgCadence` }),
-        updrs3Total: resolveFieldFromEntries(sorted, "updrs3Total", d => computeUPDRS3(d), debug, { label: `${phaseLabel}.updrs3Total` }),
+      const agg = {
+        testDate: resolveFieldFromEntries(sorted, d => d.testDate, debug, `${phaseLabel}.testDate`),
+        legLength: resolveFieldFromEntries(sorted, d => d.legLength, debug, `${phaseLabel}.legLength`),
+        moca: resolveFieldFromEntries(sorted, d => d.moca, debug, `${phaseLabel}.moca`),
+        totalLEDD: resolveFieldFromEntries(sorted, d => d.totalLEDD, debug, `${phaseLabel}.totalLEDD`),
+        medicationDetails: resolveFieldFromEntries(sorted, d => d.medicationDetails, debug, `${phaseLabel}.medicationDetails`),
+        hyStage: resolveFieldFromEntries(sorted, d => d.hyStage, debug, `${phaseLabel}.hyStage`),
+        tug_avg: resolveFieldFromEntries(sorted, d => d.tug_avg, debug, `${phaseLabel}.tug_avg`),
+        avgSpeed: resolveFieldFromEntries(sorted, d => d.avgSpeed, debug, `${phaseLabel}.avgSpeed`),
+        avgStepLength: resolveFieldFromEntries(sorted, d => d.avgStepLength, debug, `${phaseLabel}.avgStepLength`),
+        avgCadence: resolveFieldFromEntries(sorted, d => d.avgCadence, debug, `${phaseLabel}.avgCadence`),
+        updrs3Total: resolveFieldFromEntries(sorted, d => computeUPDRS3(d), debug, `${phaseLabel}.updrs3Total`),
         parqAnyPositive: sorted.some(e => {
           const d = e.data || {};
           return [d.parq1,d.parq2,d.parq3,d.parq4,d.parq5,d.parq6,d.parq7].some(yes);
         }),
-        files: sorted,
         debug
       };
+
+      return agg;
     }
 
     // =========================================================
@@ -962,13 +1159,12 @@
 
       const uniqCodes = unique(codes);
       if (uniqCodes.length) return uniqCodes.join(", ");
-
       if (preAgg.parqAnyPositive || postAgg.parqAnyPositive) return "PARQ+";
       return "";
     }
 
     // =========================================================
-    // Merge to final C
+    // Merge final C
     // =========================================================
     function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
       const subjectId =
@@ -1044,7 +1240,7 @@
     }
 
     // =========================================================
-    // Debug rendering
+    // Debug formatting
     // =========================================================
     function formatAForDebug(aRows, aDebug, aAssign) {
       const lines = [];
@@ -1061,39 +1257,32 @@
       return lines.join("\n");
     }
 
-    function formatBForDebug(classified, validationWarnings) {
+    function formatReviewedBForDebug(reviewed, aliasDebug, parseErrors) {
       const lines = [];
-      if (validationWarnings.length) {
-        lines.push("Validation warnings:");
-        validationWarnings.forEach(w => lines.push("- " + w));
-        lines.push("");
+      lines.push("Alias rules:");
+      if (aliasDebug.length) {
+        aliasDebug.forEach(x => lines.push("- " + x));
+      } else {
+        lines.push("- （无）");
       }
-
-      lines.push(`B 总文件数：${classified.all.length}`);
-      lines.push(`Pre：${classified.pre.length} | Post：${classified.post.length} | Unknown：${classified.unknown.length}`);
       lines.push("");
 
-      function dumpGroup(title, entries, pill) {
-        lines.push(`${title} (${entries.length})`);
-        if (!entries.length) {
-          lines.push("  - 无");
-          lines.push("");
-          return;
-        }
-        entries.forEach((entry, i) => {
-          const m = entry.meta;
+      lines.push("审核后 B 文件：");
+      if (!reviewed.length) {
+        lines.push("- 无");
+      } else {
+        reviewed.forEach((x, idx) => {
           lines.push(
-            `  ${i + 1}. ${m.fileName}\n` +
-            `     id=${s(m.id) || "(空)"} | name=${s(m.name) || "(空)"} | testType=${s(m.testTypeRaw) || "(空)"} | testDate=${s(m.testDate) || "(空)"} | localSaveTime=${s(m.localSaveTime) || "(空)"} | parse=${m.parseMethod}\n` +
-            `     phase=${entry.phase} | reason=${entry.phaseReason}`
+            `${idx + 1}. include=${x.include ? "Y" : "N"} | phase=${x.phase} | canonical=${x.canonicalSubject || "(空)"} | rawName=${s(x.meta.name) || "(空)"} | id=${s(x.meta.id) || "(空)"} | file=${x.meta.fileName}`
           );
         });
-        lines.push("");
       }
 
-      dumpGroup("PRE 文件", classified.pre);
-      dumpGroup("POST 文件", classified.post);
-      dumpGroup("UNKNOWN 文件（不参与计算）", classified.unknown);
+      if (parseErrors.length) {
+        lines.push("");
+        lines.push("解析失败文件：");
+        parseErrors.forEach(x => lines.push("- " + x));
+      }
 
       return lines.join("\n");
     }
@@ -1101,24 +1290,13 @@
     function formatConflictDebug(preAgg, postAgg) {
       const lines = [];
 
-      function dumpPhase(title, agg) {
+      function dump(title, agg) {
         lines.push(`=== ${title} ===`);
-        lines.push("文件优先级顺序（较旧 -> 较新 / 较后优先）：");
-        if (!agg.debug.fileOrder.length) {
-          lines.push("- 无文件");
-        } else {
-          agg.debug.fileOrder.forEach((x, idx) => {
-            lines.push(
-              `${idx + 1}. ${x.fileName} | localSaveTime=${x.localSaveTime || "(空)"} | testDate=${x.testDate || "(空)"} | uploadIndex=${x.uploadIndex} | completeness=${x.completeness}`
-            );
-          });
-        }
-        lines.push("");
         lines.push("字段选择日志：");
-        if (!agg.debug.selection.length) {
-          lines.push("- 无");
-        } else {
+        if (agg.debug.selection.length) {
           agg.debug.selection.forEach(x => lines.push("- " + x));
+        } else {
+          lines.push("- 无");
         }
         lines.push("");
         lines.push("冲突详情：");
@@ -1129,41 +1307,20 @@
             lines.push(`- 字段：${conf.field}`);
             lines.push(`  自动选中：${conf.chosen} （来自 ${conf.chosenFrom}）`);
             conf.values.forEach(v => {
-              lines.push(`  · 候选值：${v.value} | 文件：${v.fileName} | localSaveTime=${v.localSaveTime || "(空)"} | testDate=${v.testDate || "(空)"} | uploadIndex=${v.uploadIndex}`);
+              lines.push(`  · 候选：${v.value} | 文件：${v.fileName} | testDate=${v.testDate || "(空)"} | localSaveTime=${v.localSaveTime || "(空)"} | uploadIndex=${v.uploadIndex}`);
             });
           });
         }
         lines.push("");
       }
 
-      dumpPhase("PRE 聚合", preAgg);
-      dumpPhase("POST 聚合", postAgg);
-
-      return lines.join("\n");
-    }
-
-    function buildSummary(result, classified, conflictCount, warningsCount) {
-      const lines = [];
-      lines.push("运行摘要");
-      lines.push("--------");
-      lines.push(`B 总文件数：${classified.all.length}`);
-      lines.push(`Pre：${classified.pre.length}`);
-      lines.push(`Post：${classified.post.length}`);
-      lines.push(`Unknown（未参与计算）：${classified.unknown.length}`);
-      lines.push(`Conflicts：${conflictCount}`);
-      lines.push(`Warnings：${warningsCount}`);
-      lines.push("");
-      lines.push(`最终 Subject ID：${s(result["Subject ID"]) || "(空)"}`);
-      lines.push(`最终 Name：${s(result["Name"]) || "(空)"}`);
-      lines.push(`最终 Pre_date：${s(result["Pre_date"]) || "(空)"}`);
-      lines.push(`最终 Post_date：${s(result["Post_date"]) || "(空)"}`);
-      lines.push(`最终 LEDD：${s(result["LEDD"]) || "(空)"}`);
-      lines.push(`最终 Med_regime：${s(result["Med_regime"]) || "(空)"}`);
+      dump("PRE", preAgg);
+      dump("POST", postAgg);
       return lines.join("\n");
     }
 
     // =========================================================
-    // Export helpers
+    // Export
     // =========================================================
     function downloadExcel(rowObj, filename = "C_merged.xlsx") {
       const ws = XLSX.utils.json_to_sheet([rowObj]);
@@ -1184,23 +1341,34 @@
       URL.revokeObjectURL(url);
     }
 
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
     // =========================================================
-    // Main pipeline
+    // Step 1: Analyze and create review table
     // =========================================================
-    async function run(download = false) {
+    async function analyzeAndBuildReview() {
       try {
-        setStatus("正在分析，请稍候…");
+        setStatus("正在读取 A 和 B，并生成审核表…");
+
         const pasteText = document.getElementById("pasteA").value;
         const files = Array.from(document.getElementById("fileB").files || []);
+        const aliasText = document.getElementById("aliasRules").value;
 
-        // 1) Parse A
+        // Parse A
         const { rows: aRows, debug: aDebug } = parseAPaste(pasteText);
         const aAssign = assignAPrePost(aRows);
-        const preA = aAssign.preA;
-        const postA = aAssign.postA;
 
-        // 2) Parse B files
-        const bEntries = [];
+        // Parse alias rules
+        const { aliasMap, debug: aliasDebug } = parseAliasRules(aliasText);
+
+        // Parse B
+        const rawEntries = [];
         const parseErrors = [];
 
         for (let i = 0; i < files.length; i++) {
@@ -1208,123 +1376,160 @@
           try {
             const entry = await readBFile(f, i + 1);
             const phaseInfo = detectTestTypeFromDataOrName(entry.data, entry.meta.fileName);
-            bEntries.push({
+            rawEntries.push({
               ...entry,
-              phase: phaseInfo.phase,
-              phaseReason: phaseInfo.reason
+              autoPhase: phaseInfo.phase,
+              autoReason: phaseInfo.reason
             });
           } catch (err) {
-            parseErrors.push(`- ${f.name}: ${err.message}`);
+            parseErrors.push(`${f.name}: ${err.message}`);
           }
         }
 
-        // 如果全部 B 都失败，也允许继续，只是 B 为空
-        if (files.length && parseErrors.length === files.length) {
-          throw new Error(
-            "所有 B 文件都解析失败，无法继续。\n\n" + parseErrors.join("\n")
-          );
-        }
-
-        // 3) Validate single subject among B
-        const validation = validateSingleSubject(bEntries);
-        if (validation.errors.length) {
-          throw new Error(
-            "B 文件单一受试者检查失败：\n\n" + validation.errors.join("\n\n")
-          );
-        }
-
-        // 4) Classify B
-        const classified = {
-          all: bEntries,
-          pre: bEntries.filter(x => x.phase === "pre"),
-          post: bEntries.filter(x => x.phase === "post"),
-          unknown: bEntries.filter(x => x.phase === "unknown")
+        window.__RAW_B_ENTRIES__ = rawEntries;
+        window.__PARSE_ERRORS__ = parseErrors;
+        window.__LAST_A__ = {
+          aRows, aDebug, aAssign
         };
 
-        // 5) Aggregate by phase
-        const preAgg = aggregatePhase(classified.pre, "pre");
-        const postAgg = aggregatePhase(classified.post, "post");
+        renderReviewTable(rawEntries, parseErrors, aliasMap);
 
-        // 6) Subject info from B (single subject assumption)
-        const subjectInfo = {
-          id: validation.idSet[0] || "",
-          name: validation.nameSet[0] || ""
-        };
+        setKPI("kpiA", aRows.length);
+        setKPI("kpiBTotal", rawEntries.length);
+        setKPI("kpiIncluded", rawEntries.length);
+        setKPI("kpiPre", rawEntries.filter(x => x.autoPhase === "pre").length);
+        setKPI("kpiPost", rawEntries.filter(x => x.autoPhase === "post").length);
+        setKPI("kpiConflict", 0);
 
-        // 7) Merge final C
-        const result = mergeToC(preA, postA, preAgg, postAgg, subjectInfo);
+        setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
+        setText("debugB", formatReviewedBForDebug(
+          rawEntries.map(x => ({
+            ...x,
+            include: true,
+            phase: x.autoPhase,
+            canonicalSubject: canonicalizeName(x.meta.name, aliasMap)
+          })),
+          aliasDebug,
+          parseErrors
+        ));
+        setText("debugConflict", "还没有执行最终导出，所以暂时没有 conflict 计算结果。");
+        setText("debugSummary",
+          [
+            "已生成审核表。",
+            `A 行数：${aRows.length}`,
+            `B 成功解析：${rawEntries.length}`,
+            `B 解析失败：${parseErrors.length}`,
+            "",
+            "下一步：请到「B 文件审核表」里检查 Include / Phase / Canonical Subject，确认后再点击「按审核表导出 Excel」。"
+          ].join("\n")
+        );
+        setText("preview", "{}");
 
-        // 8) Prepare debug
-        const warningList = [];
-        if (parseErrors.length) {
-          warningList.push(`有 ${parseErrors.length} 个 B 文件解析失败。`);
+        setStatus(
+          `审核表已生成。\n\n成功解析 B：${rawEntries.length} 个\n解析失败：${parseErrors.length} 个\n\n请先检查审核表，再点击导出。`,
+          false
+        );
+      } catch (err) {
+        console.error(err);
+        setStatus("处理失败：\n\n" + err.message, true);
+      }
+    }
+
+    // =========================================================
+    // Step 2: Export using reviewed table
+    // =========================================================
+    async function exportUsingReviewedTable(download = true) {
+      try {
+        if (!window.__LAST_A__) {
+          throw new Error("还没有生成审核表。\n\n请先点击「1) 读取并生成审核表」。");
         }
-        warningList.push(...validation.warnings);
-        if (!classified.pre.length) warningList.push("没有任何可用的 pre B 文件。所有 pre 来自 A（若 A 有）。");
-        if (!classified.post.length) warningList.push("没有任何可用的 post B 文件。所有 post 来自 A（若 A 有）。");
-        if (classified.unknown.length) warningList.push(`有 ${classified.unknown.length} 个 B 文件无法判断 pre/post，已归为 unknown，未参与计算。`);
+
+        setStatus("正在根据审核表整合数据…");
+
+        const reviewed = getReviewedEntries();
+        const validation = validateReviewedEntries(reviewed);
+        if (!validation.ok) {
+          throw new Error(validation.message);
+        }
+
+        const included = validation.included;
+        const preEntries = included.filter(x => x.phase === "pre");
+        const postEntries = included.filter(x => x.phase === "post");
+        const unknownIncluded = included.filter(x => x.phase === "unknown");
+
+        const preAgg = aggregatePhase(preEntries, "pre");
+        const postAgg = aggregatePhase(postEntries, "post");
+
+        const { aRows, aDebug, aAssign } = window.__LAST_A__;
+        const preA = aAssign.preA;
+        const postA = aAssign.postA;
+
+        // subject info
+        const subjectId = unique(included.map(x => s(x.meta.id)).filter(Boolean))[0] || "";
+        const canonicalNames = unique(included.map(x => s(x.canonicalSubject)).filter(Boolean));
+        const subjectName =
+          canonicalNames[0] ||
+          unique(included.map(x => s(x.meta.name)).filter(Boolean))[0] ||
+          "";
+
+        const result = mergeToC(preA, postA, preAgg, postAgg, {
+          id: subjectId,
+          name: subjectName
+        });
 
         const conflictCount = preAgg.debug.conflicts.length + postAgg.debug.conflicts.length;
 
+        setKPI("kpiIncluded", included.length);
+        setKPI("kpiPre", preEntries.length);
+        setKPI("kpiPost", postEntries.length);
+        setKPI("kpiConflict", conflictCount);
+
+        setText("preview", JSON.stringify(result, null, 2));
+        setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
+        setText("debugB", formatReviewedBForDebug(reviewed, [], window.__PARSE_ERRORS__));
+        setText("debugConflict", formatConflictDebug(preAgg, postAgg));
+
+        const summaryLines = [];
+        summaryLines.push("导出前检查完成。");
+        summaryLines.push(`Included：${included.length}`);
+        summaryLines.push(`Pre：${preEntries.length}`);
+        summaryLines.push(`Post：${postEntries.length}`);
+        summaryLines.push(`Unknown（Included 但未参与计算）：${unknownIncluded.length}`);
+        summaryLines.push(`Conflicts：${conflictCount}`);
+        summaryLines.push("");
+        summaryLines.push(`最终 Subject ID：${subjectId || "(空)"}`);
+        summaryLines.push(`最终 Subject Name：${subjectName || "(空)"}`);
+
+        if (unknownIncluded.length) {
+          summaryLines.push("");
+          summaryLines.push("注意：有 Included 的 unknown 文件没有参与 pre/post 聚合。");
+          summaryLines.push("如果这些其实是 pre 或 post，请回到审核表修改 Phase。");
+        }
+
+        setText("debugSummary", summaryLines.join("\n"));
+
         const debugPayload = {
           timestamp: new Date().toISOString(),
-          summary: {
-            aRows: aRows.length,
-            bTotal: classified.all.length,
-            bPre: classified.pre.length,
-            bPost: classified.post.length,
-            bUnknown: classified.unknown.length,
-            conflictCount,
-            warningCount: warningList.length,
-            parseErrorCount: parseErrors.length
-          },
-          parseErrors,
-          warnings: warningList,
-          validation,
-          aDebug,
-          aAssign,
-          classified,
+          reviewed,
+          includedCount: included.length,
+          preCount: preEntries.length,
+          postCount: postEntries.length,
+          unknownIncludedCount: unknownIncluded.length,
+          conflictCount,
+          parseErrors: window.__PARSE_ERRORS__,
           preAgg,
           postAgg,
           result
         };
 
-        // 9) Render UI
-        setKPI("kpiA", aRows.length);
-        setKPI("kpiBTotal", classified.all.length);
-        setKPI("kpiBPre", classified.pre.length);
-        setKPI("kpiBPost", classified.post.length);
-        setKPI("kpiBUnknown", classified.unknown.length);
-        setKPI("kpiConflict", conflictCount);
-
-        setText("preview", JSON.stringify(result, null, 2));
-        setText("debugSummary", buildSummary(result, classified, conflictCount, warningList.length));
-        setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
-        setText("debugB", formatBForDebug(classified, validation.warnings.concat(parseErrors.length ? [`解析失败文件数：${parseErrors.length}`] : [])));
-        setText("debugConflict", formatConflictDebug(preAgg, postAgg));
-
-        window.__LAST_DEBUG__ = debugPayload;
         window.__LAST_RESULT__ = result;
-
-        const statusLines = [];
-        statusLines.push("分析完成。");
-        if (warningList.length) {
-          statusLines.push(`Warnings：${warningList.length} 个`);
-        }
-        if (parseErrors.length) {
-          statusLines.push(`B 解析失败：${parseErrors.length} 个文件（详情请看 Debug）`);
-        }
-        if (classified.unknown.length) {
-          statusLines.push(`Unknown B：${classified.unknown.length} 个（未参与计算）`);
-        }
-        if (conflictCount) {
-          statusLines.push(`Conflicts：${conflictCount} 个字段存在冲突，系统已自动选值（详情请看 Debug）`);
-        }
-        setStatus(statusLines.join("\n"), false);
+        window.__LAST_DEBUG__ = debugPayload;
 
         if (download) {
           downloadExcel(result, "C_merged.xlsx");
-          setStatus(statusLines.join("\n") + "\n\n已下载：C_merged.xlsx", false);
+          setStatus(summaryLines.join("\n") + "\n\n已下载：C_merged.xlsx", false);
+        } else {
+          setStatus(summaryLines.join("\n"), false);
         }
       } catch (err) {
         console.error(err);
@@ -1332,11 +1537,14 @@
       }
     }
 
-    document.getElementById("btnAnalyze").addEventListener("click", () => run(false));
-    document.getElementById("btnDownload").addEventListener("click", () => run(true));
+    // =========================================================
+    // events
+    // =========================================================
+    document.getElementById("btnAnalyze").addEventListener("click", analyzeAndBuildReview);
+    document.getElementById("btnExport").addEventListener("click", () => exportUsingReviewedTable(true));
     document.getElementById("btnDebug").addEventListener("click", () => {
       if (!window.__LAST_DEBUG__) {
-        setStatus("还没有可下载的 Debug 报告。请先点击“先分析 / 预览”或“生成并下载 Excel”。", true);
+        setStatus("还没有可下载的 Debug 报告。\n\n请先读取审核表并至少导出/预览一次。", true);
         return;
       }
       downloadJSON(window.__LAST_DEBUG__, "debug_report.json");
@@ -1345,4 +1553,3 @@
   </script>
 </body>
 </html>
-
