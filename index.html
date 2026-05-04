@@ -34,7 +34,7 @@
       font-family:Arial,"Microsoft JhengHei","PingFang TC",sans-serif;
     }
     .container{
-      max-width:1500px;
+      max-width:1600px;
       margin:0 auto;
       display:grid;
       gap:18px;
@@ -326,12 +326,13 @@
 </head>
 <body>
   <div class="container">
+
     <div class="card">
       <h1>Paste A + Review Many B + LEDD + BMI</h1>
       <div class="sub">
         <div><b>A：</b>直接粘贴 1–2 行（固定表头，不上传）</div>
         <div><b>B：</b>可一次上传很多个；先进入审核表，再决定 Include / Phase / Canonical Subject</div>
-        <div><b>新增：</b>内嵌本地 LEDD 计算器、强制 F/M、BMI 自动计算与分类、FCI/Par_Q 输出问题缩写、同时保留原始与手动 LEDD</div>
+        <div><b>新增：</b>内嵌本地 LEDD 计算器、药单原文自动解析、强制 F/M、BMI 自动计算、FCI/Par_Q 输出问题缩写、详细 debug</div>
       </div>
     </div>
 
@@ -348,9 +349,7 @@
           <option value="F">F</option>
           <option value="M">M</option>
         </select>
-        <div class="small">
-          这里是最终 Gender 的唯一来源，不自动猜。
-        </div>
+        <div class="small">这里是最终 Gender 的唯一来源，不自动猜。</div>
       </div>
 
       <div class="card">
@@ -385,46 +384,71 @@
     </div>
 
     <div class="card">
-  <h2>Step 2.5 药单原文自动解析 + LEDD</h2>
+      <h2>Step 2.5 手动 LEDD 快速计算器（可选）</h2>
+      <div class="hint">
+        这是本地版 LEDD quick calculator。你可以逐行输入 PD 药物，系统实时计算 total LEDD。<br>
+        组合制剂（如 Stalevo / Sinemet / Madopar）请只输入对应的 <b>levodopa dose</b>。
+      </div>
 
-  <div class="hint">
-    你可以直接把原始 <code>medicationDetails</code> 粘贴进来。<br>
-    系统会自动识别药名、强度、每天次数、每次片数，并按 Parkinson’s Measurement 常用 conversion factors 计算 LEDD。<br>
-    组合制剂（如 Stalevo / Sinemet / Madopar）会按 <b>levodopa dose only</b> 处理。<br>
-    如果有真正缺失的信息（例如 standalone entacapone 没有配套 levodopa），系统会明确标出 unresolved warning。
-  </div>
+      <div id="leddRows"></div>
 
-  <label for="medText" style="margin-top:12px;">Medication raw text</label>
-  <textarea id="medText" placeholder="直接粘贴原始 medicationDetails 到这里"></textarea>
+      <div class="btns" style="margin-top:8px;">
+        <button type="button" id="btnAddLeddRow" class="ghost">+ 新增一行药物</button>
+        <button type="button" id="btnClearLedd" class="ghost">清空 LEDD 计算器</button>
+      </div>
 
-  <div class="btns">
-    <button type="button" id="btnParseMed" class="secondary">解析药单并计算 LEDD</button>
-    <button type="button" id="btnUseParsedLedd" class="ghost">将解析结果用于导出</button>
-    <button type="button" id="btnClearMed" class="ghost">清空药单文本</button>
-  </div>
+      <div style="margin-top:12px;" class="inline">
+        <div id="leddTotalBox" class="ledd-total">Manual LEDD Total = 0</div>
+      </div>
 
-  <div class="small">
-    默认规则：<br>
-    - <b>Sinemet / Sinemet CR 缺省 strength 一律按 50/200</b><br>
-    - <b>4-5 times/day</b> 这类范围，默认取 <b>上限</b>（例如 5/day），并写入 warning<br>
-    - <b>PRN / upon need</b> 默认不计入 LEDD，除非有明确固定频次<br>
-    - <b>Entacapone / Tolcapone 单独出现</b> 不单独换算，而是标 unresolved
-  </div>
-
-  <div style="margin-top:12px;" class="ledd-total" id="parsedLeddBox">Parsed Text LEDD = 0</div>
-
-  <div class="grid" style="margin-top:14px;">
-    <div>
-      <label>结构化解析结果</label>
-      <pre id="medParsePreview">尚未解析。</pre>
+      <div class="small">
+        这只是一个补充来源。最终导出时系统会同时保留：<br>
+        - B 文件原始 <code>totalLEDD</code><br>
+        - 手动 quick calc LEDD<br>
+        - 药单文本解析出的 parsed LEDD
+      </div>
     </div>
-    <div>
-      <label>Warnings / Unresolved</label>
-      <pre id="medParseWarnings">尚未解析。</pre>
-    </div>
-  </div>
-</div>
 
+    <div class="card">
+      <h2>Step 2.6 药单原文自动解析 + LEDD</h2>
+
+      <div class="hint">
+        你可以直接把原始 <code>medicationDetails</code> 粘贴进来。<br>
+        系统会自动识别药名、强度、每天次数、每次片数，并按 Parkinson’s Measurement 常用 conversion factors 计算 LEDD。<br>
+        组合制剂（如 Stalevo / Sinemet / Madopar）按 <b>levodopa dose only</b> 处理。<br>
+        如果有真正缺失的信息（例如 standalone entacapone 没有配套 levodopa），系统会明确标出 unresolved warning。
+      </div>
+
+      <label for="medText" style="margin-top:12px;">Medication raw text</label>
+      <textarea id="medText" placeholder="直接粘贴原始 medicationDetails 到这里"></textarea>
+
+      <div class="btns">
+        <button type="button" id="btnParseMed" class="secondary">解析药单并计算 LEDD</button>
+        <button type="button" id="btnUseParsedLedd" class="ghost">将解析结果用于导出</button>
+        <button type="button" id="btnClearMed" class="ghost">清空药单文本</button>
+      </div>
+
+      <div class="small">
+        默认规则：<br>
+        - <b>Sinemet / Sinemet CR 缺省 strength 一律按 50/200</b><br>
+        - <b>4-5 times/day</b> 这类范围，默认取 <b>上限</b>，并写 warning<br>
+        - <b>PRN / upon need</b> 默认不计入 LEDD，除非有明确固定频次<br>
+        - <b>Entacapone / Tolcapone 单独出现</b> 不单独换算，而是标 unresolved
+      </div>
+
+      <div style="margin-top:12px;" class="ledd-total" id="parsedLeddBox">Parsed Text LEDD = 0</div>
+
+      <div class="grid" style="margin-top:14px;">
+        <div>
+          <label>结构化解析结果</label>
+          <pre id="medParsePreview">尚未解析。</pre>
+        </div>
+        <div>
+          <label>Warnings / Unresolved</label>
+          <pre id="medParseWarnings">尚未解析。</pre>
+        </div>
+      </div>
+    </div>
 
     <div class="card">
       <h2>Step 3. 先读取并生成审核表</h2>
@@ -559,7 +583,6 @@
       "Stalevo": { factor: 1.33, note: "Input levodopa dose only" },
       "Levodopa_with_Tolcapone": { factor: 1.5, note: "Input levodopa dose only" },
       "Rytary": { factor: 0.6, note: "Input levodopa dose only" },
-
       "Amantadine": { factor: 1, note: "" },
       "Apomorphine": { factor: 10, note: "" },
       "Azilect": { factor: 100, note: "rasagiline brand" },
@@ -587,6 +610,8 @@
     window.__LAST_A__ = null;
     window.__LAST_RESULT__ = null;
     window.__LAST_DEBUG__ = null;
+    window.__USE_PARSED_MED__ = false;
+    window.__LAST_PARSED_MED__ = null;
 
     // =========================================================
     // UI helpers
@@ -911,7 +936,6 @@
         parseMethod = "json";
       } else if (ext === "txt") {
         const text = await file.text();
-
         const json = tryParseJSON(text);
         if (json && typeof json === "object") {
           data = json;
@@ -1145,7 +1169,7 @@
     }
 
     // =========================================================
-    // Phase aggregation
+    // 聚合
     // =========================================================
     function sortEntriesForPriority(entries) {
       return [...entries].sort((a, b) => {
@@ -1258,23 +1282,23 @@
     }
 
     // =========================================================
-    // FCI / PARQ codes
+    // FCI / PARQ
     // =========================================================
     const COMORBIDITY_MAP = [
-      { key: "fci1_arthritis", code: "ARTH", label: "arthritis" },
-      { key: "fci2_osteoporosis", code: "OP", label: "osteoporosis" },
-      { key: "fci3_asthma", code: "ASTH", label: "asthma" },
-      { key: "fci4_copd", code: "COPD", label: "COPD" },
-      { key: "fci5_angina", code: "AP", label: "angina" },
-      { key: "fci6_heart_failure", code: "HF", label: "heart failure" },
-      { key: "fci7_heart_attack", code: "MI", label: "myocardial infarction" },
-      { key: "fci8_neuro_disease", code: "NEURO", label: "neurological disease" },
-      { key: "fci10_peripheral_vascular", code: "PVD", label: "peripheral vascular disease" },
-      { key: "fci11_diabetes", code: "DM", label: "diabetes mellitus" },
-      { key: "fci12_gastro", code: "GI", label: "gastrointestinal disease" },
-      { key: "fci16_hearing", code: "HL", label: "hearing loss" },
-      { key: "fci17_disc_disease", code: "DISC", label: "disc disease" },
-      { key: "fci18_obesity", code: "OB", label: "obesity" }
+      { key: "fci1_arthritis", code: "ARTH" },
+      { key: "fci2_osteoporosis", code: "OP" },
+      { key: "fci3_asthma", code: "ASTH" },
+      { key: "fci4_copd", code: "COPD" },
+      { key: "fci5_angina", code: "AP" },
+      { key: "fci6_heart_failure", code: "HF" },
+      { key: "fci7_heart_attack", code: "MI" },
+      { key: "fci8_neuro_disease", code: "NEURO" },
+      { key: "fci10_peripheral_vascular", code: "PVD" },
+      { key: "fci11_diabetes", code: "DM" },
+      { key: "fci12_gastro", code: "GI" },
+      { key: "fci16_hearing", code: "HL" },
+      { key: "fci17_disc_disease", code: "DISC" },
+      { key: "fci18_obesity", code: "OB" }
     ];
 
     function getComorbidityCodes(preA, postA) {
@@ -1304,7 +1328,7 @@
     }
 
     // =========================================================
-    // LEDD calculator
+    // 手动 LEDD quick calc
     // =========================================================
     function createLeddRow(initial = {}) {
       const row = document.createElement("div");
@@ -1312,7 +1336,7 @@
       row.innerHTML = `
         <select class="ledd-drug"></select>
         <input type="number" class="ledd-dose" placeholder="Dose (mg each time)" min="0" step="0.01" value="${initial.dose ?? ""}">
-        <input type="number" class="ledd-freq" placeholder="Times/day" min="0" step="1" value="${initial.freq ?? ""}">
+        <input type="number" class="ledd-freq" placeholder="Times/day" min="0" step="0.01" value="${initial.freq ?? ""}">
         <button type="button" class="danger ledd-remove">删除</button>
       `;
 
@@ -1373,736 +1397,730 @@
       addLeddRow({});
     });
 
-    // 默认先给一行
     addLeddRow({});
 
     // =========================================================
-// Medication text parser (raw text -> structured LEDD)
-// =========================================================
+    // Medication text parser
+    // =========================================================
+    const MED_DRUGS = {
+      ropinirole: {
+        key: "ropinirole",
+        canonical: "Ropinirole",
+        factor: 20,
+        type: "dopamine_agonist",
+        aliases: ["ropinirole", "ropinrole", "ropinirole hcl", "ropinirole hydrochloride", "requip"]
+      },
+      pramipexole: {
+        key: "pramipexole",
+        canonical: "Pramipexole",
+        factor: 100,
+        type: "dopamine_agonist",
+        aliases: [
+          "pramipexole",
+          "pramipexole dihydrochlride",
+          "pramipexole dihydrochloride",
+          "pramipexole extended release",
+          "pramipexole er",
+          "mirapex",
+          "pramipexole dihydrochlride extended release"
+        ]
+      },
+      rasagiline: {
+        key: "rasagiline",
+        canonical: "Rasagiline",
+        factor: 100,
+        type: "mao_b",
+        aliases: ["rasagiline", "rasagline", "azilect"]
+      },
+      rotigotine: {
+        key: "rotigotine",
+        canonical: "Rotigotine",
+        factor: 30,
+        type: "dopamine_agonist",
+        aliases: ["rotigotine", "rotigotine transdermal patch", "neupro"]
+      },
+      amantadine: {
+        key: "amantadine",
+        canonical: "Amantadine",
+        factor: 1,
+        type: "other",
+        aliases: ["amantadine", "amantadine sulfate"]
+      },
+      stalevo: {
+        key: "stalevo",
+        canonical: "Stalevo",
+        factor: 1.33,
+        type: "levodopa_combo_first_is_ldopa",
+        aliases: ["stalevo"]
+      },
+      madopar: {
+        key: "madopar",
+        canonical: "Madopar",
+        factor: 1,
+        type: "levodopa_combo_first_is_ldopa",
+        aliases: ["madopar", "madopar dispersible", "medopar", "medopar dispersible"]
+      },
+      sinemet_cr: {
+        key: "sinemet_cr",
+        canonical: "Sinemet CR",
+        factor: 0.75,
+        type: "levodopa_combo_second_is_ldopa",
+        aliases: ["sinemet cr", "sinemetcr", "sinemet controlled release"]
+      },
+      sinemet: {
+        key: "sinemet",
+        canonical: "Sinemet",
+        factor: 1,
+        type: "levodopa_combo_second_is_ldopa",
+        aliases: ["sinemet"]
+      },
+      carbidopa_levodopa: {
+        key: "carbidopa_levodopa",
+        canonical: "Carbidopa/Levodopa",
+        factor: 1,
+        type: "levodopa_combo_second_is_ldopa",
+        aliases: [
+          "carbidopa/levodopa",
+          "carbidopa levodopa",
+          "carbidopa and levodopa",
+          "carbide and levadopa",
+          "carbide and levodopa",
+          "carbide levadopa"
+        ]
+      },
+      entacapone: {
+        key: "entacapone",
+        canonical: "Entacapone",
+        factor: null,
+        type: "entacapone_standalone",
+        aliases: ["entacapone"]
+      },
+      tolcapone: {
+        key: "tolcapone",
+        canonical: "Tolcapone",
+        factor: null,
+        type: "tolcapone_standalone",
+        aliases: ["tolcapone"]
+      },
+      gabapentin: {
+        key: "gabapentin",
+        canonical: "Gabapentin",
+        factor: null,
+        type: "ignored_no_ledd",
+        aliases: ["gabapentin"]
+      }
+    };
 
-const MED_DRUGS = {
-  ropinirole: {
-    canonical: "Ropinirole",
-    factor: 20,
-    type: "dopamine_agonist",
-    aliases: ["ropinirole", "ropinrole", "ropinirole hcl", "requip", "ropinirole hydrochloride"]
-  },
-  pramipexole: {
-    canonical: "Pramipexole",
-    factor: 100,
-    type: "dopamine_agonist",
-    aliases: ["pramipexole", "pramipexole dihydrochlride", "pramipexole dihydrochloride", "pramipexole extended release", "pramipexole er", "mirapex"]
-  },
-  rasagiline: {
-    canonical: "Rasagiline",
-    factor: 100,
-    type: "mao_b",
-    aliases: ["rasagiline", "rasagline", "azilect"]
-  },
-  rotigotine: {
-    canonical: "Rotigotine",
-    factor: 30,
-    type: "dopamine_agonist",
-    aliases: ["rotigotine", "rotigotine transdermal patch", "neupro"]
-  },
-  amantadine: {
-    canonical: "Amantadine",
-    factor: 1,
-    type: "other",
-    aliases: ["amantadine", "amantadine sulfate"]
-  },
-  stalevo: {
-    canonical: "Stalevo",
-    factor: 1.33,
-    type: "levodopa_combo_first_is_ldopa",
-    aliases: ["stalevo"]
-  },
-  madopar: {
-    canonical: "Madopar",
-    factor: 1,
-    type: "levodopa_combo_first_is_ldopa",
-    aliases: ["madopar", "madopar dispersible", "medopar", "medopar dispersible"]
-  },
-  sinemet_cr: {
-    canonical: "Sinemet CR",
-    factor: 0.75,
-    type: "levodopa_combo_second_is_ldopa",
-    aliases: ["sinemet cr", "sinemetcr", "sinemet controlled release"]
-  },
-  sinemet: {
-    canonical: "Sinemet",
-    factor: 1,
-    type: "levodopa_combo_second_is_ldopa",
-    aliases: ["sinemet"]
-  },
-  carbidopa_levodopa: {
-    canonical: "Carbidopa/Levodopa",
-    factor: 1,
-    type: "levodopa_combo_second_is_ldopa",
-    aliases: [
-      "carbidopa/levodopa",
-      "carbidopa levodopa",
-      "carbidopa and levodopa",
-      "carbide and levadopa",
-      "carbide and levodopa",
-      "carbide levadopa"
-    ]
-  },
-  entacapone: {
-    canonical: "Entacapone",
-    factor: null,
-    type: "entacapone_standalone",
-    aliases: ["entacapone"]
-  },
-  tolcapone: {
-    canonical: "Tolcapone",
-    factor: null,
-    type: "tolcapone_standalone",
-    aliases: ["tolcapone"]
-  },
-  gabapentin: {
-    canonical: "Gabapentin",
-    factor: null,
-    type: "ignored_no_ledd",
-    aliases: ["gabapentin"]
-  }
-};
+    function normalizeMedicationText(text) {
+      return String(text || "")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/\u00A0/g, " ")
+        .replace(/\\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .replace(/[“”"]/g, "")
+        .replace(/[；]/g, ";")
+        .replace(/[，]/g, ",")
+        .replace(/\t+/g, " ")
+        .replace(/[ ]{2,}/g, " ")
+        .trim();
+    }
 
-function normalizeMedicationText(text) {
-  return String(text || "")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/\u00A0/g, " ")
-    .replace(/\\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .replace(/[“”"]/g, "")
-    .replace(/[；]/g, ";")
-    .replace(/[，]/g, ",")
-    .replace(/\t+/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(/\n\s+/g, "\n")
-    .trim();
-}
+    function splitMedicationLines(text) {
+      const normalized = normalizeMedicationText(text);
 
-function splitMedicationLines(text) {
-  const normalized = normalizeMedicationText(text);
-
-  // 优先按换行分
-  let rawLines = normalized
-    .split(/\n+/)
-    .map(x => x.trim())
-    .filter(Boolean);
-
-  // 若一整段没有很好分开，按数字编号或分号再拆
-  const refined = [];
-  rawLines.forEach(line => {
-    let chunks = line
-      .split(/(?=\b\d+\.\s)/g)
-      .map(x => x.trim())
-      .filter(Boolean);
-
-    chunks.forEach(chunk => {
-      const parts = chunk
-        .split(/;/g)
+      let lines = normalized
+        .split(/\n+/)
         .map(x => x.trim())
         .filter(Boolean);
-      refined.push(...parts);
-    });
-  });
 
-  return refined
-    .map(x => x.replace(/^\d+\.\s*/, "").trim())
-    .filter(Boolean);
-}
-
-function numberWordToValue(word) {
-  const map = {
-    "zero": 0,
-    "half": 0.5,
-    "one": 1,
-    "one and a half": 1.5,
-    "one-half": 0.5,
-    "two": 2,
-    "three": 3,
-    "four": 4,
-    "five": 5,
-    "six": 6,
-    "seven": 7,
-    "eight": 8,
-    "nine": 9,
-    "ten": 10,
-    "once": 1,
-    "twice": 2
-  };
-  return map[lower(word)];
-}
-
-function detectDrug(line) {
-  const l = lower(line);
-  for (const key of Object.keys(MED_DRUGS)) {
-    const info = MED_DRUGS[key];
-    for (const alias of info.aliases) {
-      if (l.includes(alias)) {
-        return { key, ...info };
-      }
-    }
-  }
-  return null;
-}
-
-function extractSlashStrengths(line) {
-  const m = line.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?\s*mg?/i);
-  if (!m) return null;
-  const nums = [m[1], m[2], m[3]].filter(Boolean).map(Number);
-  return nums;
-}
-
-function extractSingleMg(line) {
-  const m = line.match(/(\d+(?:\.\d+)?)\s*mg\b/i);
-  if (!m) return null;
-  return Number(m[1]);
-}
-
-function extractDailyTimes(line, warnings) {
-  const l = lower(line);
-
-  // range like 4-5 time/day => take upper bound by default
-  let m = l.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*(?:times?|time)?(?:\s*(?:per|\/)\s*day|\s*day)?/);
-  if (m) {
-    const low = Number(m[1]);
-    const high = Number(m[2]);
-    warnings.push(`频次范围 "${m[0]}" → 默认取上限 ${high}/day`);
-    return high;
-  }
-
-  // 2/day, 3/day
-  m = l.match(/(\d+(?:\.\d+)?)\s*(?:\/|per\s*)day\b/);
-  if (m) return Number(m[1]);
-
-  // 4 times per day / 4 time/day / 4 times
-  m = l.match(/(\d+(?:\.\d+)?)\s*(?:times?|time)\s*(?:per\s*day|\/day)?/);
-  if (m) return Number(m[1]);
-
-  // once per day / twice per day
-  if (/once\s*(?:per\s*day|a day|daily|\/day)?/.test(l)) return 1;
-  if (/twice\s*(?:per\s*day|a day|daily|\/day)?/.test(l)) return 2;
-
-  // three times per day etc.
-  if (/three\s+times?\s*(?:per\s*day|a day|daily|\/day)?/.test(l)) return 3;
-  if (/four\s+times?\s*(?:per\s*day|a day|daily|\/day)?/.test(l)) return 4;
-  if (/five\s+times?\s*(?:per\s*day|a day|daily|\/day)?/.test(l)) return 5;
-
-  // stuck style: "2 mg2" / "100 mg2" / "50/200 mg0.5"
-  m = l.match(/mg\s*(\d+(?:\.\d+)?)\s*$/);
-  if (m) return Number(m[1]);
-
-  return null;
-}
-
-function extractSpecialPillsPerDay(line, warnings) {
-  const l = lower(line);
-
-  // "1.5 pill for three time and 1 pill for one time"
-  let m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)[^\\n;,.]*for\s*(\d+(?:\.\d+)?)\s*(?:times?|time)[^\\n;,.]*?(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)[^\\n;,.]*for\s*(\d+(?:\.\d+)?)\s*(?:times?|time)/);
-  if (m) {
-    const pill1 = Number(m[1]);
-    const time1 = Number(m[2]);
-    const pill2 = Number(m[3]);
-    const time2 = Number(m[4]);
-    return {
-      pillsPerDay: pill1 * time1 + pill2 * time2,
-      note: `分段频次：${pill1} pill × ${time1} + ${pill2} pill × ${time2}`
-    };
-  }
-
-  return null;
-}
-
-function extractPillsPerDose(line) {
-  const l = lower(line);
-
-  if (/one and a half\s*(?:pill|tab|tablet)?/.test(l)) return 1.5;
-  if (/half a\s*(?:pill|tab|tablet)/.test(l)) return 0.5;
-  if (/half each time/.test(l)) return 0.5;
-  if (/half a pill\/time/.test(l)) return 0.5;
-  if (/0\.5\s*(?:pill|tab|tablet)?(?:\/time|each time|per dose)?/.test(l)) return 0.5;
-  if (/1\.5\s*(?:pill|tab|tablet)?(?:\/time|each time|per dose)?/.test(l)) return 1.5;
-
-  let m = l.match(/(\d+(?:\.\d+)?)\s*(?:pills?|tabs?|tablets?)\s*(?:per dose|\/dose|each time|\/time)/);
-  if (m) return Number(m[1]);
-
-  m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)\s*(?:per dose|\/dose|each time|\/time)/);
-  if (m) return Number(m[1]);
-
-  // "1 pill/day" usually means daily units already, but if times/day also exists, treat as pills per dose
-  m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)\b/);
-  if (m) return Number(m[1]);
-
-  return 1; // default
-}
-
-function defaultStrengthIfMissing(drugKey, warnings) {
-  if (drugKey === "sinemet" || drugKey === "sinemet_cr") {
-    warnings.push("Sinemet/Sinemet CR 未写明 strength → 默认按 50/200");
-    return [50, 200];
-  }
-  return null;
-}
-
-function mapMadoparSingleMgToLevodopa(singleMg, warnings) {
-  // 常见品牌总规格：Madopar 125 = 100/25, Madopar 250 = 200/50
-  if (singleMg === 125) {
-    warnings.push("Madopar 125mg → 视为 100/25，因此 levodopa=100mg");
-    return 100;
-  }
-  if (singleMg === 250) {
-    warnings.push("Madopar 250mg → 视为 200/50，因此 levodopa=200mg");
-    return 200;
-  }
-  return null;
-}
-
-function computeDrugLEDD(drugInfo, line, warnings) {
-  const slash = extractSlashStrengths(line);
-  const singleMg = extractSingleMg(line);
-  const freq = extractDailyTimes(line, warnings);
-  const specialDaily = extractSpecialPillsPerDay(line, warnings);
-  const pillsPerDose = extractPillsPerDose(line);
-
-  // PRN / upon need 默认不计
-  if (/upon need|prn|as needed/.test(lower(line)) && (freq == null && !specialDaily)) {
-    return {
-      status: "ignored",
-      reason: "PRN / upon need with no fixed frequency",
-      steps: ["PRN / upon need 且无固定频次 → 不纳入 LEDD"],
-      ledd: 0
-    };
-  }
-
-  // 无 factor 的特殊情况
-  if (drugInfo.type === "ignored_no_ledd") {
-    return {
-      status: "ignored",
-      reason: `${drugInfo.canonical} 不在当前 LEDD conversion list 中`,
-      steps: [`${drugInfo.canonical} 不计入 LEDD`],
-      ledd: 0
-    };
-  }
-
-  if (drugInfo.type === "entacapone_standalone") {
-    return {
-      status: "unresolved",
-      reason: "Entacapone standalone 不能直接单独换算；需与 levodopa 联合",
-      steps: ["Entacapone = 0.33 × L-Dopa；该网站要求 Enter Levodopa with Entacapone"],
-      ledd: ""
-    };
-  }
-
-  if (drugInfo.type === "tolcapone_standalone") {
-    return {
-      status: "unresolved",
-      reason: "Tolcapone standalone 不能直接单独换算；需与 levodopa 联合",
-      steps: ["Tolcapone = 0.5 × L-Dopa；该网站要求 Enter Levodopa with Tolcapone"],
-      ledd: ""
-    };
-  }
-
-  let strength = slash || defaultStrengthIfMissing(drugInfo.key, warnings);
-  let dailyTimes = freq;
-  let dailyUnits = null;
-  const steps = [];
-
-  // 若存在分段总 pills/day，就优先用
-  if (specialDaily) {
-    dailyUnits = specialDaily.pillsPerDay;
-    steps.push(specialDaily.note);
-    if (dailyTimes == null) {
-      warnings.push("存在分段 pills/day 但未单独抽到 times/day；已直接按总 pills/day 计算");
-    }
-  } else {
-    if (dailyTimes == null) {
-      dailyTimes = 1;
-      warnings.push("未识别到频次 → 默认按 1/day");
-    }
-    dailyUnits = pillsPerDose * dailyTimes;
-    steps.push(`daily units = pills per dose ${pillsPerDose} × ${dailyTimes}/day = ${roundTo(dailyUnits, 3)}`);
-  }
-
-  // 非 levodopa combo：daily mg = single strength × dailyUnits
-  if (["dopamine_agonist", "mao_b", "other"].includes(drugInfo.type)) {
-    const dose = singleMg != null ? singleMg : (Array.isArray(strength) ? strength[strength.length - 1] : null);
-    if (dose == null) {
-      return {
-        status: "unresolved",
-        reason: `${drugInfo.canonical} 缺少可识别强度`,
-        steps: [`无法识别 ${drugInfo.canonical} 的 mg strength`],
-        ledd: ""
-      };
-    }
-
-    const dailyMg = roundTo(dose * dailyUnits, 3);
-    const ledd = roundTo(dailyMg * drugInfo.factor, 3);
-    steps.push(`daily dose = ${dose} mg × ${roundTo(dailyUnits, 3)} = ${dailyMg} mg/day`);
-    steps.push(`LEDD = ${dailyMg} × factor ${drugInfo.factor} = ${ledd}`);
-    return {
-      status: "ok",
-      reason: "",
-      dose,
-      dailyUnits,
-      dailyMg,
-      ledd,
-      steps
-    };
-  }
-
-  // levodopa combo：按 levodopa component only
-  if (drugInfo.type === "levodopa_combo_first_is_ldopa") {
-    let ldopaPerUnit = null;
-
-    if (Array.isArray(strength)) {
-      ldopaPerUnit = Number(strength[0]);
-    } else if (singleMg != null && drugInfo.key === "madopar") {
-      ldopaPerUnit = mapMadoparSingleMgToLevodopa(singleMg, warnings);
-    }
-
-    if (ldopaPerUnit == null) {
-      return {
-        status: "unresolved",
-        reason: `${drugInfo.canonical} 缺少可识别的 levodopa component`,
-        steps: [`无法从 ${drugInfo.canonical} 中识别 levodopa dose`],
-        ledd: ""
-      };
-    }
-
-    const dailyLdopa = roundTo(ldopaPerUnit * dailyUnits, 3);
-    const ledd = roundTo(dailyLdopa * drugInfo.factor, 3);
-    steps.push(`levodopa per unit = ${ldopaPerUnit} mg`);
-    steps.push(`daily levodopa = ${ldopaPerUnit} × ${roundTo(dailyUnits, 3)} = ${dailyLdopa} mg/day`);
-    steps.push(`LEDD = ${dailyLdopa} × factor ${drugInfo.factor} = ${ledd}`);
-    return {
-      status: "ok",
-      reason: "",
-      ldopaPerUnit,
-      dailyUnits,
-      dailyLdopa,
-      ledd,
-      steps
-    };
-  }
-
-  if (drugInfo.type === "levodopa_combo_second_is_ldopa") {
-    let ldopaPerUnit = null;
-
-    if (Array.isArray(strength)) {
-      ldopaPerUnit = Number(strength[1]);
-    }
-
-    if (ldopaPerUnit == null) {
-      return {
-        status: "unresolved",
-        reason: `${drugInfo.canonical} 缺少可识别的 levodopa component`,
-        steps: [`无法从 ${drugInfo.canonical} 中识别 levodopa dose`],
-        ledd: ""
-      };
-    }
-
-    const dailyLdopa = roundTo(ldopaPerUnit * dailyUnits, 3);
-    const ledd = roundTo(dailyLdopa * drugInfo.factor, 3);
-    steps.push(`levodopa per unit = ${ldopaPerUnit} mg`);
-    steps.push(`daily levodopa = ${ldopaPerUnit} × ${roundTo(dailyUnits, 3)} = ${dailyLdopa} mg/day`);
-    steps.push(`LEDD = ${dailyLdopa} × factor ${drugInfo.factor} = ${ledd}`);
-    return {
-      status: "ok",
-      reason: "",
-      ldopaPerUnit,
-      dailyUnits,
-      dailyLdopa,
-      ledd,
-      steps
-    };
-  }
-
-  return {
-    status: "unresolved",
-    reason: "未覆盖的药物类型",
-    steps: ["药物类型未覆盖"],
-    ledd: ""
-  };
-}
-
-function parseMedicationText(rawText) {
-  const lines = splitMedicationLines(rawText);
-  const results = [];
-  const warnings = [];
-  let total = 0;
-
-  lines.forEach((line, idx) => {
-    const localWarnings = [];
-    const drug = detectDrug(line);
-
-    if (!drug) {
-      results.push({
-        lineNo: idx + 1,
-        raw: line,
-        drug: "",
-        status: "unresolved",
-        steps: [],
-        ledd: "",
-        reason: "未识别药物名称"
+      const refined = [];
+      lines.forEach(line => {
+        const parts = line.split(/(?=\b\d+\.\s)/g).map(x => x.trim()).filter(Boolean);
+        parts.forEach(p => {
+          p.split(/;/g).map(x => x.trim()).filter(Boolean).forEach(x => refined.push(x));
+        });
       });
-      return;
+
+      return refined
+        .map(x => x.replace(/^\d+\.\s*/, "").trim())
+        .filter(Boolean);
     }
 
-    const parsed = computeDrugLEDD(drug, line, localWarnings);
-    if (parsed.status === "ok") {
-      total += Number(parsed.ledd || 0);
+    function replaceNumberWords(line) {
+      let sLine = " " + lower(line) + " ";
+      const replacements = [
+        ["one and a half", "1.5"],
+        ["half a", "0.5"],
+        ["half each time", "0.5 each time"],
+        ["half", "0.5"],
+        ["once", "1"],
+        ["twice", "2"],
+        ["three", "3"],
+        ["four", "4"],
+        ["five", "5"],
+        ["six", "6"],
+        ["seven", "7"],
+        ["eight", "8"],
+        ["nine", "9"],
+        ["ten", "10"],
+        ["one", "1"],
+        ["two", "2"]
+      ];
+      replacements.forEach(([a, b]) => {
+        sLine = sLine.replaceAll(a, b);
+      });
+      return sLine.trim();
     }
 
-    results.push({
-      lineNo: idx + 1,
-      raw: line,
-      drug: drug.canonical,
-      status: parsed.status,
-      steps: parsed.steps || [],
-      ledd: parsed.ledd,
-      reason: parsed.reason || "",
-      warnings: localWarnings
+    function detectDrug(line) {
+      const l = lower(line);
+      for (const key of Object.keys(MED_DRUGS)) {
+        const info = MED_DRUGS[key];
+        for (const alias of info.aliases) {
+          if (l.includes(alias)) return info;
+        }
+      }
+      return null;
+    }
+
+    function extractSlashStrengths(line) {
+      const l = replaceNumberWords(line);
+      const m = l.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)(?:\s*\/\s*(\d+(?:\.\d+)?))?\s*(?:mg)?/i);
+      if (!m) return null;
+      return [m[1], m[2], m[3]].filter(Boolean).map(Number);
+    }
+
+    function extractSingleMg(line) {
+      const l = replaceNumberWords(line);
+      const m = l.match(/(\d+(?:\.\d+)?)\s*mg\b/i);
+      if (!m) return null;
+      return Number(m[1]);
+    }
+
+    function extractDailyTimes(line, warnings) {
+      const l = replaceNumberWords(line);
+
+      let m = l.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*(?:times?|time)?(?:\s*(?:per|\/)\s*day|\s*day)?/);
+      if (m) {
+        const high = Number(m[2]);
+        warnings.push(`频次范围 "${m[0]}" → 默认取上限 ${high}/day`);
+        return high;
+      }
+
+      m = l.match(/(\d+(?:\.\d+)?)\s*(?:\/|per\s*)day\b/);
+      if (m) return Number(m[1]);
+
+      m = l.match(/(\d+(?:\.\d+)?)\s*time(?:s)?\s*(?:per\s*day|\/day)?/);
+      if (m) return Number(m[1]);
+
+      // e.g. 2time/day, 3time/dayg
+      m = l.match(/(\d+(?:\.\d+)?)\s*time(?:s)?\/day/);
+      if (m) return Number(m[1]);
+
+      // stuck style: "2 mg2" / "100 mg2" / "50/200 mg0.5"
+      m = l.match(/mg\s*(\d+(?:\.\d+)?)\s*$/);
+      if (m) return Number(m[1]);
+
+      return null;
+    }
+
+    function extractSpecialPillsPerDay(line) {
+      const l = replaceNumberWords(line);
+
+      let m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)[^\\n;,.]*for\s*(\d+(?:\.\d+)?)\s*(?:times?|time)[^\\n;,.]*?(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)[^\\n;,.]*for\s*(\d+(?:\.\d+)?)\s*(?:times?|time)/);
+      if (m) {
+        const pill1 = Number(m[1]);
+        const time1 = Number(m[2]);
+        const pill2 = Number(m[3]);
+        const time2 = Number(m[4]);
+        return {
+          pillsPerDay: pill1 * time1 + pill2 * time2,
+          note: `分段频次：${pill1} pill × ${time1} + ${pill2} pill × ${time2}`
+        };
+      }
+
+      return null;
+    }
+
+    function extractPillsPerDose(line) {
+      const l = replaceNumberWords(line);
+
+      let m = l.match(/(\d+(?:\.\d+)?)\s*(?:pills?|tabs?|tablets?)\s*(?:per dose|\/dose|each time|\/time)/);
+      if (m) return Number(m[1]);
+
+      m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)\s*(?:per dose|\/dose|each time|\/time)/);
+      if (m) return Number(m[1]);
+
+      // 1pill/2time/day
+      m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)\s*\/\s*\d+(?:\.\d+)?\s*time\/day/);
+      if (m) return Number(m[1]);
+
+      // if phrase like "0.5 each time"
+      m = l.match(/(\d+(?:\.\d+)?)\s*(?:each time|\/time)/);
+      if (m) return Number(m[1]);
+
+      m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)\b/);
+      if (m) return Number(m[1]);
+
+      return 1;
+    }
+
+    function defaultStrengthIfMissing(drugKey, warnings) {
+      if (drugKey === "sinemet" || drugKey === "sinemet_cr") {
+        warnings.push("Sinemet/Sinemet CR 未写明 strength → 默认按 50/200");
+        return [50, 200];
+      }
+      return null;
+    }
+
+    function mapMadoparSingleMgToLevodopa(singleMg, warnings) {
+      if (singleMg === 125) {
+        warnings.push("Madopar 125mg → 视为 100/25，因此 levodopa=100mg");
+        return 100;
+      }
+      if (singleMg === 250) {
+        warnings.push("Madopar 250mg → 视为 200/50，因此 levodopa=200mg");
+        return 200;
+      }
+      return null;
+    }
+
+    function computeDrugLEDD(drugInfo, line, warnings) {
+      const slash = extractSlashStrengths(line);
+      const singleMg = extractSingleMg(line);
+      const freq = extractDailyTimes(line, warnings);
+      const specialDaily = extractSpecialPillsPerDay(line);
+      const pillsPerDose = extractPillsPerDose(line);
+      const steps = [];
+
+      if (/upon need|prn|as needed/.test(lower(line)) && (freq == null && !specialDaily)) {
+        return {
+          status: "ignored",
+          reason: "PRN / upon need with no fixed frequency",
+          steps: ["PRN / upon need 且无固定频次 → 不纳入 LEDD"],
+          ledd: 0
+        };
+      }
+
+      if (drugInfo.type === "ignored_no_ledd") {
+        return {
+          status: "ignored",
+          reason: `${drugInfo.canonical} 不在当前 LEDD conversion list 中`,
+          steps: [`${drugInfo.canonical} 不计入 LEDD`],
+          ledd: 0
+        };
+      }
+
+      if (drugInfo.type === "entacapone_standalone") {
+        return {
+          status: "unresolved",
+          reason: "Entacapone standalone 不能直接单独换算；需与 levodopa 联合",
+          steps: ["Entacapone = 0.33 × L-Dopa；该网站要求 Enter Levodopa with Entacapone"],
+          ledd: ""
+        };
+      }
+
+      if (drugInfo.type === "tolcapone_standalone") {
+        return {
+          status: "unresolved",
+          reason: "Tolcapone standalone 不能直接单独换算；需与 levodopa 联合",
+          steps: ["Tolcapone = 0.5 × L-Dopa；该网站要求 Enter Levodopa with Tolcapone"],
+          ledd: ""
+        };
+      }
+
+      let strength = slash || defaultStrengthIfMissing(drugInfo.key, warnings);
+      let dailyTimes = freq;
+      let dailyUnits = null;
+
+      if (specialDaily) {
+        dailyUnits = specialDaily.pillsPerDay;
+        steps.push(specialDaily.note);
+        if (dailyTimes == null) {
+          warnings.push("存在分段 pills/day，但未单独抽到 times/day；已直接按总 pills/day 计算");
+        }
+      } else {
+        if (dailyTimes == null) {
+          dailyTimes = 1;
+          warnings.push("未识别到频次 → 默认按 1/day");
+        }
+        dailyUnits = pillsPerDose * dailyTimes;
+        steps.push(`daily units = pills per dose ${pillsPerDose} × ${dailyTimes}/day = ${roundTo(dailyUnits, 3)}`);
+      }
+
+      if (["dopamine_agonist", "mao_b", "other"].includes(drugInfo.type)) {
+        const dose = singleMg != null ? singleMg : (Array.isArray(strength) ? strength[strength.length - 1] : null);
+        if (dose == null) {
+          return {
+            status: "unresolved",
+            reason: `${drugInfo.canonical} 缺少可识别强度`,
+            steps: [`无法识别 ${drugInfo.canonical} 的 mg strength`],
+            ledd: ""
+          };
+        }
+        if (drugInfo.key === "rasagiline" && dose > 5) {
+          warnings.push(`Rasagiline dose unusually high: ${dose} mg`);
+        }
+        const dailyMg = roundTo(dose * dailyUnits, 3);
+        const ledd = roundTo(dailyMg * drugInfo.factor, 3);
+        steps.push(`daily dose = ${dose} mg × ${roundTo(dailyUnits, 3)} = ${dailyMg} mg/day`);
+        steps.push(`LEDD = ${dailyMg} × factor ${drugInfo.factor} = ${ledd}`);
+        return {
+          status: "ok",
+          reason: "",
+          dose,
+          dailyUnits,
+          dailyMg,
+          ledd,
+          steps
+        };
+      }
+
+      if (drugInfo.type === "levodopa_combo_first_is_ldopa") {
+        let ldopaPerUnit = null;
+
+        if (Array.isArray(strength)) {
+          ldopaPerUnit = Number(strength[0]);
+        } else if (singleMg != null && drugInfo.key === "madopar") {
+          ldopaPerUnit = mapMadoparSingleMgToLevodopa(singleMg, warnings);
+        }
+
+        if (ldopaPerUnit == null) {
+          return {
+            status: "unresolved",
+            reason: `${drugInfo.canonical} 缺少可识别的 levodopa component`,
+            steps: [`无法从 ${drugInfo.canonical} 中识别 levodopa dose`],
+            ledd: ""
+          };
+        }
+
+        const dailyLdopa = roundTo(ldopaPerUnit * dailyUnits, 3);
+        const ledd = roundTo(dailyLdopa * drugInfo.factor, 3);
+        steps.push(`levodopa per unit = ${ldopaPerUnit} mg`);
+        steps.push(`daily levodopa = ${ldopaPerUnit} × ${roundTo(dailyUnits, 3)} = ${dailyLdopa} mg/day`);
+        steps.push(`LEDD = ${dailyLdopa} × factor ${drugInfo.factor} = ${ledd}`);
+        return {
+          status: "ok",
+          reason: "",
+          ldopaPerUnit,
+          dailyUnits,
+          dailyLdopa,
+          ledd,
+          steps
+        };
+      }
+
+      if (drugInfo.type === "levodopa_combo_second_is_ldopa") {
+        let ldopaPerUnit = null;
+        if (Array.isArray(strength)) {
+          ldopaPerUnit = Number(strength[1]);
+        }
+
+        if (ldopaPerUnit == null) {
+          return {
+            status: "unresolved",
+            reason: `${drugInfo.canonical} 缺少可识别的 levodopa component`,
+            steps: [`无法从 ${drugInfo.canonical} 中识别 levodopa dose`],
+            ledd: ""
+          };
+        }
+
+        const dailyLdopa = roundTo(ldopaPerUnit * dailyUnits, 3);
+        const ledd = roundTo(dailyLdopa * drugInfo.factor, 3);
+        steps.push(`levodopa per unit = ${ldopaPerUnit} mg`);
+        steps.push(`daily levodopa = ${ldopaPerUnit} × ${roundTo(dailyUnits, 3)} = ${dailyLdopa} mg/day`);
+        steps.push(`LEDD = ${dailyLdopa} × factor ${drugInfo.factor} = ${ledd}`);
+        return {
+          status: "ok",
+          reason: "",
+          ldopaPerUnit,
+          dailyUnits,
+          dailyLdopa,
+          ledd,
+          steps
+        };
+      }
+
+      return {
+        status: "unresolved",
+        reason: "未覆盖的药物类型",
+        steps: ["药物类型未覆盖"],
+        ledd: ""
+      };
+    }
+
+    function parseMedicationText(rawText) {
+      const lines = splitMedicationLines(rawText);
+      const results = [];
+      const warnings = [];
+      let total = 0;
+
+      lines.forEach((line, idx) => {
+        const localWarnings = [];
+        const drug = detectDrug(line);
+
+        if (!drug) {
+          results.push({
+            lineNo: idx + 1,
+            raw: line,
+            drug: "",
+            status: "unresolved",
+            steps: [],
+            ledd: "",
+            reason: "未识别药物名称",
+            warnings: []
+          });
+          warnings.push(`Line ${idx + 1}: 未识别药物名称`);
+          return;
+        }
+
+        const parsed = computeDrugLEDD(drug, line, localWarnings);
+        if (parsed.status === "ok") {
+          total += Number(parsed.ledd || 0);
+        }
+
+        results.push({
+          lineNo: idx + 1,
+          raw: line,
+          drug: drug.canonical,
+          status: parsed.status,
+          steps: parsed.steps || [],
+          ledd: parsed.ledd,
+          reason: parsed.reason || "",
+          warnings: localWarnings
+        });
+
+        localWarnings.forEach(w => warnings.push(`Line ${idx + 1} (${drug.canonical}): ${w}`));
+        if (parsed.status === "unresolved") {
+          warnings.push(`Line ${idx + 1} (${drug.canonical}): ${parsed.reason}`);
+        }
+      });
+
+      return {
+        lines,
+        results,
+        total: roundTo(total, 3) || 0,
+        warnings
+      };
+    }
+
+    function renderMedicationParseResult(parsed) {
+      if (!parsed) {
+        document.getElementById("medParsePreview").textContent = "尚未解析。";
+        document.getElementById("medParseWarnings").textContent = "尚未解析。";
+        document.getElementById("parsedLeddBox").textContent = "Parsed Text LEDD = 0";
+        return;
+      }
+
+      const previewLines = [];
+      parsed.results.forEach(item => {
+        previewLines.push(`Line ${item.lineNo}: ${item.raw}`);
+        previewLines.push(`  Drug: ${item.drug || "(未识别)"}`);
+        previewLines.push(`  Status: ${item.status}`);
+        if (item.steps?.length) {
+          item.steps.forEach(step => previewLines.push(`  - ${step}`));
+        }
+        if (!isBlank(item.ledd)) {
+          previewLines.push(`  => LEDD = ${item.ledd}`);
+        }
+        if (item.reason) {
+          previewLines.push(`  Reason: ${item.reason}`);
+        }
+        previewLines.push("");
+      });
+
+      const warningText = parsed.warnings.length
+        ? parsed.warnings.join("\n")
+        : "无 warnings / unresolved。";
+
+      document.getElementById("medParsePreview").textContent = previewLines.join("\n");
+      document.getElementById("medParseWarnings").textContent = warningText;
+      document.getElementById("parsedLeddBox").textContent = `Parsed Text LEDD = ${parsed.total}`;
+    }
+
+    function getParsedMedicationResult() {
+      const rawText = document.getElementById("medText")?.value || "";
+      if (!s(rawText)) return null;
+      return parseMedicationText(rawText);
+    }
+
+    document.getElementById("btnParseMed").addEventListener("click", () => {
+      try {
+        const parsed = getParsedMedicationResult();
+        if (!parsed) {
+          renderMedicationParseResult(null);
+          setStatus("药单文本为空。请先粘贴 medicationDetails。", true);
+          return;
+        }
+        window.__LAST_PARSED_MED__ = parsed;
+        renderMedicationParseResult(parsed);
+        setStatus(`药单解析完成。可计算 LEDD = ${parsed.total}；warnings = ${parsed.warnings.length}。`, false);
+      } catch (e) {
+        console.error(e);
+        setStatus("药单解析失败：\n\n" + e.message, true);
+      }
     });
 
-    localWarnings.forEach(w => warnings.push(`Line ${idx + 1} (${drug.canonical}): ${w}`));
-    if (parsed.status === "unresolved") {
-      warnings.push(`Line ${idx + 1} (${drug.canonical}): ${parsed.reason}`);
-    }
-  });
+    document.getElementById("btnUseParsedLedd").addEventListener("click", () => {
+      if (!window.__LAST_PARSED_MED__) {
+        const parsed = getParsedMedicationResult();
+        if (!parsed) {
+          setStatus("还没有可用的解析结果。请先点击“解析药单并计算 LEDD”。", true);
+          return;
+        }
+        window.__LAST_PARSED_MED__ = parsed;
+      }
+      window.__USE_PARSED_MED__ = true;
+      renderMedicationParseResult(window.__LAST_PARSED_MED__);
+      setStatus(`已标记：导出时会将 parsed medication text（LEDD=${window.__LAST_PARSED_MED__.total}）作为参考来源之一。`, false);
+    });
 
-  return {
-    lines,
-    results,
-    total: roundTo(total, 3) || 0,
-    warnings
-  };
-}
-
-function renderMedicationParseResult(parsed) {
-  if (!parsed) {
-    document.getElementById("medParsePreview").textContent = "尚未解析。";
-    document.getElementById("medParseWarnings").textContent = "尚未解析。";
-    document.getElementById("parsedLeddBox").textContent = "Parsed Text LEDD = 0";
-    return;
-  }
-
-  const previewLines = [];
-  parsed.results.forEach(item => {
-    previewLines.push(`Line ${item.lineNo}: ${item.raw}`);
-    previewLines.push(`  Drug: ${item.drug || "(未识别)"}`);
-    previewLines.push(`  Status: ${item.status}`);
-    if (item.steps?.length) {
-      item.steps.forEach(step => previewLines.push(`  - ${step}`));
-    }
-    if (!isBlank(item.ledd)) {
-      previewLines.push(`  => LEDD = ${item.ledd}`);
-    }
-    if (item.reason) {
-      previewLines.push(`  Reason: ${item.reason}`);
-    }
-    previewLines.push("");
-  });
-
-  const warningText = parsed.warnings.length
-    ? parsed.warnings.join("\n")
-    : "无 warnings / unresolved。";
-
-  document.getElementById("medParsePreview").textContent = previewLines.join("\n");
-  document.getElementById("medParseWarnings").textContent = warningText;
-  document.getElementById("parsedLeddBox").textContent = `Parsed Text LEDD = ${parsed.total}`;
-}
-
-function getParsedMedicationResult() {
-  const rawText = document.getElementById("medText")?.value || "";
-  if (!s(rawText)) return null;
-  return parseMedicationText(rawText);
-}
-
-// 用于把解析结果记为“已采用”
-window.__USE_PARSED_MED__ = false;
-window.__LAST_PARSED_MED__ = null;
-
-document.getElementById("btnParseMed").addEventListener("click", () => {
-  try {
-    const parsed = getParsedMedicationResult();
-    if (!parsed) {
+    document.getElementById("btnClearMed").addEventListener("click", () => {
+      document.getElementById("medText").value = "";
+      window.__USE_PARSED_MED__ = false;
+      window.__LAST_PARSED_MED__ = null;
       renderMedicationParseResult(null);
-      setStatus("药单文本为空。请先粘贴 medicationDetails。", true);
-      return;
-    }
-    window.__LAST_PARSED_MED__ = parsed;
-    renderMedicationParseResult(parsed);
-    setStatus(`药单解析完成。可计算 LEDD = ${parsed.total}；warnings = ${parsed.warnings.length}。`, false);
-  } catch (e) {
-    console.error(e);
-    setStatus("药单解析失败：\n\n" + e.message, true);
-  }
-});
+    });
 
-document.getElementById("btnUseParsedLedd").addEventListener("click", () => {
-  if (!window.__LAST_PARSED_MED__) {
-    const parsed = getParsedMedicationResult();
-    if (!parsed) {
-      setStatus("还没有可用的解析结果。请先点击“解析药单并计算 LEDD”。", true);
-      return;
-    }
-    window.__LAST_PARSED_MED__ = parsed;
-  }
-  window.__USE_PARSED_MED__ = true;
-  renderMedicationParseResult(window.__LAST_PARSED_MED__);
-  setStatus(`已标记：导出时会使用 parsed medication text（LEDD=${window.__LAST_PARSED_MED__.total}）作为参考来源之一。`, false);
-});
-
-document.getElementById("btnClearMed").addEventListener("click", () => {
-  document.getElementById("medText").value = "";
-  window.__USE_PARSED_MED__ = false;
-  window.__LAST_PARSED_MED__ = null;
-  renderMedicationParseResult(null);
-});
     // =========================================================
-    // Merge to final C
+    // 合并
     // =========================================================
-function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
-  const manualSex = document.getElementById("manualSex").value;
-  if (!manualSex) {
-    throw new Error("你还没有填写 Gender（F/M）。\n\n请先在页面顶部的 Step 0 选择 F 或 M，然后再生成结果。");
-  }
+    function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
+      const manualSex = document.getElementById("manualSex").value;
+      if (!manualSex) {
+        throw new Error("你还没有填写 Gender（F/M）。\n\n请先在页面顶部的 Step 0 选择 F 或 M，然后再生成结果。");
+      }
 
-  const subjectId =
-    subjectInfo.id ||
-    pick(preA, ["id"], "") ||
-    pick(postA, ["id"], "");
+      const subjectId =
+        subjectInfo.id ||
+        pick(preA, ["id"], "") ||
+        pick(postA, ["id"], "");
 
-  const name =
-    subjectInfo.name ||
-    pick(preA, ["name"], "") ||
-    pick(postA, ["name"], "");
+      const name =
+        subjectInfo.name ||
+        pick(preA, ["name"], "") ||
+        pick(postA, ["name"], "");
 
-  const heightM =
-    maybeCmToMeter(pick(preA, ["fci18_height"], "")) ||
-    maybeCmToMeter(pick(postA, ["fci18_height"], ""));
+      const heightM =
+        maybeCmToMeter(pick(preA, ["fci18_height"], "")) ||
+        maybeCmToMeter(pick(postA, ["fci18_height"], ""));
 
-  const weightKg =
-    pick(preA, ["fci18_weight"], "") ||
-    pick(postA, ["fci18_weight"], "");
+      const weightKg =
+        pick(preA, ["fci18_weight"], "") ||
+        pick(postA, ["fci18_weight"], "");
 
-  const bmi = computeBMI(heightM, weightKg);
-  const bmiCat = bmiCategory(bmi);
+      const bmi = computeBMI(heightM, weightKg);
+      const bmiCat = bmiCategory(bmi);
 
-  const legLengthM = maybeCmToMeter(preAgg.legLength || postAgg.legLength || "");
-  const standardStepLength = legLengthM === "" ? "" : roundTo(Number(legLengthM) * 0.8, 2);
+      const legLengthM = maybeCmToMeter(preAgg.legLength || postAgg.legLength || "");
+      const standardStepLength = legLengthM === "" ? "" : roundTo(Number(legLengthM) * 0.8, 2);
 
-  const trainingVals = [
-    preA?.training1, preA?.training2, preA?.training3,
-    postA?.training1, postA?.training2, postA?.training3
-  ].map(s).filter(Boolean);
-  const trainingStatus = unique(trainingVals).join("; ");
+      const trainingVals = [
+        preA?.training1, preA?.training2, preA?.training3,
+        postA?.training1, postA?.training2, postA?.training3
+      ].map(s).filter(Boolean);
+      const trainingStatus = unique(trainingVals).join("; ");
 
-  // 三种 LEDD 来源
-  const originalLEDD = combineSameOrPair(preAgg.totalLEDD, postAgg.totalLEDD);
-  const manualLEDD = getManualLeddRows().length ? String(recalcManualLedd()) : "";
+      const originalLEDD = combineSameOrPair(preAgg.totalLEDD, postAgg.totalLEDD);
+      const manualLEDD = getManualLeddRows().length ? String(recalcManualLedd()) : "";
 
-  let parsedResult = window.__LAST_PARSED_MED__;
-  if (!parsedResult && s(document.getElementById("medText")?.value || "")) {
-    try {
-      parsedResult = getParsedMedicationResult();
-      window.__LAST_PARSED_MED__ = parsedResult;
-    } catch (e) {
-      console.error("parsed medication failed in mergeToC", e);
+      let parsedResult = window.__LAST_PARSED_MED__;
+      if (!parsedResult && s(document.getElementById("medText")?.value || "")) {
+        try {
+          parsedResult = getParsedMedicationResult();
+          window.__LAST_PARSED_MED__ = parsedResult;
+        } catch (e) {
+          console.error("parsed medication failed in mergeToC", e);
+        }
+      }
+      const parsedLEDD = parsedResult ? String(parsedResult.total) : "";
+
+      // 最终 LEDD 优先级：原始 > parsed(仅当用户点击采用) > manual
+      const finalLEDD = originalLEDD || (window.__USE_PARSED_MED__ ? parsedLEDD : "") || manualLEDD || "";
+
+      const originalMedRegime = combineSameOrPair(preAgg.medicationDetails, postAgg.medicationDetails);
+      const manualLeddText = manualLeddSummary();
+
+      let finalMedRegime = originalMedRegime;
+      if (parsedResult && parsedResult.results?.length) {
+        const parsedBrief = parsedResult.results.map(r => {
+          const leddPart = isBlank(r.ledd) ? "LEDD=NA" : `LEDD=${r.ledd}`;
+          return `${r.drug || "UNKNOWN"}(${leddPart})`;
+        }).join("; ");
+        finalMedRegime = finalMedRegime
+          ? `${finalMedRegime} | parsedMed: ${parsedBrief}`
+          : `parsedMed: ${parsedBrief}`;
+      }
+      if (manualLeddText) {
+        finalMedRegime = finalMedRegime
+          ? `${finalMedRegime} | manualLEDD: ${manualLeddText}`
+          : `manualLEDD: ${manualLeddText}`;
+      }
+
+      const remarksParts = [];
+      appendRemark(remarksParts, bmi ? `BMI=${bmi}` : "");
+      appendRemark(remarksParts, bmiCat ? `BMI_category=${bmiCat}` : "");
+      appendRemark(remarksParts, originalLEDD ? `LEDD_original=${originalLEDD}` : "");
+      appendRemark(remarksParts, parsedLEDD ? `LEDD_parsed=${parsedLEDD}` : "");
+      appendRemark(remarksParts, manualLEDD ? `LEDD_manual=${manualLEDD}` : "");
+      if (parsedResult?.warnings?.length) {
+        appendRemark(remarksParts, `medWarnings=${parsedResult.warnings.length}`);
+      }
+      if (!originalLEDD && !parsedLEDD && !manualLEDD) {
+        appendRemark(remarksParts, "LEDD_missing");
+      }
+      const remarks = remarksParts.join("; ");
+
+      return {
+        "Group": "",
+        "Subject ID": subjectId,
+        "Name": name,
+        "PD_duration": pick(preA, ["diagnosisYear"], "") || pick(postA, ["diagnosisYear"], ""),
+        "H&Y": preAgg.hyStage || postAgg.hyStage || "",
+        "FCI": buildFCIField(preA, postA),
+        "Par_Q": buildParQ(preA, postA, preAgg, postAgg),
+        "Age": pick(preA, ["age"], "") || pick(postA, ["age"], ""),
+        "Gender": manualSex,
+        "dominant hand": pick(preA, ["dominantHand"], "") || pick(postA, ["dominantHand"], ""),
+        "education_Year": pick(preA, ["educationYears"], "") || pick(postA, ["educationYears"], ""),
+        "walking_aid": pick(preA, ["wheelchair"], "") || pick(postA, ["wheelchair"], ""),
+        "height (m)": heightM,
+        "weight (kg)": weightKg,
+        "leg length (m)": legLengthM,
+        "standard_step-length(m)": standardStepLength,
+
+        "Pre_date": preAgg.testDate ? formatDateYYYYMMDD(preAgg.testDate) : (preA ? formatDateYYYYMMDD(preA.timestamp) : ""),
+        "training_status": trainingStatus,
+        "Post_date": postAgg.testDate ? formatDateYYYYMMDD(postAgg.testDate) : (postA ? formatDateYYYYMMDD(postA.timestamp) : ""),
+
+        "pre_steplength(m)": preAgg.avgStepLength || "",
+        "post_steplength(m)": postAgg.avgStepLength || "",
+        "pre_cadence(bpm)": preAgg.avgCadence || "",
+        "post_cadence(bpm)": postAgg.avgCadence || "",
+        "Pre_velocity(m/s)": preAgg.avgSpeed || "",
+        "post_velocity(m/s)": postAgg.avgSpeed || "",
+        "Pre_TUG (s)": preAgg.tug_avg || "",
+        "post_TUG(s)": postAgg.tug_avg || "",
+
+        "Pre_fogQ": pick(preA, ["fogqTotal"], ""),
+        "post_fogQ": pick(postA, ["fogqTotal"], ""),
+        "pre_UPDRS3": preAgg.updrs3Total || "",
+        "post_UPDRS3": postAgg.updrs3Total || "",
+        "Pre_PDQ": pick(preA, ["pdqTotal"], ""),
+        "Post_PDQ": pick(postA, ["pdqTotal"], ""),
+        "Pre_Moca": preAgg.moca || "",
+        "Post_Moca": postAgg.moca || "",
+        "Pre_HADS_D": pick(preA, ["hadsDepression"], ""),
+        "Post_HADS_D": pick(postA, ["hadsDepression"], ""),
+        "Pre_HADS_A": pick(preA, ["hadsAnxiety"], ""),
+        "Post_HADS_A": pick(postA, ["hadsAnxiety"], ""),
+
+        "LEDD": finalLEDD,
+        "Med_regime": finalMedRegime,
+        "contact": "",
+        "remarks": remarks
+      };
     }
-  }
-  const parsedLEDD = parsedResult ? String(parsedResult.total) : "";
-
-  // 最终 LEDD 优先级：原始 > parsed > manual
-  const finalLEDD = originalLEDD || (window.__USE_PARSED_MED__ ? parsedLEDD : "") || manualLEDD || "";
-
-  const originalMedRegime = combineSameOrPair(preAgg.medicationDetails, postAgg.medicationDetails);
-  const manualLeddText = manualLeddSummary();
-
-  let finalMedRegime = originalMedRegime;
-  if (parsedResult && parsedResult.results?.length) {
-    const parsedBrief = parsedResult.results.map(r => {
-      const leddPart = isBlank(r.ledd) ? "LEDD=NA" : `LEDD=${r.ledd}`;
-      return `${r.drug || "UNKNOWN"}(${leddPart})`;
-    }).join("; ");
-    finalMedRegime = finalMedRegime
-      ? `${finalMedRegime} | parsedMed: ${parsedBrief}`
-      : `parsedMed: ${parsedBrief}`;
-  }
-  if (manualLeddText) {
-    finalMedRegime = finalMedRegime
-      ? `${finalMedRegime} | manualLEDD: ${manualLeddText}`
-      : `manualLEDD: ${manualLeddText}`;
-  }
-
-  const remarksParts = [];
-  appendRemark(remarksParts, bmi ? `BMI=${bmi}` : "");
-  appendRemark(remarksParts, bmiCat ? `BMI_category=${bmiCat}` : "");
-  appendRemark(remarksParts, originalLEDD ? `LEDD_original=${originalLEDD}` : "");
-  appendRemark(remarksParts, parsedLEDD ? `LEDD_parsed=${parsedLEDD}` : "");
-  appendRemark(remarksParts, manualLEDD ? `LEDD_manual=${manualLEDD}` : "");
-  if (parsedResult?.warnings?.length) {
-    appendRemark(remarksParts, `medWarnings=${parsedResult.warnings.length}`);
-  }
-  if (!originalLEDD && !parsedLEDD && !manualLEDD) {
-    appendRemark(remarksParts, "LEDD_missing");
-  }
-  const remarks = remarksParts.join("; ");
-
-  return {
-    "Group": "",
-    "Subject ID": subjectId,
-    "Name": name,
-    "PD_duration": pick(preA, ["diagnosisYear"], "") || pick(postA, ["diagnosisYear"], ""),
-    "H&Y": preAgg.hyStage || postAgg.hyStage || "",
-    "FCI": buildFCIField(preA, postA),
-    "Par_Q": buildParQ(preA, postA, preAgg, postAgg),
-    "Age": pick(preA, ["age"], "") || pick(postA, ["age"], ""),
-    "Gender": manualSex,
-    "dominant hand": pick(preA, ["dominantHand"], "") || pick(postA, ["dominantHand"], ""),
-    "education_Year": pick(preA, ["educationYears"], "") || pick(postA, ["educationYears"], ""),
-    "walking_aid": pick(preA, ["wheelchair"], "") || pick(postA, ["wheelchair"], ""),
-    "height (m)": heightM,
-    "weight (kg)": weightKg,
-    "leg length (m)": legLengthM,
-    "standard_step-length(m)": standardStepLength,
-
-    "Pre_date": preAgg.testDate ? formatDateYYYYMMDD(preAgg.testDate) : (preA ? formatDateYYYYMMDD(preA.timestamp) : ""),
-    "training_status": trainingStatus,
-    "Post_date": postAgg.testDate ? formatDateYYYYMMDD(postAgg.testDate) : (postA ? formatDateYYYYMMDD(postA.timestamp) : ""),
-
-    "pre_steplength(m)": preAgg.avgStepLength || "",
-    "post_steplength(m)": postAgg.avgStepLength || "",
-    "pre_cadence(bpm)": preAgg.avgCadence || "",
-    "post_cadence(bpm)": postAgg.avgCadence || "",
-    "Pre_velocity(m/s)": preAgg.avgSpeed || "",
-    "post_velocity(m/s)": postAgg.avgSpeed || "",
-    "Pre_TUG (s)": preAgg.tug_avg || "",
-    "post_TUG(s)": postAgg.tug_avg || "",
-
-    "Pre_fogQ": pick(preA, ["fogqTotal"], ""),
-    "post_fogQ": pick(postA, ["fogqTotal"], ""),
-    "pre_UPDRS3": preAgg.updrs3Total || "",
-    "post_UPDRS3": postAgg.updrs3Total || "",
-    "Pre_PDQ": pick(preA, ["pdqTotal"], ""),
-    "Post_PDQ": pick(postA, ["pdqTotal"], ""),
-    "Pre_Moca": preAgg.moca || "",
-    "Post_Moca": postAgg.moca || "",
-    "Pre_HADS_D": pick(preA, ["hadsDepression"], ""),
-    "Post_HADS_D": pick(postA, ["hadsDepression"], ""),
-    "Pre_HADS_A": pick(preA, ["hadsAnxiety"], ""),
-    "Post_HADS_A": pick(postA, ["hadsAnxiety"], ""),
-
-    "LEDD": finalLEDD,
-    "Med_regime": finalMedRegime,
-    "contact": "",
-    "remarks": remarks
-  };
-}
 
     // =========================================================
     // Debug formatting
@@ -2188,12 +2206,15 @@ function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
       lines.push(`manualLeddRows = ${getManualLeddRows().length}`);
       lines.push(`manualLeddTotal = ${getManualLeddRows().length ? recalcManualLedd() : "(空)"}`);
       lines.push(`manualLeddSummary = ${manualLeddSummary() || "(空)"}`);
+      lines.push(`useParsedMedication = ${window.__USE_PARSED_MED__ ? "Yes" : "No"}`);
+      lines.push(`parsedMedicationTotal = ${window.__LAST_PARSED_MED__ ? window.__LAST_PARSED_MED__.total : "(空)"}`);
+      lines.push(`parsedMedicationWarnings = ${window.__LAST_PARSED_MED__?.warnings?.length || 0}`);
 
       return lines.join("\n");
     }
 
     // =========================================================
-    // Export helpers
+    // 导出
     // =========================================================
     function downloadExcel(rowObj, filename = "C_merged.xlsx") {
       const ws = XLSX.utils.json_to_sheet([rowObj]);
@@ -2223,11 +2244,12 @@ function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
       document.getElementById("fileB").value = "";
       document.getElementById("aliasRules").value = "";
       document.getElementById("leddRows").innerHTML = "";
+      addLeddRow({});
+
       document.getElementById("medText").value = "";
       window.__USE_PARSED_MED__ = false;
       window.__LAST_PARSED_MED__ = null;
-      renderMedicationParseResult(null
-      addLeddRow({});
+      renderMedicationParseResult(null);
 
       setStatus("");
       setText("preview", "{}");
@@ -2386,11 +2408,8 @@ function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
           name: subjectName
         });
 
-        const heightM = result["height (m)"];
-        const weightKg = result["weight (kg)"];
-        const bmi = computeBMI(heightM, weightKg);
+        const bmi = computeBMI(result["height (m)"], result["weight (kg)"]);
         const bmiCat = bmiCategory(bmi);
-
         const conflictCount = preAgg.debug.conflicts.length + postAgg.debug.conflicts.length;
 
         setKPI("kpiIncluded", included.length);
@@ -2442,10 +2461,10 @@ function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
           manualLeddRows: getManualLeddRows(),
           manualLeddTotal: getManualLeddRows().length ? recalcManualLedd() : "",
           manualLeddSummary: manualLeddSummary(),
-          preAgg,
-          postAgg,
           parsedMedication: window.__LAST_PARSED_MED__,
           useParsedMedication: window.__USE_PARSED_MED__,
+          preAgg,
+          postAgg,
           result
         };
 
