@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Paste A + Review Many B + LEDD + BMI</title>
+  <title>Paste A + Review Many B + LEDD + BMI (Fixed)</title>
 
+  <!-- 正确的 SheetJS 引用：千万不要改坏 -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
   <style>
@@ -26,6 +27,7 @@
     }
 
     * { box-sizing: border-box; }
+
     body{
       margin:0;
       padding:24px;
@@ -33,12 +35,14 @@
       color:var(--text);
       font-family:Arial,"Microsoft JhengHei","PingFang TC",sans-serif;
     }
+
     .container{
       max-width:1600px;
       margin:0 auto;
       display:grid;
       gap:18px;
     }
+
     .card{
       background:var(--card);
       border-radius:var(--radius);
@@ -46,6 +50,7 @@
       padding:20px;
       border:1px solid #eef2f7;
     }
+
     h1,h2,h3{ margin:0 0 12px 0; }
     h1{ font-size:28px; }
     h2{ font-size:20px; }
@@ -62,11 +67,13 @@
       grid-template-columns:1fr 1fr;
       gap:18px;
     }
+
     .grid3{
       display:grid;
       grid-template-columns:1fr 1fr 1fr;
       gap:18px;
     }
+
     @media (max-width: 1200px){
       .grid3{ grid-template-columns:1fr; }
     }
@@ -167,6 +174,7 @@
       line-height:1.6;
       white-space:pre-wrap;
     }
+
     .ok{ color:var(--green); }
     .err{ color:var(--red); }
 
@@ -328,11 +336,11 @@
   <div class="container">
 
     <div class="card">
-      <h1>Paste A + Review Many B + LEDD + BMI</h1>
+      <h1>Paste A + Review Many B + LEDD + BMI (Fixed)</h1>
       <div class="sub">
         <div><b>A：</b>直接粘贴 1–2 行（固定表头，不上传）</div>
         <div><b>B：</b>可一次上传很多个；先进入审核表，再决定 Include / Phase / Canonical Subject</div>
-        <div><b>新增：</b>内嵌本地 LEDD 计算器、药单原文自动解析、强制 F/M、BMI 自动计算、FCI/Par_Q 输出问题缩写、详细 debug</div>
+        <div><b>包含：</b>宽松 JSON parser、药单原文自动解析、手动 LEDD、BMI、FCI/Par_Q、详细 debug、Excel 导出</div>
       </div>
     </div>
 
@@ -384,7 +392,7 @@
     </div>
 
     <div class="card">
-      <h2>Step 2.5 手动 LEDD 快速计算器（可选）</h2>
+      <h2>Step 2.5 手动 LEDD quick calculator（可选）</h2>
       <div class="hint">
         这是本地版 LEDD quick calculator。你可以逐行输入 PD 药物，系统实时计算 total LEDD。<br>
         组合制剂（如 Stalevo / Sinemet / Madopar）请只输入对应的 <b>levodopa dose</b>。
@@ -400,13 +408,6 @@
       <div style="margin-top:12px;" class="inline">
         <div id="leddTotalBox" class="ledd-total">Manual LEDD Total = 0</div>
       </div>
-
-      <div class="small">
-        这只是一个补充来源。最终导出时系统会同时保留：<br>
-        - B 文件原始 <code>totalLEDD</code><br>
-        - 手动 quick calc LEDD<br>
-        - 药单文本解析出的 parsed LEDD
-      </div>
     </div>
 
     <div class="card">
@@ -416,7 +417,7 @@
         你可以直接把原始 <code>medicationDetails</code> 粘贴进来。<br>
         系统会自动识别药名、强度、每天次数、每次片数，并按 Parkinson’s Measurement 常用 conversion factors 计算 LEDD。<br>
         组合制剂（如 Stalevo / Sinemet / Madopar）按 <b>levodopa dose only</b> 处理。<br>
-        如果有真正缺失的信息（例如 standalone entacapone 没有配套 levodopa），系统会明确标出 unresolved warning。
+        若有真正缺失的信息（例如 standalone entacapone 没有配套 levodopa），系统会明确标出 unresolved warning。
       </div>
 
       <label for="medText" style="margin-top:12px;">Medication raw text</label>
@@ -545,11 +546,12 @@
         <div id="schemaBox" class="schema-box"></div>
       </details>
     </div>
+
   </div>
 
   <script>
     // =========================================================
-    // 固定 A 表头
+    // Fixed schema
     // =========================================================
     const A_HEADERS = [
       "timestamp","id","name","age","diagnosisYear","educationYears","dominantHand",
@@ -569,9 +571,6 @@
     ];
     document.getElementById("schemaBox").textContent = A_HEADERS.join(" | ");
 
-    // =========================================================
-    // LEDD conversion factors
-    // =========================================================
     const LEDD_FACTORS = {
       "Levodopa": { factor: 1, note: "Input levodopa dose only" },
       "Sinemet": { factor: 1, note: "levodopa/carbidopa; input levodopa dose only" },
@@ -602,8 +601,25 @@
       "SelegilineSublingual": { factor: 80, note: "" }
     };
 
+    const COMORBIDITY_MAP = [
+      { key: "fci1_arthritis", code: "ARTH" },
+      { key: "fci2_osteoporosis", code: "OP" },
+      { key: "fci3_asthma", code: "ASTH" },
+      { key: "fci4_copd", code: "COPD" },
+      { key: "fci5_angina", code: "AP" },
+      { key: "fci6_heart_failure", code: "HF" },
+      { key: "fci7_heart_attack", code: "MI" },
+      { key: "fci8_neuro_disease", code: "NEURO" },
+      { key: "fci10_peripheral_vascular", code: "PVD" },
+      { key: "fci11_diabetes", code: "DM" },
+      { key: "fci12_gastro", code: "GI" },
+      { key: "fci16_hearing", code: "HL" },
+      { key: "fci17_disc_disease", code: "DISC" },
+      { key: "fci18_obesity", code: "OB" }
+    ];
+
     // =========================================================
-    // 全局缓存
+    // Global state
     // =========================================================
     window.__RAW_B_ENTRIES__ = [];
     window.__PARSE_ERRORS__ = [];
@@ -614,7 +630,7 @@
     window.__LAST_PARSED_MED__ = null;
 
     // =========================================================
-    // UI helpers
+    // Basic helpers
     // =========================================================
     function setStatus(msg, isError = false) {
       const el = document.getElementById("status");
@@ -638,9 +654,6 @@
         .replace(/"/g, "&quot;");
     }
 
-    // =========================================================
-    // utils
-    // =========================================================
     function isBlank(v) {
       return v === undefined || v === null || String(v).trim() === "";
     }
@@ -738,9 +751,6 @@
       if (t) parts.push(t);
     }
 
-    // =========================================================
-    // BMI
-    // =========================================================
     function computeBMI(heightM, weightKg) {
       const h = Number(heightM);
       const w = Number(weightKg);
@@ -758,7 +768,63 @@
     }
 
     // =========================================================
-    // alias
+    // Robust JSON parser (fixed)
+    // =========================================================
+    function tryParseJSON(text) {
+      if (text === undefined || text === null) return null;
+
+      let raw = String(text);
+      raw = raw.replace(/^\uFEFF/, "");
+      raw = raw.trim();
+      if (!raw) return null;
+
+      const firstBrace = raw.indexOf("{");
+      const lastBrace = raw.lastIndexOf("}");
+      const firstBracket = raw.indexOf("[");
+      const lastBracket = raw.lastIndexOf("]");
+
+      let candidate = raw;
+      const objPossible = firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace;
+      const arrPossible = firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket;
+
+      if (objPossible || arrPossible) {
+        if (objPossible && arrPossible) {
+          if (firstBrace < firstBracket) {
+            candidate = raw.slice(firstBrace, lastBrace + 1);
+          } else {
+            candidate = raw.slice(firstBracket, lastBracket + 1);
+          }
+        } else if (objPossible) {
+          candidate = raw.slice(firstBrace, lastBrace + 1);
+        } else if (arrPossible) {
+          candidate = raw.slice(firstBracket, lastBracket + 1);
+        }
+      }
+
+      try {
+        return JSON.parse(candidate);
+      } catch (e1) {
+        let repaired = candidate
+          .replace(/,\s*([}\]])/g, "$1")
+          .replace(/\t/g, " ")
+          .trim();
+        try {
+          return JSON.parse(repaired);
+        } catch (e2) {
+          let repaired2 = repaired
+            .replace(/([{,]\s*)'([^']+?)'\s*:/g, '$1"$2":')
+            .replace(/:\s*'([^']*?)'(\s*[,}\]])/g, ': "$1"$2');
+          try {
+            return JSON.parse(repaired2);
+          } catch (e3) {
+            return null;
+          }
+        }
+      }
+    }
+
+    // =========================================================
+    // Alias helpers
     // =========================================================
     function normalizeNameBasic(name) {
       return s(name)
@@ -915,34 +981,41 @@
     }
 
     // =========================================================
-    // Parse B
+    // Parse B (fixed)
     // =========================================================
-    function tryParseJSON(text) {
-      try { return JSON.parse(text); } catch { return null; }
-    }
-
     async function readBFile(file, uploadIndex) {
       const ext = file.name.split(".").pop().toLowerCase();
       let data = null;
       let parseMethod = "";
 
+      const text = await file.text();
+      const cleanText = String(text || "").replace(/^\uFEFF/, "").trim();
+
+      if (!cleanText) {
+        throw new Error(`文件 ${file.name} 是空的。`);
+      }
+
       if (ext === "json") {
-        const text = await file.text();
-        const json = tryParseJSON(text);
+        const json = tryParseJSON(cleanText);
         if (!json || typeof json !== "object") {
-          throw new Error(`文件 ${file.name} 不是有效 JSON。`);
+          throw new Error(
+            `文件 ${file.name} 不是有效 JSON。\n` +
+            `提示：这个 .json 文件可能是“近似 JSON”导出格式（如 BOM、尾逗号、单引号或额外包装文字）。`
+          );
         }
         data = json;
         parseMethod = "json";
-      } else if (ext === "txt") {
-        const text = await file.text();
-        const json = tryParseJSON(text);
+      }
+
+      else if (ext === "txt") {
+        const json = tryParseJSON(cleanText);
         if (json && typeof json === "object") {
           data = json;
           parseMethod = "txt-json";
         } else {
-          const lines = text.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+          const lines = cleanText.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
           const obj = {};
+
           for (const line of lines) {
             if (line.includes(":")) {
               const idx = line.indexOf(":");
@@ -958,15 +1031,18 @@
               }
             }
           }
+
           if (!Object.keys(obj).length) {
             throw new Error(`文件 ${file.name} 的 TXT 无法识别为 JSON 或 key-value。`);
           }
+
           data = obj;
           parseMethod = "txt-keyvalue";
         }
-      } else if (ext === "csv") {
-        const text = await file.text();
-        const wb = XLSX.read(text, { type: "string" });
+      }
+
+      else if (ext === "csv") {
+        const wb = XLSX.read(cleanText, { type: "string" });
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
@@ -1015,7 +1091,9 @@
             parseMethod = "csv-fallback-row";
           }
         }
-      } else {
+      }
+
+      else {
         throw new Error(`文件 ${file.name} 格式不支持。只支持 .txt / .json / .csv`);
       }
 
@@ -1050,7 +1128,7 @@
     }
 
     // =========================================================
-    // 审核表
+    // Review table
     // =========================================================
     function phasePill(phase) {
       if (phase === "pre") return '<span class="pill pill-pre">pre</span>';
@@ -1169,7 +1247,7 @@
     }
 
     // =========================================================
-    // 聚合
+    // Aggregation
     // =========================================================
     function sortEntriesForPriority(entries) {
       return [...entries].sort((a, b) => {
@@ -1282,25 +1360,8 @@
     }
 
     // =========================================================
-    // FCI / PARQ
+    // FCI / PARQ helpers
     // =========================================================
-    const COMORBIDITY_MAP = [
-      { key: "fci1_arthritis", code: "ARTH" },
-      { key: "fci2_osteoporosis", code: "OP" },
-      { key: "fci3_asthma", code: "ASTH" },
-      { key: "fci4_copd", code: "COPD" },
-      { key: "fci5_angina", code: "AP" },
-      { key: "fci6_heart_failure", code: "HF" },
-      { key: "fci7_heart_attack", code: "MI" },
-      { key: "fci8_neuro_disease", code: "NEURO" },
-      { key: "fci10_peripheral_vascular", code: "PVD" },
-      { key: "fci11_diabetes", code: "DM" },
-      { key: "fci12_gastro", code: "GI" },
-      { key: "fci16_hearing", code: "HL" },
-      { key: "fci17_disc_disease", code: "DISC" },
-      { key: "fci18_obesity", code: "OB" }
-    ];
-
     function getComorbidityCodes(preA, postA) {
       const codes = [];
       for (const item of COMORBIDITY_MAP) {
@@ -1328,7 +1389,7 @@
     }
 
     // =========================================================
-    // 手动 LEDD quick calc
+    // Manual LEDD quick calc
     // =========================================================
     function createLeddRow(initial = {}) {
       const row = document.createElement("div");
@@ -1396,7 +1457,6 @@
       document.getElementById("leddRows").innerHTML = "";
       addLeddRow({});
     });
-
     addLeddRow({});
 
     // =========================================================
@@ -1613,11 +1673,9 @@
       m = l.match(/(\d+(?:\.\d+)?)\s*time(?:s)?\s*(?:per\s*day|\/day)?/);
       if (m) return Number(m[1]);
 
-      // e.g. 2time/day, 3time/dayg
       m = l.match(/(\d+(?:\.\d+)?)\s*time(?:s)?\/day/);
       if (m) return Number(m[1]);
 
-      // stuck style: "2 mg2" / "100 mg2" / "50/200 mg0.5"
       m = l.match(/mg\s*(\d+(?:\.\d+)?)\s*$/);
       if (m) return Number(m[1]);
 
@@ -1651,11 +1709,9 @@
       m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)\s*(?:per dose|\/dose|each time|\/time)/);
       if (m) return Number(m[1]);
 
-      // 1pill/2time/day
       m = l.match(/(\d+(?:\.\d+)?)\s*(?:pill|tab|tablet)\s*\/\s*\d+(?:\.\d+)?\s*time\/day/);
       if (m) return Number(m[1]);
 
-      // if phrase like "0.5 each time"
       m = l.match(/(\d+(?:\.\d+)?)\s*(?:each time|\/time)/);
       if (m) return Number(m[1]);
 
@@ -1983,7 +2039,7 @@
     });
 
     // =========================================================
-    // 合并
+    // Merge to final C
     // =========================================================
     function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
       const manualSex = document.getElementById("manualSex").value;
@@ -2021,6 +2077,7 @@
       ].map(s).filter(Boolean);
       const trainingStatus = unique(trainingVals).join("; ");
 
+      // 三种 LEDD 来源
       const originalLEDD = combineSameOrPair(preAgg.totalLEDD, postAgg.totalLEDD);
       const manualLEDD = getManualLeddRows().length ? String(recalcManualLedd()) : "";
 
@@ -2081,421 +2138,4 @@
         "Par_Q": buildParQ(preA, postA, preAgg, postAgg),
         "Age": pick(preA, ["age"], "") || pick(postA, ["age"], ""),
         "Gender": manualSex,
-        "dominant hand": pick(preA, ["dominantHand"], "") || pick(postA, ["dominantHand"], ""),
-        "education_Year": pick(preA, ["educationYears"], "") || pick(postA, ["educationYears"], ""),
-        "walking_aid": pick(preA, ["wheelchair"], "") || pick(postA, ["wheelchair"], ""),
-        "height (m)": heightM,
-        "weight (kg)": weightKg,
-        "leg length (m)": legLengthM,
-        "standard_step-length(m)": standardStepLength,
-
-        "Pre_date": preAgg.testDate ? formatDateYYYYMMDD(preAgg.testDate) : (preA ? formatDateYYYYMMDD(preA.timestamp) : ""),
-        "training_status": trainingStatus,
-        "Post_date": postAgg.testDate ? formatDateYYYYMMDD(postAgg.testDate) : (postA ? formatDateYYYYMMDD(postA.timestamp) : ""),
-
-        "pre_steplength(m)": preAgg.avgStepLength || "",
-        "post_steplength(m)": postAgg.avgStepLength || "",
-        "pre_cadence(bpm)": preAgg.avgCadence || "",
-        "post_cadence(bpm)": postAgg.avgCadence || "",
-        "Pre_velocity(m/s)": preAgg.avgSpeed || "",
-        "post_velocity(m/s)": postAgg.avgSpeed || "",
-        "Pre_TUG (s)": preAgg.tug_avg || "",
-        "post_TUG(s)": postAgg.tug_avg || "",
-
-        "Pre_fogQ": pick(preA, ["fogqTotal"], ""),
-        "post_fogQ": pick(postA, ["fogqTotal"], ""),
-        "pre_UPDRS3": preAgg.updrs3Total || "",
-        "post_UPDRS3": postAgg.updrs3Total || "",
-        "Pre_PDQ": pick(preA, ["pdqTotal"], ""),
-        "Post_PDQ": pick(postA, ["pdqTotal"], ""),
-        "Pre_Moca": preAgg.moca || "",
-        "Post_Moca": postAgg.moca || "",
-        "Pre_HADS_D": pick(preA, ["hadsDepression"], ""),
-        "Post_HADS_D": pick(postA, ["hadsDepression"], ""),
-        "Pre_HADS_A": pick(preA, ["hadsAnxiety"], ""),
-        "Post_HADS_A": pick(postA, ["hadsAnxiety"], ""),
-
-        "LEDD": finalLEDD,
-        "Med_regime": finalMedRegime,
-        "contact": "",
-        "remarks": remarks
-      };
-    }
-
-    // =========================================================
-    // Debug formatting
-    // =========================================================
-    function formatAForDebug(aRows, aDebug, aAssign) {
-      const lines = [];
-      lines.push("A 解析日志：");
-      aDebug.forEach(x => lines.push("- " + x));
-      lines.push("");
-      lines.push("A pre/post 归位：");
-      lines.push(aAssign.message);
-      lines.push("");
-      lines.push("A 原始行摘要：");
-      aRows.forEach((row, idx) => {
-        lines.push(`Row ${idx + 1}: timestamp=${s(row.timestamp)} | id=${s(row.id)} | name=${s(row.name)} | pdqTotal=${s(row.pdqTotal)} | fogqTotal=${s(row.fogqTotal)} | hadsA=${s(row.hadsAnxiety)} | hadsD=${s(row.hadsDepression)}`);
-      });
-      return lines.join("\n");
-    }
-
-    function formatReviewedBForDebug(reviewed, aliasDebug, parseErrors) {
-      const lines = [];
-      lines.push("Alias rules:");
-      if (aliasDebug.length) aliasDebug.forEach(x => lines.push("- " + x));
-      else lines.push("- （无）");
-
-      lines.push("");
-      lines.push("审核后 B 文件：");
-      if (!reviewed.length) {
-        lines.push("- 无");
-      } else {
-        reviewed.forEach((x, idx) => {
-          lines.push(
-            `${idx + 1}. include=${x.include ? "Y" : "N"} | phase=${x.phase} | canonical=${x.canonicalSubject || "(空)"} | rawName=${s(x.meta.name) || "(空)"} | id=${s(x.meta.id) || "(空)"} | file=${x.meta.fileName}`
-          );
-        });
-      }
-
-      if (parseErrors.length) {
-        lines.push("");
-        lines.push("解析失败文件：");
-        parseErrors.forEach(x => lines.push("- " + x));
-      }
-
-      return lines.join("\n");
-    }
-
-    function formatConflictDebug(preAgg, postAgg, result) {
-      const lines = [];
-
-      function dump(title, agg) {
-        lines.push(`=== ${title} ===`);
-        lines.push("字段选择日志：");
-        if (agg.debug.selection.length) agg.debug.selection.forEach(x => lines.push("- " + x));
-        else lines.push("- 无");
-        lines.push("");
-        lines.push("冲突详情：");
-        if (!agg.debug.conflicts.length) {
-          lines.push("- 无冲突");
-        } else {
-          agg.debug.conflicts.forEach(conf => {
-            lines.push(`- 字段：${conf.field}`);
-            lines.push(`  自动选中：${conf.chosen} （来自 ${conf.chosenFrom}）`);
-            conf.values.forEach(v => {
-              lines.push(`  · 候选：${v.value} | 文件：${v.fileName} | testDate=${v.testDate || "(空)"} | localSaveTime=${v.localSaveTime || "(空)"} | uploadIndex=${v.uploadIndex}`);
-            });
-          });
-        }
-        lines.push("");
-      }
-
-      dump("PRE", preAgg);
-      dump("POST", postAgg);
-
-      lines.push("=== BMI / LEDD / 合并字段 ===");
-      lines.push(`Gender = ${result["Gender"] || "(空)"}`);
-      lines.push(`height (m) = ${result["height (m)"] || "(空)"}`);
-      lines.push(`weight (kg) = ${result["weight (kg)"] || "(空)"}`);
-      lines.push(`FCI = ${result["FCI"] || "(空)"}`);
-      lines.push(`Par_Q = ${result["Par_Q"] || "(空)"}`);
-      lines.push(`LEDD = ${result["LEDD"] || "(空)"}`);
-      lines.push(`Med_regime = ${result["Med_regime"] || "(空)"}`);
-      lines.push(`remarks = ${result["remarks"] || "(空)"}`);
-      lines.push(`manualLeddRows = ${getManualLeddRows().length}`);
-      lines.push(`manualLeddTotal = ${getManualLeddRows().length ? recalcManualLedd() : "(空)"}`);
-      lines.push(`manualLeddSummary = ${manualLeddSummary() || "(空)"}`);
-      lines.push(`useParsedMedication = ${window.__USE_PARSED_MED__ ? "Yes" : "No"}`);
-      lines.push(`parsedMedicationTotal = ${window.__LAST_PARSED_MED__ ? window.__LAST_PARSED_MED__.total : "(空)"}`);
-      lines.push(`parsedMedicationWarnings = ${window.__LAST_PARSED_MED__?.warnings?.length || 0}`);
-
-      return lines.join("\n");
-    }
-
-    // =========================================================
-    // 导出
-    // =========================================================
-    function downloadExcel(rowObj, filename = "C_merged.xlsx") {
-      const ws = XLSX.utils.json_to_sheet([rowObj]);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "C");
-      XLSX.writeFile(wb, filename);
-    }
-
-    function downloadJSON(obj, filename = "debug_report.json") {
-      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    // =========================================================
-    // 清空
-    // =========================================================
-    function clearAll() {
-      document.getElementById("manualSex").value = "";
-      document.getElementById("pasteA").value = "";
-      document.getElementById("fileB").value = "";
-      document.getElementById("aliasRules").value = "";
-      document.getElementById("leddRows").innerHTML = "";
-      addLeddRow({});
-
-      document.getElementById("medText").value = "";
-      window.__USE_PARSED_MED__ = false;
-      window.__LAST_PARSED_MED__ = null;
-      renderMedicationParseResult(null);
-
-      setStatus("");
-      setText("preview", "{}");
-      setText("debugSummary", "尚未运行。");
-      setText("debugA", "尚未运行。");
-      setText("debugB", "尚未运行。");
-      setText("debugConflict", "尚未运行。");
-
-      setKPI("kpiA", 0);
-      setKPI("kpiBTotal", 0);
-      setKPI("kpiIncluded", 0);
-      setKPI("kpiPre", 0);
-      setKPI("kpiPost", 0);
-      setKPI("kpiConflict", 0);
-      setKPI("kpiBMI", "-");
-      setKPI("kpiBMICat", "-");
-
-      document.getElementById("reviewTableBody").innerHTML =
-        '<tr><td colspan="10" class="muted">还没有读取 B 文件。请先点击「读取并生成审核表」。</td></tr>';
-
-      const box = document.getElementById("parseErrorBox");
-      box.style.display = "none";
-      box.innerHTML = "";
-
-      window.__RAW_B_ENTRIES__ = [];
-      window.__PARSE_ERRORS__ = [];
-      window.__LAST_A__ = null;
-      window.__LAST_RESULT__ = null;
-      window.__LAST_DEBUG__ = null;
-    }
-    document.getElementById("btnClear").addEventListener("click", clearAll);
-
-    // =========================================================
-    // Step 1: 读取并生成审核表
-    // =========================================================
-    async function analyzeAndBuildReview() {
-      try {
-        setStatus("正在读取 A 和 B，并生成审核表…");
-
-        const pasteText = document.getElementById("pasteA").value;
-        const files = Array.from(document.getElementById("fileB").files || []);
-        const aliasText = document.getElementById("aliasRules").value;
-
-        const { rows: aRows, debug: aDebug } = parseAPaste(pasteText);
-        const aAssign = assignAPrePost(aRows);
-        const { aliasMap, debug: aliasDebug } = parseAliasRules(aliasText);
-
-        const rawEntries = [];
-        const parseErrors = [];
-
-        for (let i = 0; i < files.length; i++) {
-          const f = files[i];
-          try {
-            const entry = await readBFile(f, i + 1);
-            const phaseInfo = detectTestTypeFromDataOrName(entry.data, entry.meta.fileName);
-            rawEntries.push({
-              ...entry,
-              autoPhase: phaseInfo.phase,
-              autoReason: phaseInfo.reason
-            });
-          } catch (err) {
-            parseErrors.push(`${f.name}: ${err.message}`);
-          }
-        }
-
-        window.__RAW_B_ENTRIES__ = rawEntries;
-        window.__PARSE_ERRORS__ = parseErrors;
-        window.__LAST_A__ = { aRows, aDebug, aAssign, aliasDebug };
-
-        renderReviewTable(rawEntries, parseErrors, aliasMap);
-
-        setKPI("kpiA", aRows.length);
-        setKPI("kpiBTotal", rawEntries.length);
-        setKPI("kpiIncluded", rawEntries.length);
-        setKPI("kpiPre", rawEntries.filter(x => x.autoPhase === "pre").length);
-        setKPI("kpiPost", rawEntries.filter(x => x.autoPhase === "post").length);
-        setKPI("kpiConflict", 0);
-        setKPI("kpiBMI", "-");
-        setKPI("kpiBMICat", "-");
-
-        setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
-        setText("debugB", formatReviewedBForDebug(
-          rawEntries.map(x => ({
-            ...x,
-            include: true,
-            phase: x.autoPhase,
-            canonicalSubject: canonicalizeName(x.meta.name, aliasMap)
-          })),
-          aliasDebug,
-          parseErrors
-        ));
-        setText("debugConflict", "还没有执行最终导出，所以暂时没有 conflict / BMI / LEDD 计算结果。");
-        setText("debugSummary",
-          [
-            "已生成审核表。",
-            `A 行数：${aRows.length}`,
-            `B 成功解析：${rawEntries.length}`,
-            `B 解析失败：${parseErrors.length}`,
-            "",
-            "下一步：请在审核表里检查 Include / Phase / Canonical Subject，确认后再点击「生成结果并下载 Excel」。"
-          ].join("\n")
-        );
-        setText("preview", "{}");
-
-        setStatus(
-          `审核表已生成。\n\n成功解析 B：${rawEntries.length} 个\n解析失败：${parseErrors.length} 个\n\n请先检查审核表，再点击导出。`,
-          false
-        );
-      } catch (err) {
-        console.error(err);
-        setStatus("处理失败：\n\n" + err.message, true);
-      }
-    }
-
-    // =========================================================
-    // Step 2: 按审核表生成并导出
-    // =========================================================
-    async function exportUsingReviewedTable(download = true) {
-      try {
-        if (!window.__LAST_A__) {
-          throw new Error("还没有生成审核表。\n\n请先点击「1) 读取并生成审核表」。");
-        }
-
-        const manualSex = document.getElementById("manualSex").value;
-        if (!manualSex) {
-          throw new Error("你还没有填写 Gender（F/M）。\n\n请先在页面顶部的 Step 0 选择 F 或 M。");
-        }
-
-        setStatus("正在根据审核表整合数据…");
-
-        const reviewed = getReviewedEntries();
-        const validation = validateReviewedEntries(reviewed);
-        if (!validation.ok) throw new Error(validation.message);
-
-        const included = validation.included;
-        const preEntries = included.filter(x => x.phase === "pre");
-        const postEntries = included.filter(x => x.phase === "post");
-        const unknownIncluded = included.filter(x => x.phase === "unknown");
-
-        const preAgg = aggregatePhase(preEntries, "pre");
-        const postAgg = aggregatePhase(postEntries, "post");
-
-        const { aRows, aDebug, aAssign, aliasDebug } = window.__LAST_A__;
-        const preA = aAssign.preA;
-        const postA = aAssign.postA;
-
-        const subjectId = unique(included.map(x => s(x.meta.id)).filter(Boolean))[0] || "";
-        const canonicalNames = unique(included.map(x => s(x.canonicalSubject)).filter(Boolean));
-        const subjectName =
-          canonicalNames[0] ||
-          unique(included.map(x => s(x.meta.name)).filter(Boolean))[0] ||
-          "";
-
-        const result = mergeToC(preA, postA, preAgg, postAgg, {
-          id: subjectId,
-          name: subjectName
-        });
-
-        const bmi = computeBMI(result["height (m)"], result["weight (kg)"]);
-        const bmiCat = bmiCategory(bmi);
-        const conflictCount = preAgg.debug.conflicts.length + postAgg.debug.conflicts.length;
-
-        setKPI("kpiIncluded", included.length);
-        setKPI("kpiPre", preEntries.length);
-        setKPI("kpiPost", postEntries.length);
-        setKPI("kpiConflict", conflictCount);
-        setKPI("kpiBMI", bmi || "-");
-        setKPI("kpiBMICat", bmiCat || "-");
-
-        setText("preview", JSON.stringify(result, null, 2));
-        setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
-        setText("debugB", formatReviewedBForDebug(reviewed, aliasDebug || [], window.__PARSE_ERRORS__));
-        setText("debugConflict", formatConflictDebug(preAgg, postAgg, result));
-
-        const summaryLines = [];
-        summaryLines.push("导出前检查完成。");
-        summaryLines.push(`Included：${included.length}`);
-        summaryLines.push(`Pre：${preEntries.length}`);
-        summaryLines.push(`Post：${postEntries.length}`);
-        summaryLines.push(`Unknown（Included 但未参与计算）：${unknownIncluded.length}`);
-        summaryLines.push(`Conflicts：${conflictCount}`);
-        summaryLines.push("");
-        summaryLines.push(`Gender：${manualSex}`);
-        summaryLines.push(`最终 Subject ID：${subjectId || "(空)"}`);
-        summaryLines.push(`最终 Subject Name：${subjectName || "(空)"}`);
-        summaryLines.push(`BMI：${bmi || "(空)"} | ${bmiCat || "(空)"}`);
-        summaryLines.push(`FCI：${result["FCI"] || "(空)"}`);
-        summaryLines.push(`Par_Q：${result["Par_Q"] || "(空)"}`);
-        summaryLines.push(`LEDD：${result["LEDD"] || "(空)"}`);
-
-        if (unknownIncluded.length) {
-          summaryLines.push("");
-          summaryLines.push("注意：有 Included 的 unknown 文件没有参与 pre/post 聚合。");
-          summaryLines.push("如果这些其实是 pre 或 post，请回到审核表修改 Phase。");
-        }
-
-        setText("debugSummary", summaryLines.join("\n"));
-
-        const debugPayload = {
-          timestamp: new Date().toISOString(),
-          reviewed,
-          includedCount: included.length,
-          preCount: preEntries.length,
-          postCount: postEntries.length,
-          unknownIncludedCount: unknownIncluded.length,
-          conflictCount,
-          parseErrors: window.__PARSE_ERRORS__,
-          manualSex,
-          manualLeddRows: getManualLeddRows(),
-          manualLeddTotal: getManualLeddRows().length ? recalcManualLedd() : "",
-          manualLeddSummary: manualLeddSummary(),
-          parsedMedication: window.__LAST_PARSED_MED__,
-          useParsedMedication: window.__USE_PARSED_MED__,
-          preAgg,
-          postAgg,
-          result
-        };
-
-        window.__LAST_RESULT__ = result;
-        window.__LAST_DEBUG__ = debugPayload;
-
-        if (download) {
-          downloadExcel(result, "C_merged.xlsx");
-          setStatus(summaryLines.join("\n") + "\n\n已下载：C_merged.xlsx", false);
-        } else {
-          setStatus(summaryLines.join("\n"), false);
-        }
-      } catch (err) {
-        console.error(err);
-        setStatus("处理失败：\n\n" + err.message, true);
-      }
-    }
-
-    // =========================================================
-    // events
-    // =========================================================
-    document.getElementById("btnAnalyze").addEventListener("click", analyzeAndBuildReview);
-    document.getElementById("btnExport").addEventListener("click", () => exportUsingReviewedTable(true));
-    document.getElementById("btnDebug").addEventListener("click", () => {
-      if (!window.__LAST_DEBUG__) {
-        setStatus("还没有可下载的 Debug 报告。\n\n请先读取审核表并至少导出一次。", true);
-        return;
-      }
-      downloadJSON(window.__LAST_DEBUG__, "debug_report.json");
-      setStatus("已下载：debug_report.json");
-    });
-  </script>
-</body>
-</html>
+        "
