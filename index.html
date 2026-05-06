@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Paste A + Review Many B + LEDD + BMI (Fixed)</title>
+  <title>PD Merge Clean Reset</title>
 
-  <!-- 正确的 SheetJS 引用：千万不要改坏 -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <!-- ✅ 这一行不要改坏 -->
+  https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.jsscript>
 
   <style>
     :root{
@@ -26,7 +26,7 @@
       --radius:16px;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing:border-box; }
 
     body{
       margin:0;
@@ -233,20 +233,6 @@
       z-index:1;
     }
 
-    .pill{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:700;
-    }
-    .pill-pre{ background:#dcfce7; color:#166534; }
-    .pill-post{ background:#dbeafe; color:#1d4ed8; }
-    .pill-unknown{ background:#fef3c7; color:#92400e; }
-
-    .muted{ color:var(--muted); }
-    .mono{ font-family:Consolas,"Courier New",monospace; }
-
     .kpis{
       display:grid;
       grid-template-columns:repeat(8,1fr);
@@ -273,17 +259,6 @@
     .kpi .value{
       font-size:24px;
       font-weight:800;
-    }
-
-    details{
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:12px 14px;
-      background:#fff;
-    }
-    summary{
-      cursor:pointer;
-      font-weight:700;
     }
 
     .row-note{
@@ -315,6 +290,7 @@
       gap:8px;
       margin-bottom:8px;
     }
+
     @media (max-width: 900px){
       .ledd-row{
         grid-template-columns:1fr;
@@ -336,19 +312,19 @@
   <div class="container">
 
     <div class="card">
-      <h1>Paste A + Review Many B + LEDD + BMI (Fixed)</h1>
+      <h1>PD Merge Clean Reset</h1>
       <div class="sub">
         <div><b>A：</b>直接粘贴 1–2 行（固定表头，不上传）</div>
-        <div><b>B：</b>可一次上传很多个；先进入审核表，再决定 Include / Phase / Canonical Subject</div>
-        <div><b>包含：</b>宽松 JSON parser、药单原文自动解析、手动 LEDD、BMI、FCI/Par_Q、详细 debug、Excel 导出</div>
+        <div><b>B：</b>上传多个文件，进入审核表后人工决定 Include / Phase / Canonical Subject</div>
+        <div><b>包含：</b>宽松 JSON parser、LEDD quick calculator、药单原文解析、BMI、FCI/Par_Q、Excel 导出</div>
       </div>
     </div>
 
     <div class="grid3">
       <div class="card">
-        <h2>Step 0. 必填：Gender（生成前必须选）</h2>
+        <h2>Step 0. Gender（必填）</h2>
         <div class="warn">
-          生成结果前必须手动选择 <b>F / M</b>。<br>
+          生成结果前必须选择 <b>F / M</b>。<br>
           没选就不给预览，也不给下载。
         </div>
         <label for="manualSex" style="margin-top:12px;">Gender</label>
@@ -357,20 +333,19 @@
           <option value="F">F</option>
           <option value="M">M</option>
         </select>
-        <div class="small">这里是最终 Gender 的唯一来源，不自动猜。</div>
       </div>
 
       <div class="card">
         <h2>Step 1. 粘贴 A</h2>
         <div class="hint">
           直接从 Excel 复制 <b>1–2 行数据</b> 粘贴到下面。<br>
-          <b>不用贴表头</b>；若误贴表头，程序会自动尝试跳过。<br><br>
+          不用贴表头；误贴表头会自动尝试跳过。<br><br>
           规则：<br>
-          - 1 行 → 默认当 <b>pre</b><br>
-          - 2 行 → 优先按 <code>timestamp</code> 排序：早 = pre，晚 = post；若无法识别，则按粘贴顺序
+          - 1 行 = pre<br>
+          - 2 行 = 优先按 timestamp 早晚排序；无法识别则按粘贴顺序
         </div>
         <label for="pasteA" style="margin-top:12px;">A 粘贴区</label>
-        <textarea id="pasteA" placeholder="把 A 的 1–2 行数据直接粘贴到这里（从 Excel 复制即可）"></textarea>
+        <textarea id="pasteA" placeholder="把 A 的 1–2 行数据直接粘贴到这里"></textarea>
       </div>
 
       <div class="card">
@@ -382,20 +357,14 @@
         <textarea id="aliasRules" style="min-height:120px;" placeholder="每行一条：Canonical=Variant1,Variant2
 
 例如：
-张学强=張學強, 张学强
-李美玲=李美玲, 李美鈴"></textarea>
-
-        <div class="small">
-          alias 只影响审核表初始值；最终以你在审核表里手动修改后的 Canonical Subject 为准。
-        </div>
+张学强=張學強, 张学强"></textarea>
       </div>
     </div>
 
     <div class="card">
       <h2>Step 2.5 手动 LEDD quick calculator（可选）</h2>
       <div class="hint">
-        这是本地版 LEDD quick calculator。你可以逐行输入 PD 药物，系统实时计算 total LEDD。<br>
-        组合制剂（如 Stalevo / Sinemet / Madopar）请只输入对应的 <b>levodopa dose</b>。
+        你可以逐行输入药物，直接算 LEDD。组合制剂请只输入 <b>levodopa dose</b>。
       </div>
 
       <div id="leddRows"></div>
@@ -414,10 +383,9 @@
       <h2>Step 2.6 药单原文自动解析 + LEDD</h2>
 
       <div class="hint">
-        你可以直接把原始 <code>medicationDetails</code> 粘贴进来。<br>
-        系统会自动识别药名、强度、每天次数、每次片数，并按 Parkinson’s Measurement 常用 conversion factors 计算 LEDD。<br>
-        组合制剂（如 Stalevo / Sinemet / Madopar）按 <b>levodopa dose only</b> 处理。<br>
-        若有真正缺失的信息（例如 standalone entacapone 没有配套 levodopa），系统会明确标出 unresolved warning。
+        把原始 <code>medicationDetails</code> 直接贴进来。<br>
+        系统会尽量自动识别药名、强度、频次、每次片数，并按 LEDD 规则计算。<br>
+        默认：<b>Sinemet / Sinemet CR 若没写 strength → 50/200</b>
       </div>
 
       <label for="medText" style="margin-top:12px;">Medication raw text</label>
@@ -431,10 +399,10 @@
 
       <div class="small">
         默认规则：<br>
-        - <b>Sinemet / Sinemet CR 缺省 strength 一律按 50/200</b><br>
-        - <b>4-5 times/day</b> 这类范围，默认取 <b>上限</b>，并写 warning<br>
-        - <b>PRN / upon need</b> 默认不计入 LEDD，除非有明确固定频次<br>
-        - <b>Entacapone / Tolcapone 单独出现</b> 不单独换算，而是标 unresolved
+        - Sinemet / Sinemet CR 缺省 strength = 50/200<br>
+        - 4-5 times/day → 默认取上限 5/day，并写 warning<br>
+        - PRN / upon need → 不计入 LEDD（除非写了固定频次）<br>
+        - Entacapone / Tolcapone 单独出现 → unresolved
       </div>
 
       <div style="margin-top:12px;" class="ledd-total" id="parsedLeddBox">Parsed Text LEDD = 0</div>
@@ -452,12 +420,9 @@
     </div>
 
     <div class="card">
-      <h2>Step 3. 先读取并生成审核表</h2>
+      <h2>Step 3. 生成审核表</h2>
       <div class="warn">
-        这一步不会直接导出结果，而是先把所有 B 文件读出来，给你做人工审核：<br>
-        - <b>Include</b>：这个文件要不要用<br>
-        - <b>Phase</b>：pre / post / unknown<br>
-        - <b>Canonical Subject</b>：哪些名字算同一个人（例如 張學強 / 张学强）
+        这一步不会直接导出，而是先把所有 B 文件读出来供你审核。
       </div>
       <div class="btns">
         <button id="btnAnalyze" class="secondary">1) 读取并生成审核表</button>
@@ -485,13 +450,13 @@
     <div class="card">
       <h2>Step 4. B 文件审核表</h2>
       <div class="hint">
-        你现在要做的事情：<br>
-        1. 不要的文件取消勾选 <b>Include</b><br>
-        2. auto phase 不对，就改 <b>Phase</b><br>
-        3. 不同写法其实是同一个人，就把 <b>Canonical Subject</b> 改成一样
+        你可以手动修改：<br>
+        - Include<br>
+        - Phase（pre / post / unknown）<br>
+        - Canonical Subject（例如把 張學強 / 张学强 合并成同一个）
       </div>
 
-      <div id="reviewContainer" class="table-wrap" style="margin-top:14px;">
+      <div class="table-wrap" style="margin-top:14px;">
         <table>
           <thead>
             <tr>
@@ -551,7 +516,7 @@
 
   <script>
     // =========================================================
-    // Fixed schema
+    // Schema / maps
     // =========================================================
     const A_HEADERS = [
       "timestamp","id","name","age","diagnosisYear","educationYears","dominantHand",
@@ -572,33 +537,33 @@
     document.getElementById("schemaBox").textContent = A_HEADERS.join(" | ");
 
     const LEDD_FACTORS = {
-      "Levodopa": { factor: 1, note: "Input levodopa dose only" },
-      "Sinemet": { factor: 1, note: "levodopa/carbidopa; input levodopa dose only" },
-      "Madopar": { factor: 1, note: "levodopa/benserazide; input levodopa dose only" },
-      "Duodopa": { factor: 1.11, note: "Input levodopa dose only" },
-      "LevodopaCR": { factor: 0.75, note: "Controlled release" },
-      "SinemetCR": { factor: 0.75, note: "CR levodopa/carbidopa; input levodopa dose only" },
-      "Levodopa_with_Entacapone": { factor: 1.33, note: "Input levodopa dose only" },
-      "Stalevo": { factor: 1.33, note: "Input levodopa dose only" },
-      "Levodopa_with_Tolcapone": { factor: 1.5, note: "Input levodopa dose only" },
-      "Rytary": { factor: 0.6, note: "Input levodopa dose only" },
-      "Amantadine": { factor: 1, note: "" },
-      "Apomorphine": { factor: 10, note: "" },
-      "Azilect": { factor: 100, note: "rasagiline brand" },
-      "Bromocriptine": { factor: 10, note: "" },
-      "Cabergoline": { factor: 80, note: "" },
-      "Lisuride": { factor: 100, note: "" },
-      "Mirapex": { factor: 100, note: "pramipexole brand" },
-      "Perglide": { factor: 100, note: "" },
-      "Pramipexole": { factor: 100, note: "" },
-      "Rasagiline": { factor: 100, note: "" },
-      "Requip": { factor: 20, note: "ropinirole brand" },
-      "RequipXL": { factor: 20, note: "ropinirole CR brand" },
-      "Ropinirole": { factor: 20, note: "" },
-      "RopiniroleCR": { factor: 20, note: "" },
-      "Rotigotine": { factor: 30, note: "" },
-      "SelegilineOral": { factor: 10, note: "" },
-      "SelegilineSublingual": { factor: 80, note: "" }
+      "Levodopa": 1,
+      "Sinemet": 1,
+      "Madopar": 1,
+      "Duodopa": 1.11,
+      "LevodopaCR": 0.75,
+      "SinemetCR": 0.75,
+      "Levodopa_with_Entacapone": 1.33,
+      "Stalevo": 1.33,
+      "Levodopa_with_Tolcapone": 1.5,
+      "Rytary": 0.6,
+      "Amantadine": 1,
+      "Apomorphine": 10,
+      "Azilect": 100,
+      "Bromocriptine": 10,
+      "Cabergoline": 80,
+      "Lisuride": 100,
+      "Mirapex": 100,
+      "Perglide": 100,
+      "Pramipexole": 100,
+      "Rasagiline": 100,
+      "Requip": 20,
+      "RequipXL": 20,
+      "Ropinirole": 20,
+      "RopiniroleCR": 20,
+      "Rotigotine": 30,
+      "SelegilineOral": 10,
+      "SelegilineSublingual": 80
     };
 
     const COMORBIDITY_MAP = [
@@ -618,6 +583,115 @@
       { key: "fci18_obesity", code: "OB" }
     ];
 
+    const MED_DRUGS = {
+      ropinirole: {
+        key: "ropinirole",
+        canonical: "Ropinirole",
+        factor: 20,
+        type: "simple",
+        aliases: ["ropinirole", "ropinrole", "ropinirole hcl", "ropinirole hydrochloride", "requip"]
+      },
+      pramipexole: {
+        key: "pramipexole",
+        canonical: "Pramipexole",
+        factor: 100,
+        type: "simple",
+        aliases: [
+          "pramipexole",
+          "pramipexole dihydrochlride",
+          "pramipexole dihydrochloride",
+          "pramipexole extended release",
+          "pramipexole er",
+          "mirapex",
+          "pramipexole dihydrochlride extended release"
+        ]
+      },
+      rasagiline: {
+        key: "rasagiline",
+        canonical: "Rasagiline",
+        factor: 100,
+        type: "simple",
+        aliases: ["rasagiline", "rasagline", "azilect"]
+      },
+      rotigotine: {
+        key: "rotigotine",
+        canonical: "Rotigotine",
+        factor: 30,
+        type: "simple",
+        aliases: ["rotigotine", "rotigotine transdermal patch", "neupro"]
+      },
+      amantadine: {
+        key: "amantadine",
+        canonical: "Amantadine",
+        factor: 1,
+        type: "simple",
+        aliases: ["amantadine", "amantadine sulfate"]
+      },
+      stalevo: {
+        key: "stalevo",
+        canonical: "Stalevo",
+        factor: 1.33,
+        type: "ldopa_first",
+        aliases: ["stalevo"]
+      },
+      madopar: {
+        key: "madopar",
+        canonical: "Madopar",
+        factor: 1,
+        type: "ldopa_first",
+        aliases: ["madopar", "madopar dispersible", "medopar", "medopar dispersible"]
+      },
+      sinemet_cr: {
+        key: "sinemet_cr",
+        canonical: "Sinemet CR",
+        factor: 0.75,
+        type: "ldopa_second",
+        aliases: ["sinemet cr", "sinemetcr", "sinemet controlled release"]
+      },
+      sinemet: {
+        key: "sinemet",
+        canonical: "Sinemet",
+        factor: 1,
+        type: "ldopa_second",
+        aliases: ["sinemet"]
+      },
+      carbidopa_levodopa: {
+        key: "carbidopa_levodopa",
+        canonical: "Carbidopa/Levodopa",
+        factor: 1,
+        type: "ldopa_second",
+        aliases: [
+          "carbidopa/levodopa",
+          "carbidopa levodopa",
+          "carbidopa and levodopa",
+          "carbide and levadopa",
+          "carbide and levodopa",
+          "carbidopa"
+        ]
+      },
+      entacapone: {
+        key: "entacapone",
+        canonical: "Entacapone",
+        factor: null,
+        type: "unresolved_entacapone",
+        aliases: ["entacapone"]
+      },
+      tolcapone: {
+        key: "tolcapone",
+        canonical: "Tolcapone",
+        factor: null,
+        type: "unresolved_tolcapone",
+        aliases: ["tolcapone"]
+      },
+      gabapentin: {
+        key: "gabapentin",
+        canonical: "Gabapentin",
+        factor: null,
+        type: "ignored",
+        aliases: ["gabapentin"]
+      }
+    };
+
     // =========================================================
     // Global state
     // =========================================================
@@ -630,7 +704,7 @@
     window.__LAST_PARSED_MED__ = null;
 
     // =========================================================
-    // Basic helpers
+    // UI helpers
     // =========================================================
     function setStatus(msg, isError = false) {
       const el = document.getElementById("status");
@@ -654,6 +728,9 @@
         .replace(/"/g, "&quot;");
     }
 
+    // =========================================================
+    // General helpers
+    // =========================================================
     function isBlank(v) {
       return v === undefined || v === null || String(v).trim() === "";
     }
@@ -768,7 +845,7 @@
     }
 
     // =========================================================
-    // Robust JSON parser (fixed)
+    // Robust JSON parser
     // =========================================================
     function tryParseJSON(text) {
       if (text === undefined || text === null) return null;
@@ -880,9 +957,7 @@
     function parseAPaste(text) {
       const raw = String(text || "").trim();
       if (!raw) {
-        throw new Error(
-          "A 为空。\n\n请把 A 的 1–2 行数据直接粘贴到文本框中。\n建议从 Excel 直接复制整行数据（tab 分隔）。"
-        );
+        throw new Error("A 为空。请把 A 的 1–2 行数据直接粘贴到文本框中。");
       }
 
       const lines = raw
@@ -909,7 +984,7 @@
         }
 
         if (headerLike) {
-          debug.push(`第 ${lineIdx + 1} 行看起来像表头，已自动跳过。`);
+          debug.push(`第 ${lineIdx + 1} 行像表头，已跳过。`);
           continue;
         }
 
@@ -917,9 +992,7 @@
         while (normalized.length < A_HEADERS.length) normalized.push("");
 
         const obj = {};
-        A_HEADERS.forEach((h, idx) => {
-          obj[h] = normalized[idx] ?? "";
-        });
+        A_HEADERS.forEach((h, idx) => obj[h] = normalized[idx] ?? "");
 
         const nonEmptyCount = Object.values(obj).filter(v => !isBlank(v)).length;
         if (nonEmptyCount > 0) {
@@ -929,15 +1002,11 @@
       }
 
       if (!rows.length) {
-        throw new Error(
-          "A 无法解析。\n\n可能原因：\n1. 你贴进去的是空内容\n2. 不是 tab 分隔（不是从 Excel 直接复制）\n3. 只贴了表头，没有贴数据行"
-        );
+        throw new Error("A 无法解析。请确认是从 Excel 直接复制的 tab 分隔数据。");
       }
 
       if (rows.length > 2) {
-        throw new Error(
-          `A 检测到 ${rows.length} 行有效数据。\n\n这版只允许同一个人的 1–2 行。\n请只保留同一个人的 pre/post 两行（或单行）。`
-        );
+        throw new Error(`A 检测到 ${rows.length} 行有效数据。当前只允许同一个人的 1–2 行。`);
       }
 
       return { rows, debug };
@@ -945,11 +1014,7 @@
 
     function assignAPrePost(aRows) {
       if (aRows.length === 1) {
-        return {
-          preA: aRows[0],
-          postA: null,
-          message: "A 只有 1 行：默认视为 pre。"
-        };
+        return { preA: aRows[0], postA: null, message: "A 只有 1 行：默认视为 pre。" };
       }
 
       const r1 = aRows[0];
@@ -959,29 +1024,21 @@
 
       if (t1 && t2) {
         if (t1.getTime() <= t2.getTime()) {
-          return {
-            preA: r1,
-            postA: r2,
-            message: `A 有 2 行：按 timestamp 排序。\npre = ${s(r1.timestamp)}\npost = ${s(r2.timestamp)}`
-          };
+          return { preA: r1, postA: r2, message: `A 两行按 timestamp 排序：pre=${s(r1.timestamp)} | post=${s(r2.timestamp)}` };
         } else {
-          return {
-            preA: r2,
-            postA: r1,
-            message: `A 有 2 行：按 timestamp 排序（已交换顺序）。\npre = ${s(r2.timestamp)}\npost = ${s(r1.timestamp)}`
-          };
+          return { preA: r2, postA: r1, message: `A 两行按 timestamp 排序（已交换）：pre=${s(r2.timestamp)} | post=${s(r1.timestamp)}` };
         }
       }
 
       return {
         preA: r1,
         postA: r2,
-        message: "A 有 2 行，但 timestamp 不能可靠识别：已按粘贴顺序处理（第 1 行=pre，第 2 行=post）。"
+        message: "A 两行 timestamp 无法可靠识别：按粘贴顺序（第1行=pre，第2行=post）"
       };
     }
 
     // =========================================================
-    // Parse B (fixed)
+    // Parse B
     // =========================================================
     async function readBFile(file, uploadIndex) {
       const ext = file.name.split(".").pop().toLowerCase();
@@ -998,16 +1055,11 @@
       if (ext === "json") {
         const json = tryParseJSON(cleanText);
         if (!json || typeof json !== "object") {
-          throw new Error(
-            `文件 ${file.name} 不是有效 JSON。\n` +
-            `提示：这个 .json 文件可能是“近似 JSON”导出格式（如 BOM、尾逗号、单引号或额外包装文字）。`
-          );
+          throw new Error(`文件 ${file.name} 不是有效 JSON（可能是 BOM、尾逗号、单引号或外部包文字格式）。`);
         }
         data = json;
         parseMethod = "json";
-      }
-
-      else if (ext === "txt") {
+      } else if (ext === "txt") {
         const json = tryParseJSON(cleanText);
         if (json && typeof json === "object") {
           data = json;
@@ -1015,7 +1067,6 @@
         } else {
           const lines = cleanText.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
           const obj = {};
-
           for (const line of lines) {
             if (line.includes(":")) {
               const idx = line.indexOf(":");
@@ -1031,24 +1082,18 @@
               }
             }
           }
-
           if (!Object.keys(obj).length) {
             throw new Error(`文件 ${file.name} 的 TXT 无法识别为 JSON 或 key-value。`);
           }
-
           data = obj;
           parseMethod = "txt-keyvalue";
         }
-      }
-
-      else if (ext === "csv") {
+      } else if (ext === "csv") {
         const wb = XLSX.read(cleanText, { type: "string" });
         const sheet = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-        if (!rows.length) {
-          throw new Error(`文件 ${file.name} 的 CSV 没有有效数据。`);
-        }
+        if (!rows.length) throw new Error(`文件 ${file.name} 的 CSV 没有有效数据。`);
 
         if (rows.length === 1) {
           data = rows[0];
@@ -1062,23 +1107,23 @@
             const keyCol = cols.find(c => c.toLowerCase() === "key");
             const valCol = cols.find(c => c.toLowerCase() === "value");
             const obj = {};
-            for (const row of rows) {
+            rows.forEach(row => {
               const key = s(row[keyCol]);
               if (key) obj[key] = row[valCol];
-            }
+            });
             data = obj;
             parseMethod = "csv-keyvalue-header";
           } else if (cols.length === 2) {
             const c1 = cols[0], c2 = cols[1];
             const obj = {};
             let count = 0;
-            for (const row of rows) {
+            rows.forEach(row => {
               const key = s(row[c1]);
               if (key) {
                 obj[key] = row[c2];
                 count++;
               }
-            }
+            });
             if (count >= 3) {
               data = obj;
               parseMethod = "csv-keyvalue-2col";
@@ -1091,9 +1136,7 @@
             parseMethod = "csv-fallback-row";
           }
         }
-      }
-
-      else {
+      } else {
         throw new Error(`文件 ${file.name} 格式不支持。只支持 .txt / .json / .csv`);
       }
 
@@ -1118,10 +1161,10 @@
       if (["post","after","followup","follow-up"].includes(raw)) return { phase: "post", reason: "由内容中的 testType 判断" };
 
       const fname = lower(fileName);
-      if (/\bpre\b/.test(fname) || fname.includes("_pre") || fname.includes("-pre") || fname.includes(" pre ")) {
+      if (/\bpre\b/.test(fname) || fname.includes("_pre") || fname.includes("-pre")) {
         return { phase: "pre", reason: "由文件名包含 pre 判断" };
       }
-      if (/\bpost\b/.test(fname) || fname.includes("_post") || fname.includes("-post") || fname.includes(" post ")) {
+      if (/\bpost\b/.test(fname) || fname.includes("_post") || fname.includes("-post")) {
         return { phase: "post", reason: "由文件名包含 post 判断" };
       }
       return { phase: "unknown", reason: "内容和文件名都无法判断 pre/post" };
@@ -1160,7 +1203,6 @@
               </td>
               <td>
                 <input type="text" class="review-canonical" value="${escapeHtml(canonical)}" placeholder="例如：张学强" />
-                <div class="row-note" style="margin-top:6px;">不同写法想合并，就改成同一个 canonical</div>
               </td>
               <td class="mono">${escapeHtml(rawName || "(空)")}</td>
               <td class="mono">${escapeHtml(s(entry.meta.id) || "(空)")}</td>
@@ -1211,7 +1253,7 @@
       if (!included.length) {
         return {
           ok: false,
-          message: "你当前没有勾选任何 B 文件。\n\n请至少保留 1 个 Include = 勾选 的 B 文件。"
+          message: "你当前没有勾选任何 B 文件。请至少保留 1 个 Include = 勾选 的 B 文件。"
         };
       }
 
@@ -1220,9 +1262,8 @@
         return {
           ok: false,
           message:
-            "审核后的 Included 文件中仍然存在多个不同的 ID，不能当作同一个人处理：\n- " +
-            idSet.join("\n- ") +
-            "\n\n请取消不需要的文件，或确认是否真的混入了其他人的数据。"
+            "审核后的 Included 文件中仍然存在多个不同的 ID：\n- " +
+            idSet.join("\n- ")
         };
       }
 
@@ -1233,8 +1274,7 @@
             ok: false,
             message:
               "审核后的 Included 文件没有可用 ID，而且 Canonical Subject 仍有多个不同值：\n- " +
-              canonSet.join("\n- ") +
-              "\n\n如果这些其实是同一个人，请把它们改成同一个 Canonical Subject；如果不是同一个人，请取消不需要的文件。"
+              canonSet.join("\n- ")
           };
         }
       }
@@ -1263,7 +1303,7 @@
 
     function resolveFieldFromEntries(entries, extractor, debug, label) {
       const candidates = [];
-      for (const entry of entries) {
+      entries.forEach(entry => {
         const value = extractor(entry.data, entry.meta);
         if (!isBlank(value)) {
           candidates.push({
@@ -1275,7 +1315,7 @@
             uploadIndex: entry.meta.uploadIndex
           });
         }
-      }
+      });
 
       if (!candidates.length) {
         debug.selection.push(`${label}: 无非空值 → 留空`);
@@ -1295,8 +1335,8 @@
         if (ta !== tb) return ta - tb;
         return a.uploadIndex - b.uploadIndex;
       });
-      const chosen = ranked[ranked.length - 1];
 
+      const chosen = ranked[ranked.length - 1];
       debug.conflicts.push({
         field: label,
         chosen: chosen.value,
@@ -1325,19 +1365,19 @@
       ];
       let sum = 0;
       let any = false;
-      for (const k of keys) {
+      keys.forEach(k => {
         const n = toNum(data[k]);
         if (n !== "") {
           sum += n;
           any = true;
         }
-      }
+      });
       return any ? sum : "";
     }
 
     function aggregatePhase(entries, phaseLabel) {
       const sorted = sortEntriesForPriority(entries);
-      const debug = { phase: phaseLabel, selection: [], conflicts: [], files: sorted.map(x => x.meta.fileName) };
+      const debug = { phase: phaseLabel, selection: [], conflicts: [] };
 
       return {
         testDate: resolveFieldFromEntries(sorted, d => d.testDate, debug, `${phaseLabel}.testDate`),
@@ -1360,15 +1400,15 @@
     }
 
     // =========================================================
-    // FCI / PARQ helpers
+    // FCI / PARQ
     // =========================================================
     function getComorbidityCodes(preA, postA) {
       const codes = [];
-      for (const item of COMORBIDITY_MAP) {
+      COMORBIDITY_MAP.forEach(item => {
         if (yes(preA?.[item.key]) || yes(postA?.[item.key])) {
           codes.push(item.code);
         }
-      }
+      });
       return unique(codes);
     }
 
@@ -1401,10 +1441,10 @@
         <button type="button" class="danger ledd-remove">删除</button>
       `;
 
-      const drugSelect = row.querySelector(".ledd-drug");
-      drugSelect.innerHTML = `
+      const select = row.querySelector(".ledd-drug");
+      select.innerHTML = `
         <option value="">-- 请选择药物 --</option>
-        ${Object.keys(LEDD_FACTORS).map(key => `<option value="${key}" ${initial.drug === key ? "selected" : ""}>${key} (×${LEDD_FACTORS[key].factor})</option>`).join("")}
+        ${Object.keys(LEDD_FACTORS).map(key => `<option value="${key}" ${initial.drug === key ? "selected" : ""}>${key} (×${LEDD_FACTORS[key]})</option>`).join("")}
       `;
 
       row.addEventListener("input", recalcManualLedd);
@@ -1433,10 +1473,9 @@
     function recalcManualLedd() {
       const rows = getManualLeddRows();
       let total = 0;
-      for (const row of rows) {
-        const factor = LEDD_FACTORS[row.drug]?.factor ?? 0;
-        total += Number(row.dose) * Number(row.freq) * Number(factor);
-      }
+      rows.forEach(row => {
+        total += Number(row.dose) * Number(row.freq) * Number(LEDD_FACTORS[row.drug] || 0);
+      });
       const totalRounded = roundTo(total, 1) || 0;
       document.getElementById("leddTotalBox").textContent = `Manual LEDD Total = ${totalRounded}`;
       return totalRounded;
@@ -1446,7 +1485,7 @@
       const rows = getManualLeddRows();
       if (!rows.length) return "";
       return rows.map(r => {
-        const factor = LEDD_FACTORS[r.drug]?.factor ?? 0;
+        const factor = LEDD_FACTORS[r.drug] || 0;
         const led = roundTo(Number(r.dose) * Number(r.freq) * Number(factor), 1) || 0;
         return `${r.drug}: ${r.dose} mg × ${r.freq}/day × ${factor} = ${led}`;
       }).join("; ");
@@ -1457,120 +1496,12 @@
       document.getElementById("leddRows").innerHTML = "";
       addLeddRow({});
     });
+
     addLeddRow({});
 
     // =========================================================
     // Medication text parser
     // =========================================================
-    const MED_DRUGS = {
-      ropinirole: {
-        key: "ropinirole",
-        canonical: "Ropinirole",
-        factor: 20,
-        type: "dopamine_agonist",
-        aliases: ["ropinirole", "ropinrole", "ropinirole hcl", "ropinirole hydrochloride", "requip"]
-      },
-      pramipexole: {
-        key: "pramipexole",
-        canonical: "Pramipexole",
-        factor: 100,
-        type: "dopamine_agonist",
-        aliases: [
-          "pramipexole",
-          "pramipexole dihydrochlride",
-          "pramipexole dihydrochloride",
-          "pramipexole extended release",
-          "pramipexole er",
-          "mirapex",
-          "pramipexole dihydrochlride extended release"
-        ]
-      },
-      rasagiline: {
-        key: "rasagiline",
-        canonical: "Rasagiline",
-        factor: 100,
-        type: "mao_b",
-        aliases: ["rasagiline", "rasagline", "azilect"]
-      },
-      rotigotine: {
-        key: "rotigotine",
-        canonical: "Rotigotine",
-        factor: 30,
-        type: "dopamine_agonist",
-        aliases: ["rotigotine", "rotigotine transdermal patch", "neupro"]
-      },
-      amantadine: {
-        key: "amantadine",
-        canonical: "Amantadine",
-        factor: 1,
-        type: "other",
-        aliases: ["amantadine", "amantadine sulfate"]
-      },
-      stalevo: {
-        key: "stalevo",
-        canonical: "Stalevo",
-        factor: 1.33,
-        type: "levodopa_combo_first_is_ldopa",
-        aliases: ["stalevo"]
-      },
-      madopar: {
-        key: "madopar",
-        canonical: "Madopar",
-        factor: 1,
-        type: "levodopa_combo_first_is_ldopa",
-        aliases: ["madopar", "madopar dispersible", "medopar", "medopar dispersible"]
-      },
-      sinemet_cr: {
-        key: "sinemet_cr",
-        canonical: "Sinemet CR",
-        factor: 0.75,
-        type: "levodopa_combo_second_is_ldopa",
-        aliases: ["sinemet cr", "sinemetcr", "sinemet controlled release"]
-      },
-      sinemet: {
-        key: "sinemet",
-        canonical: "Sinemet",
-        factor: 1,
-        type: "levodopa_combo_second_is_ldopa",
-        aliases: ["sinemet"]
-      },
-      carbidopa_levodopa: {
-        key: "carbidopa_levodopa",
-        canonical: "Carbidopa/Levodopa",
-        factor: 1,
-        type: "levodopa_combo_second_is_ldopa",
-        aliases: [
-          "carbidopa/levodopa",
-          "carbidopa levodopa",
-          "carbidopa and levodopa",
-          "carbide and levadopa",
-          "carbide and levodopa",
-          "carbide levadopa"
-        ]
-      },
-      entacapone: {
-        key: "entacapone",
-        canonical: "Entacapone",
-        factor: null,
-        type: "entacapone_standalone",
-        aliases: ["entacapone"]
-      },
-      tolcapone: {
-        key: "tolcapone",
-        canonical: "Tolcapone",
-        factor: null,
-        type: "tolcapone_standalone",
-        aliases: ["tolcapone"]
-      },
-      gabapentin: {
-        key: "gabapentin",
-        canonical: "Gabapentin",
-        factor: null,
-        type: "ignored_no_ledd",
-        aliases: ["gabapentin"]
-      }
-    };
-
     function normalizeMedicationText(text) {
       return String(text || "")
         .replace(/&nbsp;/gi, " ")
@@ -1588,27 +1519,22 @@
     function splitMedicationLines(text) {
       const normalized = normalizeMedicationText(text);
 
-      let lines = normalized
-        .split(/\n+/)
-        .map(x => x.trim())
-        .filter(Boolean);
+      let lines = normalized.split(/\n+/).map(x => x.trim()).filter(Boolean);
 
       const refined = [];
       lines.forEach(line => {
-        const parts = line.split(/(?=\b\d+\.\s)/g).map(x => x.trim()).filter(Boolean);
-        parts.forEach(p => {
+        const numbered = line.split(/(?=\b\d+\.\s)/g).map(x => x.trim()).filter(Boolean);
+        numbered.forEach(p => {
           p.split(/;/g).map(x => x.trim()).filter(Boolean).forEach(x => refined.push(x));
         });
       });
 
-      return refined
-        .map(x => x.replace(/^\d+\.\s*/, "").trim())
-        .filter(Boolean);
+      return refined.map(x => x.replace(/^\d+\.\s*/, "").trim()).filter(Boolean);
     }
 
     function replaceNumberWords(line) {
-      let sLine = " " + lower(line) + " ";
-      const replacements = [
+      let txt = " " + lower(line) + " ";
+      const rules = [
         ["one and a half", "1.5"],
         ["half a", "0.5"],
         ["half each time", "0.5 each time"],
@@ -1626,16 +1552,16 @@
         ["one", "1"],
         ["two", "2"]
       ];
-      replacements.forEach(([a, b]) => {
-        sLine = sLine.replaceAll(a, b);
+      rules.forEach(([a,b]) => {
+        txt = txt.replaceAll(a, b);
       });
-      return sLine.trim();
+      return txt.trim();
     }
 
     function detectDrug(line) {
       const l = lower(line);
-      for (const key of Object.keys(MED_DRUGS)) {
-        const info = MED_DRUGS[key];
+      for (const k of Object.keys(MED_DRUGS)) {
+        const info = MED_DRUGS[k];
         for (const alias of info.aliases) {
           if (l.includes(alias)) return info;
         }
@@ -1676,6 +1602,7 @@
       m = l.match(/(\d+(?:\.\d+)?)\s*time(?:s)?\/day/);
       if (m) return Number(m[1]);
 
+      // stuck style mg0.5 / mg2
       m = l.match(/mg\s*(\d+(?:\.\d+)?)\s*$/);
       if (m) return Number(m[1]);
 
@@ -1696,7 +1623,6 @@
           note: `分段频次：${pill1} pill × ${time1} + ${pill2} pill × ${time2}`
         };
       }
-
       return null;
     }
 
@@ -1758,7 +1684,7 @@
         };
       }
 
-      if (drugInfo.type === "ignored_no_ledd") {
+      if (drugInfo.type === "ignored") {
         return {
           status: "ignored",
           reason: `${drugInfo.canonical} 不在当前 LEDD conversion list 中`,
@@ -1767,20 +1693,20 @@
         };
       }
 
-      if (drugInfo.type === "entacapone_standalone") {
+      if (drugInfo.type === "unresolved_entacapone") {
         return {
           status: "unresolved",
           reason: "Entacapone standalone 不能直接单独换算；需与 levodopa 联合",
-          steps: ["Entacapone = 0.33 × L-Dopa；该网站要求 Enter Levodopa with Entacapone"],
+          steps: ["Entacapone = 0.33 × L-Dopa；需与 levodopa 联合输入"],
           ledd: ""
         };
       }
 
-      if (drugInfo.type === "tolcapone_standalone") {
+      if (drugInfo.type === "unresolved_tolcapone") {
         return {
           status: "unresolved",
           reason: "Tolcapone standalone 不能直接单独换算；需与 levodopa 联合",
-          steps: ["Tolcapone = 0.5 × L-Dopa；该网站要求 Enter Levodopa with Tolcapone"],
+          steps: ["Tolcapone = 0.5 × L-Dopa；需与 levodopa 联合输入"],
           ledd: ""
         };
       }
@@ -1793,7 +1719,7 @@
         dailyUnits = specialDaily.pillsPerDay;
         steps.push(specialDaily.note);
         if (dailyTimes == null) {
-          warnings.push("存在分段 pills/day，但未单独抽到 times/day；已直接按总 pills/day 计算");
+          warnings.push("存在分段 pills/day，已直接按总 pills/day 计算");
         }
       } else {
         if (dailyTimes == null) {
@@ -1804,7 +1730,7 @@
         steps.push(`daily units = pills per dose ${pillsPerDose} × ${dailyTimes}/day = ${roundTo(dailyUnits, 3)}`);
       }
 
-      if (["dopamine_agonist", "mao_b", "other"].includes(drugInfo.type)) {
+      if (drugInfo.type === "simple") {
         const dose = singleMg != null ? singleMg : (Array.isArray(strength) ? strength[strength.length - 1] : null);
         if (dose == null) {
           return {
@@ -1821,26 +1747,16 @@
         const ledd = roundTo(dailyMg * drugInfo.factor, 3);
         steps.push(`daily dose = ${dose} mg × ${roundTo(dailyUnits, 3)} = ${dailyMg} mg/day`);
         steps.push(`LEDD = ${dailyMg} × factor ${drugInfo.factor} = ${ledd}`);
-        return {
-          status: "ok",
-          reason: "",
-          dose,
-          dailyUnits,
-          dailyMg,
-          ledd,
-          steps
-        };
+        return { status: "ok", ledd, steps, reason: "" };
       }
 
-      if (drugInfo.type === "levodopa_combo_first_is_ldopa") {
+      if (drugInfo.type === "ldopa_first") {
         let ldopaPerUnit = null;
-
         if (Array.isArray(strength)) {
           ldopaPerUnit = Number(strength[0]);
         } else if (singleMg != null && drugInfo.key === "madopar") {
           ldopaPerUnit = mapMadoparSingleMgToLevodopa(singleMg, warnings);
         }
-
         if (ldopaPerUnit == null) {
           return {
             status: "unresolved",
@@ -1849,29 +1765,19 @@
             ledd: ""
           };
         }
-
         const dailyLdopa = roundTo(ldopaPerUnit * dailyUnits, 3);
         const ledd = roundTo(dailyLdopa * drugInfo.factor, 3);
         steps.push(`levodopa per unit = ${ldopaPerUnit} mg`);
         steps.push(`daily levodopa = ${ldopaPerUnit} × ${roundTo(dailyUnits, 3)} = ${dailyLdopa} mg/day`);
         steps.push(`LEDD = ${dailyLdopa} × factor ${drugInfo.factor} = ${ledd}`);
-        return {
-          status: "ok",
-          reason: "",
-          ldopaPerUnit,
-          dailyUnits,
-          dailyLdopa,
-          ledd,
-          steps
-        };
+        return { status: "ok", ledd, steps, reason: "" };
       }
 
-      if (drugInfo.type === "levodopa_combo_second_is_ldopa") {
+      if (drugInfo.type === "ldopa_second") {
         let ldopaPerUnit = null;
         if (Array.isArray(strength)) {
           ldopaPerUnit = Number(strength[1]);
         }
-
         if (ldopaPerUnit == null) {
           return {
             status: "unresolved",
@@ -1880,21 +1786,12 @@
             ledd: ""
           };
         }
-
         const dailyLdopa = roundTo(ldopaPerUnit * dailyUnits, 3);
         const ledd = roundTo(dailyLdopa * drugInfo.factor, 3);
         steps.push(`levodopa per unit = ${ldopaPerUnit} mg`);
         steps.push(`daily levodopa = ${ldopaPerUnit} × ${roundTo(dailyUnits, 3)} = ${dailyLdopa} mg/day`);
         steps.push(`LEDD = ${dailyLdopa} × factor ${drugInfo.factor} = ${ledd}`);
-        return {
-          status: "ok",
-          reason: "",
-          ldopaPerUnit,
-          dailyUnits,
-          dailyLdopa,
-          ledd,
-          steps
-        };
+        return { status: "ok", ledd, steps, reason: "" };
       }
 
       return {
@@ -1923,8 +1820,7 @@
             status: "unresolved",
             steps: [],
             ledd: "",
-            reason: "未识别药物名称",
-            warnings: []
+            reason: "未识别药物名称"
           });
           warnings.push(`Line ${idx + 1}: 未识别药物名称`);
           return;
@@ -1960,7 +1856,7 @@
       };
     }
 
-    function renderMedicationParseResult(parsed) {
+    function renderMedicationResult(parsed) {
       if (!parsed) {
         document.getElementById("medParsePreview").textContent = "尚未解析。";
         document.getElementById("medParseWarnings").textContent = "尚未解析。";
@@ -1985,10 +1881,7 @@
         previewLines.push("");
       });
 
-      const warningText = parsed.warnings.length
-        ? parsed.warnings.join("\n")
-        : "无 warnings / unresolved。";
-
+      const warningText = parsed.warnings.length ? parsed.warnings.join("\n") : "无 warnings / unresolved。";
       document.getElementById("medParsePreview").textContent = previewLines.join("\n");
       document.getElementById("medParseWarnings").textContent = warningText;
       document.getElementById("parsedLeddBox").textContent = `Parsed Text LEDD = ${parsed.total}`;
@@ -2004,12 +1897,12 @@
       try {
         const parsed = getParsedMedicationResult();
         if (!parsed) {
-          renderMedicationParseResult(null);
+          renderMedicationResult(null);
           setStatus("药单文本为空。请先粘贴 medicationDetails。", true);
           return;
         }
         window.__LAST_PARSED_MED__ = parsed;
-        renderMedicationParseResult(parsed);
+        renderMedicationResult(parsed);
         setStatus(`药单解析完成。可计算 LEDD = ${parsed.total}；warnings = ${parsed.warnings.length}。`, false);
       } catch (e) {
         console.error(e);
@@ -2027,7 +1920,7 @@
         window.__LAST_PARSED_MED__ = parsed;
       }
       window.__USE_PARSED_MED__ = true;
-      renderMedicationParseResult(window.__LAST_PARSED_MED__);
+      renderMedicationResult(window.__LAST_PARSED_MED__);
       setStatus(`已标记：导出时会将 parsed medication text（LEDD=${window.__LAST_PARSED_MED__.total}）作为参考来源之一。`, false);
     });
 
@@ -2035,16 +1928,16 @@
       document.getElementById("medText").value = "";
       window.__USE_PARSED_MED__ = false;
       window.__LAST_PARSED_MED__ = null;
-      renderMedicationParseResult(null);
+      renderMedicationResult(null);
     });
 
     // =========================================================
-    // Merge to final C
+    // Merge
     // =========================================================
     function mergeToC(preA, postA, preAgg, postAgg, subjectInfo) {
       const manualSex = document.getElementById("manualSex").value;
       if (!manualSex) {
-        throw new Error("你还没有填写 Gender（F/M）。\n\n请先在页面顶部的 Step 0 选择 F 或 M，然后再生成结果。");
+        throw new Error("请先填写 Gender（F/M）。");
       }
 
       const subjectId =
@@ -2077,7 +1970,6 @@
       ].map(s).filter(Boolean);
       const trainingStatus = unique(trainingVals).join("; ");
 
-      // 三种 LEDD 来源
       const originalLEDD = combineSameOrPair(preAgg.totalLEDD, postAgg.totalLEDD);
       const manualLEDD = getManualLeddRows().length ? String(recalcManualLedd()) : "";
 
@@ -2092,7 +1984,7 @@
       }
       const parsedLEDD = parsedResult ? String(parsedResult.total) : "";
 
-      // 最终 LEDD 优先级：原始 > parsed(仅当用户点击采用) > manual
+      // 最终 LEDD 优先级：原始 > parsed(用户点采用后) > manual
       const finalLEDD = originalLEDD || (window.__USE_PARSED_MED__ ? parsedLEDD : "") || manualLEDD || "";
 
       const originalMedRegime = combineSameOrPair(preAgg.medicationDetails, postAgg.medicationDetails);
@@ -2138,4 +2030,424 @@
         "Par_Q": buildParQ(preA, postA, preAgg, postAgg),
         "Age": pick(preA, ["age"], "") || pick(postA, ["age"], ""),
         "Gender": manualSex,
-        "
+        "dominant hand": pick(preA, ["dominantHand"], "") || pick(postA, ["dominantHand"], ""),
+        "education_Year": pick(preA, ["educationYears"], "") || pick(postA, ["educationYears"], ""),
+        "walking_aid": pick(preA, ["wheelchair"], "") || pick(postA, ["wheelchair"], ""),
+        "height (m)": heightM,
+        "weight (kg)": weightKg,
+        "leg length (m)": legLengthM,
+        "standard_step-length(m)": standardStepLength,
+
+        "Pre_date": preAgg.testDate ? formatDateYYYYMMDD(preAgg.testDate) : (preA ? formatDateYYYYMMDD(preA.timestamp) : ""),
+        "training_status": trainingStatus,
+        "Post_date": postAgg.testDate ? formatDateYYYYMMDD(postAgg.testDate) : (postA ? formatDateYYYYMMDD(postA.timestamp) : ""),
+
+        "pre_steplength(m)": preAgg.avgStepLength || "",
+        "post_steplength(m)": postAgg.avgStepLength || "",
+        "pre_cadence(bpm)": preAgg.avgCadence || "",
+        "post_cadence(bpm)": postAgg.avgCadence || "",
+        "Pre_velocity(m/s)": preAgg.avgSpeed || "",
+        "post_velocity(m/s)": postAgg.avgSpeed || "",
+        "Pre_TUG (s)": preAgg.tug_avg || "",
+        "post_TUG(s)": postAgg.tug_avg || "",
+
+        "Pre_fogQ": pick(preA, ["fogqTotal"], ""),
+        "post_fogQ": pick(postA, ["fogqTotal"], ""),
+        "pre_UPDRS3": preAgg.updrs3Total || "",
+        "post_UPDRS3": postAgg.updrs3Total || "",
+        "Pre_PDQ": pick(preA, ["pdqTotal"], ""),
+        "Post_PDQ": pick(postA, ["pdqTotal"], ""),
+        "Pre_Moca": preAgg.moca || "",
+        "Post_Moca": postAgg.moca || "",
+        "Pre_HADS_D": pick(preA, ["hadsDepression"], ""),
+        "Post_HADS_D": pick(postA, ["hadsDepression"], ""),
+        "Pre_HADS_A": pick(preA, ["hadsAnxiety"], ""),
+        "Post_HADS_A": pick(postA, ["hadsAnxiety"], ""),
+
+        "LEDD": finalLEDD,
+        "Med_regime": finalMedRegime,
+        "contact": "",
+        "remarks": remarks
+      };
+    }
+
+    // =========================================================
+    // Debug
+    // =========================================================
+    function formatAForDebug(aRows, aDebug, aAssign) {
+      const lines = [];
+      lines.push("A 解析日志：");
+      aDebug.forEach(x => lines.push("- " + x));
+      lines.push("");
+      lines.push("A pre/post 归位：");
+      lines.push(aAssign.message);
+      lines.push("");
+      lines.push("A 原始行摘要：");
+      aRows.forEach((row, idx) => {
+        lines.push(`Row ${idx + 1}: timestamp=${s(row.timestamp)} | id=${s(row.id)} | name=${s(row.name)} | pdqTotal=${s(row.pdqTotal)} | fogqTotal=${s(row.fogqTotal)} | hadsA=${s(row.hadsAnxiety)} | hadsD=${s(row.hadsDepression)}`);
+      });
+      return lines.join("\n");
+    }
+
+    function formatReviewedBForDebug(reviewed, aliasDebug, parseErrors) {
+      const lines = [];
+      lines.push("Alias rules:");
+      if (aliasDebug.length) aliasDebug.forEach(x => lines.push("- " + x));
+      else lines.push("- （无）");
+
+      lines.push("");
+      lines.push("审核后 B 文件：");
+      if (!reviewed.length) {
+        lines.push("- 无");
+      } else {
+        reviewed.forEach((x, idx) => {
+          lines.push(
+            `${idx + 1}. include=${x.include ? "Y" : "N"} | phase=${x.phase} | canonical=${x.canonicalSubject || "(空)"} | rawName=${s(x.meta.name) || "(空)"} | id=${s(x.meta.id) || "(空)"} | file=${x.meta.fileName}`
+          );
+        });
+      }
+
+      if (parseErrors.length) {
+        lines.push("");
+        lines.push("解析失败文件：");
+        parseErrors.forEach(x => lines.push("- " + x));
+      }
+
+      return lines.join("\n");
+    }
+
+    function formatConflictDebug(preAgg, postAgg, result) {
+      const lines = [];
+
+      function dump(title, agg) {
+        lines.push(`=== ${title} ===`);
+        lines.push("字段选择日志：");
+        if (agg.debug.selection.length) agg.debug.selection.forEach(x => lines.push("- " + x));
+        else lines.push("- 无");
+        lines.push("");
+        lines.push("冲突详情：");
+        if (!agg.debug.conflicts.length) {
+          lines.push("- 无冲突");
+        } else {
+          agg.debug.conflicts.forEach(conf => {
+            lines.push(`- 字段：${conf.field}`);
+            lines.push(`  自动选中：${conf.chosen} （来自 ${conf.chosenFrom}）`);
+            conf.values.forEach(v => {
+              lines.push(`  · 候选：${v.value} | 文件：${v.fileName} | testDate=${v.testDate || "(空)"} | localSaveTime=${v.localSaveTime || "(空)"} | uploadIndex=${v.uploadIndex}`);
+            });
+          });
+        }
+        lines.push("");
+      }
+
+      dump("PRE", preAgg);
+      dump("POST", postAgg);
+
+      lines.push("=== BMI / LEDD / 合并字段 ===");
+      lines.push(`Gender = ${result["Gender"] || "(空)"}`);
+      lines.push(`height (m) = ${result["height (m)"] || "(空)"}`);
+      lines.push(`weight (kg) = ${result["weight (kg)"] || "(空)"}`);
+      lines.push(`FCI = ${result["FCI"] || "(空)"}`);
+      lines.push(`Par_Q = ${result["Par_Q"] || "(空)"}`);
+      lines.push(`LEDD = ${result["LEDD"] || "(空)"}`);
+      lines.push(`Med_regime = ${result["Med_regime"] || "(空)"}`);
+      lines.push(`remarks = ${result["remarks"] || "(空)"}`);
+      lines.push(`manualLeddRows = ${getManualLeddRows().length}`);
+      lines.push(`manualLeddTotal = ${getManualLeddRows().length ? recalcManualLedd() : "(空)"}`);
+      lines.push(`manualLeddSummary = ${manualLeddSummary() || "(空)"}`);
+      lines.push(`useParsedMedication = ${window.__USE_PARSED_MED__ ? "Yes" : "No"}`);
+      lines.push(`parsedMedicationTotal = ${window.__LAST_PARSED_MED__ ? window.__LAST_PARSED_MED__.total : "(空)"}`);
+      lines.push(`parsedMedicationWarnings = ${window.__LAST_PARSED_MED__?.warnings?.length || 0}`);
+
+      return lines.join("\n");
+    }
+
+    // =========================================================
+    // Export
+    // =========================================================
+    function downloadExcel(rowObj, filename = "C_merged.xlsx") {
+      if (typeof XLSX === "undefined") {
+        throw new Error("XLSX 未加载成功。请检查网络或 SheetJS script src 是否被拦截。");
+      }
+      const ws = XLSX.utils.json_to_sheet([rowObj]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "C");
+      XLSX.writeFile(wb, filename);
+    }
+
+    function downloadJSON(obj, filename = "debug_report.json") {
+      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // =========================================================
+    // Clear all
+    // =========================================================
+    function clearAll() {
+      document.getElementById("manualSex").value = "";
+      document.getElementById("pasteA").value = "";
+      document.getElementById("fileB").value = "";
+      document.getElementById("aliasRules").value = "";
+
+      document.getElementById("leddRows").innerHTML = "";
+      addLeddRow({});
+
+      document.getElementById("medText").value = "";
+      window.__USE_PARSED_MED__ = false;
+      window.__LAST_PARSED_MED__ = null;
+      renderMedicationResult(null);
+
+      setStatus("");
+      setText("preview", "{}");
+      setText("debugSummary", "尚未运行。");
+      setText("debugA", "尚未运行。");
+      setText("debugB", "尚未运行。");
+      setText("debugConflict", "尚未运行。");
+
+      setKPI("kpiA", 0);
+      setKPI("kpiBTotal", 0);
+      setKPI("kpiIncluded", 0);
+      setKPI("kpiPre", 0);
+      setKPI("kpiPost", 0);
+      setKPI("kpiConflict", 0);
+      setKPI("kpiBMI", "-");
+      setKPI("kpiBMICat", "-");
+
+      document.getElementById("reviewTableBody").innerHTML =
+        '<tr><td colspan="10" class="muted">还没有读取 B 文件。请先点击「读取并生成审核表」。</td></tr>';
+
+      const box = document.getElementById("parseErrorBox");
+      box.style.display = "none";
+      box.innerHTML = "";
+
+      window.__RAW_B_ENTRIES__ = [];
+      window.__PARSE_ERRORS__ = [];
+      window.__LAST_A__ = null;
+      window.__LAST_RESULT__ = null;
+      window.__LAST_DEBUG__ = null;
+    }
+    document.getElementById("btnClear").addEventListener("click", clearAll);
+
+    // =========================================================
+    // Analyze
+    // =========================================================
+    async function analyzeAndBuildReview() {
+      try {
+        setStatus("正在读取 A 和 B，并生成审核表…");
+
+        const pasteText = document.getElementById("pasteA").value;
+        const files = Array.from(document.getElementById("fileB").files || []);
+        const aliasText = document.getElementById("aliasRules").value;
+
+        const { rows: aRows, debug: aDebug } = parseAPaste(pasteText);
+        const aAssign = assignAPrePost(aRows);
+        const { aliasMap, debug: aliasDebug } = parseAliasRules(aliasText);
+
+        const rawEntries = [];
+        const parseErrors = [];
+
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          try {
+            const entry = await readBFile(f, i + 1);
+            const phaseInfo = detectTestTypeFromDataOrName(entry.data, entry.meta.fileName);
+            rawEntries.push({
+              ...entry,
+              autoPhase: phaseInfo.phase,
+              autoReason: phaseInfo.reason
+            });
+          } catch (err) {
+            parseErrors.push(`${f.name}: ${err.message}`);
+          }
+        }
+
+        window.__RAW_B_ENTRIES__ = rawEntries;
+        window.__PARSE_ERRORS__ = parseErrors;
+        window.__LAST_A__ = { aRows, aDebug, aAssign, aliasDebug };
+
+        renderReviewTable(rawEntries, parseErrors, aliasMap);
+
+        setKPI("kpiA", aRows.length);
+        setKPI("kpiBTotal", rawEntries.length);
+        setKPI("kpiIncluded", rawEntries.length);
+        setKPI("kpiPre", rawEntries.filter(x => x.autoPhase === "pre").length);
+        setKPI("kpiPost", rawEntries.filter(x => x.autoPhase === "post").length);
+        setKPI("kpiConflict", 0);
+        setKPI("kpiBMI", "-");
+        setKPI("kpiBMICat", "-");
+
+        setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
+        setText("debugB", formatReviewedBForDebug(
+          rawEntries.map(x => ({
+            ...x,
+            include: true,
+            phase: x.autoPhase,
+            canonicalSubject: canonicalizeName(x.meta.name, aliasMap)
+          })),
+          aliasDebug,
+          parseErrors
+        ));
+        setText("debugConflict", "还没有执行最终导出，所以暂时没有 conflict / BMI / LEDD 计算结果。");
+        setText("debugSummary",
+          [
+            "已生成审核表。",
+            `A 行数：${aRows.length}`,
+            `B 成功解析：${rawEntries.length}`,
+            `B 解析失败：${parseErrors.length}`,
+            "",
+            "下一步：请在审核表里检查 Include / Phase / Canonical Subject，确认后再点击“生成结果并下载 Excel”。"
+          ].join("\n")
+        );
+        setText("preview", "{}");
+
+        setStatus(
+          `审核表已生成。\n\n成功解析 B：${rawEntries.length} 个\n解析失败：${parseErrors.length} 个`,
+          false
+        );
+      } catch (err) {
+        console.error(err);
+        setStatus("处理失败：\n\n" + err.message, true);
+      }
+    }
+
+    // =========================================================
+    // Export
+    // =========================================================
+    async function exportUsingReviewedTable(download = true) {
+      try {
+        if (!window.__LAST_A__) {
+          throw new Error("还没有生成审核表。请先点击“读取并生成审核表”。");
+        }
+
+        const manualSex = document.getElementById("manualSex").value;
+        if (!manualSex) {
+          throw new Error("请先选择 Gender（F/M）。");
+        }
+
+        setStatus("正在根据审核表整合数据…");
+
+        const reviewed = getReviewedEntries();
+        const validation = validateReviewedEntries(reviewed);
+        if (!validation.ok) throw new Error(validation.message);
+
+        const included = validation.included;
+        const preEntries = included.filter(x => x.phase === "pre");
+        const postEntries = included.filter(x => x.phase === "post");
+        const unknownIncluded = included.filter(x => x.phase === "unknown");
+
+        const preAgg = aggregatePhase(preEntries, "pre");
+        const postAgg = aggregatePhase(postEntries, "post");
+
+        const { aRows, aDebug, aAssign, aliasDebug } = window.__LAST_A__;
+        const preA = aAssign.preA;
+        const postA = aAssign.postA;
+
+        const subjectId = unique(included.map(x => s(x.meta.id)).filter(Boolean))[0] || "";
+        const canonicalNames = unique(included.map(x => s(x.canonicalSubject)).filter(Boolean));
+        const subjectName =
+          canonicalNames[0] ||
+          unique(included.map(x => s(x.meta.name)).filter(Boolean))[0] ||
+          "";
+
+        const result = mergeToC(preA, postA, preAgg, postAgg, {
+          id: subjectId,
+          name: subjectName
+        });
+
+        const bmi = computeBMI(result["height (m)"], result["weight (kg)"]);
+        const bmiCat = bmiCategory(bmi);
+        const conflictCount = preAgg.debug.conflicts.length + postAgg.debug.conflicts.length;
+
+        setKPI("kpiIncluded", included.length);
+        setKPI("kpiPre", preEntries.length);
+        setKPI("kpiPost", postEntries.length);
+        setKPI("kpiConflict", conflictCount);
+        setKPI("kpiBMI", bmi || "-");
+        setKPI("kpiBMICat", bmiCat || "-");
+
+        setText("preview", JSON.stringify(result, null, 2));
+        setText("debugA", formatAForDebug(aRows, aDebug, aAssign));
+        setText("debugB", formatReviewedBForDebug(reviewed, aliasDebug || [], window.__PARSE_ERRORS__));
+        setText("debugConflict", formatConflictDebug(preAgg, postAgg, result));
+
+        const summaryLines = [];
+        summaryLines.push("导出前检查完成。");
+        summaryLines.push(`Included：${included.length}`);
+        summaryLines.push(`Pre：${preEntries.length}`);
+        summaryLines.push(`Post：${postEntries.length}`);
+        summaryLines.push(`Unknown（Included 但未参与计算）：${unknownIncluded.length}`);
+        summaryLines.push(`Conflicts：${conflictCount}`);
+        summaryLines.push("");
+        summaryLines.push(`Gender：${manualSex}`);
+        summaryLines.push(`最终 Subject ID：${subjectId || "(空)"}`);
+        summaryLines.push(`最终 Subject Name：${subjectName || "(空)"}`);
+        summaryLines.push(`BMI：${bmi || "(空)"} | ${bmiCat || "(空)"}`);
+        summaryLines.push(`FCI：${result["FCI"] || "(空)"}`);
+        summaryLines.push(`Par_Q：${result["Par_Q"] || "(空)"}`);
+        summaryLines.push(`LEDD：${result["LEDD"] || "(空)"}`);
+
+        if (unknownIncluded.length) {
+          summaryLines.push("");
+          summaryLines.push("注意：有 Included 的 unknown 文件没有参与 pre/post 聚合。");
+        }
+
+        setText("debugSummary", summaryLines.join("\n"));
+
+        const debugPayload = {
+          timestamp: new Date().toISOString(),
+          reviewed,
+          includedCount: included.length,
+          preCount: preEntries.length,
+          postCount: postEntries.length,
+          unknownIncludedCount: unknownIncluded.length,
+          conflictCount,
+          parseErrors: window.__PARSE_ERRORS__,
+          manualSex,
+          manualLeddRows: getManualLeddRows(),
+          manualLeddTotal: getManualLeddRows().length ? recalcManualLedd() : "",
+          manualLeddSummary: manualLeddSummary(),
+          parsedMedication: window.__LAST_PARSED_MED__,
+          useParsedMedication: window.__USE_PARSED_MED__,
+          preAgg,
+          postAgg,
+          result
+        };
+
+        window.__LAST_RESULT__ = result;
+        window.__LAST_DEBUG__ = debugPayload;
+
+        if (download) {
+          downloadExcel(result, "C_merged.xlsx");
+          setStatus(summaryLines.join("\n") + "\n\n已下载：C_merged.xlsx", false);
+        } else {
+          setStatus(summaryLines.join("\n"), false);
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus("处理失败：\n\n" + err.message, true);
+      }
+    }
+
+    // =========================================================
+    // Debug export
+    // =========================================================
+    document.getElementById("btnAnalyze").addEventListener("click", analyzeAndBuildReview);
+    document.getElementById("btnExport").addEventListener("click", () => exportUsingReviewedTable(true));
+    document.getElementById("btnDebug").addEventListener("click", () => {
+      if (!window.__LAST_DEBUG__) {
+        setStatus("还没有可下载的 Debug 报告。请先读取审核表并至少导出一次。", true);
+        return;
+      }
+      downloadJSON(window.__LAST_DEBUG__, "debug_report.json");
+      setStatus("已下载：debug_report.json");
+    });
+  </script>
+</body>
+</html>
